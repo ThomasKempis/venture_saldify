@@ -1,0 +1,66 @@
+import 'package:flutter/cupertino.dart';
+import 'package:venture_core_connect/smxConstants_core.dart';
+import 'package:venture_widgets/smxTmpScreen.dart';
+import 'dart:typed_data';
+import 'package:venture_widgets/smxShowDialog/smxShowDialogs.dart';
+import 'package:venture_widgets/smxTextField/smxTextField.dart';
+
+import '../smxLogonMovil_controller.dart';
+
+class SmxPerfil_controller extends SmxTmpCtl {
+  final SmxLogonMovil_controller controllerMain;
+  @override
+  final BuildContext context;
+
+  SmxPerfil_controller(this.context, this.controllerMain) {
+    data.context = context;
+    data.tablaTroncalRst = controllerMain.rstSysUser10;
+  }
+
+  @override
+  Future<void> save() async {
+    controllerMain.checkPermissionLocation();
+    controllerMain.rstSysUser10.update('SYSUSER10_GEOLOC_ULT', SmxConstants_core.geoLocalizacion);
+
+    await showDialogWait(context, () async {
+      await callTroncalSave(controllerMain.rstSysUser10);
+    });
+  }
+
+  Future<Uint8List> getImagen() async {
+    return await controllerMain.getImagen();
+  }
+
+  String getCorreo() {
+    return controllerMain.getCorreo();
+  }
+
+  String getNombres() {
+    String nombres = controllerMain.rstSysUser10.getValue('SYSUSER10_NOMBRES');
+    String apellidos = controllerMain.rstSysUser10.getValue('SYSUSER10_APELLIDOS');
+    return "$nombres $apellidos";
+  }
+
+  bool showValida() {
+    if (!validateWidgets(context)) {
+      return false;
+    }
+
+    if (!(getValueFactory('SYSUSER10_TELEFONO').getWidGet() as SmxTextField).isValidaStringSpecial) {
+      showValidDialog(context, mensaje:"Debe ingresar un Teléfono válido");
+      return false;
+    }
+
+    if (!(getValueFactory('SYSUSER10_CORREO_01').getWidGet() as SmxTextField).isValidaStringSpecial) {
+      showValidDialog(context, mensaje:"Debe ingresar un correo válido");
+      return false;
+    }
+
+    if (!(controllerMain.esMayorDe16(getDate('SYSUSER10_FECHA')))) {
+      showValidDialog(context, mensaje:"Debe ingresar una edad mayor a 16 años");
+      return false;
+    }
+
+    return true;
+  }
+}
