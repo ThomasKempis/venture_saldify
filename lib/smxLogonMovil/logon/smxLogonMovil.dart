@@ -89,9 +89,14 @@ class _LogonFrontEndBodyState extends State<_LogonFrontEndBody> {
 
       // Mientras se redirige, devolver algo temporal
       return const Scaffold(
-        body: DecoratedBox(
-          decoration: BoxDecoration(gradient: _loginGradient),
-          child: Center(child: CircularProgressIndicator(color: Colors.white)),
+        backgroundColor: Colors.transparent,
+        body: SizedBox.expand(
+          child: DecoratedBox(
+            decoration: BoxDecoration(gradient: _loginGradient),
+            child: Center(
+              child: CircularProgressIndicator(color: Colors.white),
+            ),
+          ),
         ),
       );
     }
@@ -100,9 +105,12 @@ class _LogonFrontEndBodyState extends State<_LogonFrontEndBody> {
     return _alreadyNavigated
         ? SizedBox.shrink()
         : Scaffold(
-            body: DecoratedBox(
-              decoration: const BoxDecoration(gradient: _loginGradient),
-              child: _buildAuth(),
+            backgroundColor: Colors.transparent,
+            body: SizedBox.expand(
+              child: DecoratedBox(
+                decoration: const BoxDecoration(gradient: _loginGradient),
+                child: _buildAuth(),
+              ),
             ),
           );
   }

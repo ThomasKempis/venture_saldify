@@ -11,7 +11,8 @@ import 'package:venture_widgets/smxTmpScreen.dart';
 import 'package:universal_html/html.dart' as html;
 import 'package:venture_core_connect/smxDataBase/smxRowSet.dart';
 import 'package:venture_widgets/smxShowDialog/smxShowDialogs.dart';
-import 'smxVentureMovil.dart';
+
+import '../../smxSaldify/smxSaldify.dart';
 
 class SmxLogonMovil_controller extends SmxTmpCtl {
   late SmxRowSet rstSysUser10;
@@ -117,7 +118,7 @@ class SmxLogonMovil_controller extends SmxTmpCtl {
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: (_) => SmxVentureMovil(controllerMain: this),
+        builder: (_) => SmxSaldiFy(controllerMain: this),
       ),
     );
   }
