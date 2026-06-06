@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:venture_saldify/smxColors.dart';
 import 'package:venture_saldify/smxLogonMovil/logon/smxPerfil/smxPerfil_controller.dart';
 import 'package:venture_widgets/smxDatePicker/smxDatePicker.dart';
 import 'package:venture_widgets/smxTextField/smxTextField.dart';
@@ -120,21 +121,21 @@ class _SmxPerfil extends State<SmxPerfil> {
                 child: Theme(
                   data: Theme.of(context).copyWith(
                     textTheme: Theme.of(context).textTheme.apply(
-                      bodyColor: Colors.white,
-                      displayColor: Colors.white,
+                      bodyColor: SmxColors.white,
+                      displayColor: SmxColors.white,
                     ),
                     inputDecorationTheme: const InputDecorationTheme(
-                      labelStyle: TextStyle(color: Colors.white70),
+                      labelStyle: TextStyle(color: SmxColors.white70),
                       floatingLabelStyle: TextStyle(
-                        color: Color(0xFF58D9A4),
+                        color: SmxColors.brandAccent,
                         fontWeight: FontWeight.bold,
                       ),
                       enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.white54),
+                        borderSide: BorderSide(color: SmxColors.white54),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderSide: BorderSide(
-                          color: Color(0xFF58D9A4),
+                          color: SmxColors.brandAccent,
                           width: 2,
                         ),
                       ),
@@ -184,7 +185,7 @@ class _SmxPerfil extends State<SmxPerfil> {
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [Color(0xFF58D9A4), Color(0xFF0D47A1)],
+                colors: [SmxColors.brandAccent, SmxColors.brandSecondary],
               ),
             ),
             child: InkWell(

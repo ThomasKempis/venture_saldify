@@ -1,8 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_signin_button/flutter_signin_button.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
+import 'package:venture_saldify/smxColors.dart';
 import 'package:venture_saldify/smxLogonMovil/logon/smxAuth/AuthRepository.dart';
 import 'package:venture_saldify/smxLogonMovil/logon/smxAuth/AuthService.dart';
 import 'package:venture_saldify/smxLogonMovil/logon/smxAuth/AuthViewModel.dart';
@@ -55,11 +55,7 @@ class _LogonFrontEndBody extends StatefulWidget {
 }
 
 class _LogonFrontEndBodyState extends State<_LogonFrontEndBody> {
-  static const _loginGradient = LinearGradient(
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-    colors: [Color(0xFF1B5E20), Color(0xFF0D47A1)],
-  );
+  static const _loginGradient = SmxGradients.saldifyBackground;
 
   String _version = '';
   bool _alreadyNavigated = false; // ⬅️ bandera
@@ -200,7 +196,7 @@ class _LogonFrontEndBodyState extends State<_LogonFrontEndBody> {
                 'SMART BALANCE & CREDITS CONTROL',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: Color(0xFF58D9A4),
+                  color: SmxColors.brandAccent,
                   fontFamily: 'Segoe UI',
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
@@ -223,34 +219,21 @@ class _LogonFrontEndBodyState extends State<_LogonFrontEndBody> {
                   child: CircularProgressIndicator(color: Colors.white),
                 )
               else ...[
-                SizedBox(
+                _SaldifyLoginButton(
                   height: buttonHeight,
-                  child: SignInButton(
-                    Buttons.Google,
-                    text: "Continuar con Google",
-                    onPressed: viewModel.signInWithGoogle,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                  ),
+                  label: 'Continuar con Google',
+                  icon: Icons.login_rounded,
+                  onPressed: viewModel.signInWithGoogle,
                 ),
                 const SizedBox(height: 16),
-                SizedBox(
+                _SaldifyLoginButton(
                   height: buttonHeight,
-                  child: SignInButton(
-                    Buttons.Google,
-                    text: "Usar otra cuenta de Google",
-                    onPressed: () async {
-                      await viewModel
-                          .signOut(); // <-- Este método debe llamar a googleSignIn.signOut()
-                      await viewModel.signInWithGoogle();
-                    },
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                  ),
+                  label: 'Usar otra cuenta de Google',
+                  icon: Icons.switch_account_rounded,
+                  onPressed: () async {
+                    await viewModel.signOut();
+                    await viewModel.signInWithGoogle();
+                  },
                 ),
               ],
               const SizedBox(height: 44),
@@ -275,6 +258,63 @@ class _LogonFrontEndBodyState extends State<_LogonFrontEndBody> {
           ),
         );
       },
+    );
+  }
+}
+
+class _SaldifyLoginButton extends StatelessWidget {
+  final double height;
+  final String label;
+  final IconData icon;
+  final VoidCallback onPressed;
+
+  const _SaldifyLoginButton({
+    required this.height,
+    required this.label,
+    required this.icon,
+    required this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final borderRadius = BorderRadius.circular(16);
+
+    return Material(
+      elevation: 10,
+      shadowColor: SmxColors.blackAlpha(.32),
+      color: SmxColors.transparent,
+      borderRadius: borderRadius,
+      clipBehavior: Clip.antiAlias,
+      child: SizedBox(
+        height: height,
+        child: Ink(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [SmxColors.brandAccent, SmxColors.brandSecondary],
+            ),
+          ),
+          child: InkWell(
+            onTap: onPressed,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(icon, color: SmxColors.white, size: 24),
+                const SizedBox(width: 10),
+                Text(
+                  label,
+                  style: const TextStyle(
+                    color: SmxColors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

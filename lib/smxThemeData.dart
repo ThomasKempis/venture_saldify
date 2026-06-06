@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:venture_saldify/smxColors.dart';
 
 List<LocalizationsDelegate> LocalDelegates = [
   //SmxAppLocalizations.delegate,
@@ -16,10 +17,7 @@ List<Locale> Locales = [
 
 ThemeData SmxThemeData() {
   return ThemeData(
-    primaryColor: const Color(0xFFD47B13),
-    appBarTheme: const AppBarTheme(
-        backgroundColor: Color(0xFFD47B13)
-    ),
+    primaryColor: SmxColors.brandLegacy,
+    appBarTheme: const AppBarTheme(backgroundColor: SmxColors.brandLegacy),
   );
 }
-
