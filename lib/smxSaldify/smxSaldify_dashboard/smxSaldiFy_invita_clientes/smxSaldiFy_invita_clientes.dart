@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:venture_saldify/smxColors.dart';
 
+import 'smxSaldiFy_invita_modal.dart';
+
 class SmxSaldiFyInvitaClientes extends StatefulWidget {
-  const SmxSaldiFyInvitaClientes({super.key});
+  final String uuidAnfitrion;
+
+  const SmxSaldiFyInvitaClientes({super.key, required this.uuidAnfitrion});
 
   @override
   State<SmxSaldiFyInvitaClientes> createState() =>
@@ -72,9 +76,7 @@ class _SmxSaldiFyInvitaClientesState extends State<SmxSaldiFyInvitaClientes> {
                     _InvitePill(
                       label: 'Copiar link',
                       filled: !_whatsAppSelected,
-                      onTap: () {
-                        setState(() => _whatsAppSelected = false);
-                      },
+                      onTap: _openCopyLinkModal,
                     ),
                     const SizedBox(width: 8),
                     _InvitePill(
@@ -91,6 +93,15 @@ class _SmxSaldiFyInvitaClientesState extends State<SmxSaldiFyInvitaClientes> {
           ),
         ],
       ),
+    );
+  }
+
+  Future<void> _openCopyLinkModal() async {
+    setState(() => _whatsAppSelected = false);
+
+    await showSmxSaldiFyInvitaModal(
+      context: context,
+      uuidAnfitrion: widget.uuidAnfitrion,
     );
   }
 }

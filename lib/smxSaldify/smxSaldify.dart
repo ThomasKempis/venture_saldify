@@ -80,6 +80,7 @@ class _SmxSaldiFy extends State<SmxSaldiFy> {
     return _selectedIndex == 0
         ? SmxSaldiFyDashboard(
             adminName: adminName,
+            uuidAnfitrion: widget.controllerMain.getUuid(),
             isMobile: layout.isMobile,
             isDesktop: layout.isDesktop,
             maxContentWidth: layout.saldifyMaxContentWidth,

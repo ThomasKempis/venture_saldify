@@ -6,9 +6,10 @@ import 'package:venture_saldify/smxApis/smxConstants.dart';
 import 'package:venture_saldify/smxLogonMovil/logon/smxLogonMovil.dart';
 import 'package:venture_saldify/smxThemeData.dart';
 
-final bool useDevInvitacionCliente = true;
 const String devUuidAnfitrion = 'ce9db2f5-dfb5-4b0e-9d35-941c0387f6de';
+const String devCorreoInvitado = 'santiago.azael.mohr@gmail.com';
 const String devUuidInvitado = 'bdfed92f-4e29-4565-9851-1a11068901c4';
+const SmxInvitacionMode devModalidad = SmxInvitacionMode.admin;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -36,22 +37,48 @@ void main() async {
 }
 
 void _applyDevInvitacionCliente() {
-  if (!kDebugMode || !useDevInvitacionCliente) return;
+  if (!kDebugMode || devModalidad == SmxInvitacionMode.admin) return;
 
   if (Uri.base.queryParameters.containsKey(SmxConstants.uuidInvitadoParam) ||
+      Uri.base.queryParameters.containsKey(SmxConstants.correoInvitadoParam) ||
       Uri.base.queryParameters.containsKey(SmxConstants.uuidAnfitrionParam)) {
     return;
   }
 
+  final invitacionParameters = _getDevInvitacionParameters();
+  if (invitacionParameters.isEmpty) return;
+
   final newUri = Uri.base.replace(
-    queryParameters: {
-      ...Uri.base.queryParameters,
-      SmxConstants.uuidInvitadoParam: devUuidInvitado,
-      SmxConstants.uuidAnfitrionParam: devUuidAnfitrion,
-    },
+    queryParameters: {...Uri.base.queryParameters, ...invitacionParameters},
   );
 
   html.window.history.replaceState(null, 'Saldify Dev', newUri.toString());
+}
+
+Map<String, String> _getDevInvitacionParameters() {
+  final uuidAnfitrion = devUuidAnfitrion.trim();
+  final uuidInvitado = devUuidInvitado.trim();
+  final correoInvitado = devCorreoInvitado.trim();
+
+  if (uuidAnfitrion.isEmpty) return {};
+
+  if (devModalidad == SmxInvitacionMode.uuid_invitado &&
+      uuidInvitado.isNotEmpty) {
+    return {
+      SmxConstants.uuidAnfitrionParam: uuidAnfitrion,
+      SmxConstants.uuidInvitadoParam: uuidInvitado,
+    };
+  }
+
+  if (devModalidad == SmxInvitacionMode.correo_invitado &&
+      correoInvitado.isNotEmpty) {
+    return {
+      SmxConstants.uuidAnfitrionParam: uuidAnfitrion,
+      SmxConstants.correoInvitadoParam: correoInvitado,
+    };
+  }
+
+  return {};
 }
 
 class MyAppSmx extends StatelessWidget {

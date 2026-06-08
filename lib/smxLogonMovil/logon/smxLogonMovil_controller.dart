@@ -137,7 +137,8 @@ class SmxLogonMovil_controller extends SmxTmpCtl {
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: (_) => SmxConstants.isClienteInvitado
+        builder: (_) =>
+            SmxConstants.isClienteInvitado || SmxConstants.hasParametrosInvitacionInvalidos
             ? SmxSaldiFyCliente(controllerMain: this)
             : SmxSaldiFy(controllerMain: this),
       ),
@@ -146,6 +147,10 @@ class SmxLogonMovil_controller extends SmxTmpCtl {
 
   String getCorreo() {
     return html.window.localStorage['correo']!.toLowerCase();
+  }
+
+  String getUuid() {
+    return rstSysUser10.getValue('SYSUSER10_UUID')?.toString() ?? '';
   }
 
   String getNombres() {

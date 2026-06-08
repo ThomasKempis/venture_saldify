@@ -10,6 +10,7 @@ import '../smxSaldify_screens/smxSaldiFy_screen_tmp.dart';
 
 class SmxSaldiFyDashboard extends StatelessWidget {
   final String adminName;
+  final String uuidAnfitrion;
   final bool isMobile;
   final bool isDesktop;
   final double maxContentWidth;
@@ -21,6 +22,7 @@ class SmxSaldiFyDashboard extends StatelessWidget {
   const SmxSaldiFyDashboard({
     super.key,
     required this.adminName,
+    required this.uuidAnfitrion,
     required this.isMobile,
     required this.isDesktop,
     required this.maxContentWidth,
@@ -77,7 +79,7 @@ class SmxSaldiFyDashboard extends StatelessWidget {
                               _openUnderConstruction(context, title),
                         ),
                         SizedBox(height: isMobile ? 16 : 20),
-                        const SmxSaldiFyInvitaClientes(),
+                        SmxSaldiFyInvitaClientes(uuidAnfitrion: uuidAnfitrion),
                         SizedBox(height: isMobile ? 24 : 30),
                         SmxSaldiFyAccionesRapidas(
                           isMobile: isMobile,
