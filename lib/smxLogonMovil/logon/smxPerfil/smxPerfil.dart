@@ -2,6 +2,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:venture_saldify/smxColors.dart';
 import 'package:venture_saldify/smxLogonMovil/logon/smxPerfil/smxPerfil_controller.dart';
+import 'package:venture_saldify/smxSaldify/smxSaldify_screens/smxSaldiFy_screen_tmp.dart';
 import 'package:venture_widgets/smxDatePicker/smxDatePicker.dart';
 import 'package:venture_widgets/smxTextField/smxTextField.dart';
 import '../smxLogonMovil_controller.dart';
@@ -244,13 +245,10 @@ class _SmxPerfil extends State<SmxPerfil> {
           Stack(
             alignment: Alignment.bottomRight,
             children: [
-              // Círculo grande (avatar) - Navega a ProfileScreen
+              // Círculo grande (avatar)
               InkWell(
                 onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => ProfileScreen()),
-                  );
+                  _openUnderConstruction(context, 'Configuracion de perfil');
                 },
                 borderRadius: BorderRadius.circular(40),
                 child: FutureBuilder<Uint8List>(
@@ -283,13 +281,10 @@ class _SmxPerfil extends State<SmxPerfil> {
                 ),
               ),
 
-              // Círculo pequeño (mano) - Navega a HandActionScreen
+              // Círculo pequeño (mano)
               InkWell(
                 onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => HandActionScreen()),
-                  );
+                  _openUnderConstruction(context, 'Accion especial');
                 },
                 borderRadius: BorderRadius.circular(12),
                 child: Container(
@@ -323,56 +318,8 @@ class _SmxPerfil extends State<SmxPerfil> {
   }
 }
 
-/// ============================================================================================================================= ///
-/// ============================================================================================================================= ///
-/// ============================================================================================================================= ///
-
-// Pantallas para cada opción
-class ProfileScreen extends StatelessWidget {
-  const ProfileScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return _buildFeatureScreen(
-      context,
-      Icons.person,
-      'Pantalla de configuración de perfil',
-    );
-  }
-}
-
-// Pantalla para la acción del ícono de mano
-class HandActionScreen extends StatelessWidget {
-  const HandActionScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return _buildFeatureScreen(
-      context,
-      Icons.touch_app,
-      'Acción especial del ícono de mano',
-    );
-  }
-}
-
-Widget _buildFeatureScreen(BuildContext context, IconData icon, String title) {
-  return Scaffold(
-    appBar: AppBar(
-      title: Text('Demo v2.2'), //Text(title),
-      leading: IconButton(
-        icon: Icon(Icons.arrow_back),
-        onPressed: () => Navigator.pop(context),
-      ),
-    ),
-    body: Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, size: 100, color: Colors.blue),
-          SizedBox(height: 20),
-          Text('Configuración de $title', style: TextStyle(fontSize: 18)),
-        ],
-      ),
-    ),
+void _openUnderConstruction(BuildContext context, String title) {
+  Navigator.of(context).push(
+    MaterialPageRoute<void>(builder: (_) => SmxSaldiFyScreenTmp(title: title)),
   );
 }

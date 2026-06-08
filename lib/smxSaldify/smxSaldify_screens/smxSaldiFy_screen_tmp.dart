@@ -4,8 +4,15 @@ import 'package:venture_saldify/smxLayout.dart';
 
 class SmxSaldiFyScreenTmp extends StatelessWidget {
   final String title;
+  final String mensaje;
+  final bool btoBack;
 
-  const SmxSaldiFyScreenTmp({super.key, required this.title});
+  const SmxSaldiFyScreenTmp({
+    super.key,
+    required this.title,
+    this.mensaje = 'Este modulo esta preparado para conectar su controller y flujo operativo.',
+    this.btoBack = true,
+  });
 
   static const _backgroundGradient = SmxGradients.saldifyBackground;
 
@@ -40,6 +47,7 @@ class SmxSaldiFyScreenTmp extends StatelessWidget {
                           ),
                           child: Row(
                             children: [
+                              if (btoBack)
                               _BackButton(
                                 onPressed: () => Navigator.of(context).pop(),
                               ),
@@ -69,8 +77,8 @@ class SmxSaldiFyScreenTmp extends StatelessWidget {
                                   mainAxisSize: MainAxisSize.min,
                                   crossAxisAlignment:
                                       CrossAxisAlignment.stretch,
-                                  children: const [
-                                    Text(
+                                  children: [
+                                    const Text(
                                       'Sistema en construccion',
                                       textAlign: TextAlign.center,
                                       style: TextStyle(
@@ -80,11 +88,11 @@ class SmxSaldiFyScreenTmp extends StatelessWidget {
                                         height: 1.05,
                                       ),
                                     ),
-                                    SizedBox(height: 16),
+                                    const SizedBox(height: 16),
                                     Text(
-                                      'Este modulo esta preparado para conectar su controller y flujo operativo.',
+                                      mensaje,
                                       textAlign: TextAlign.center,
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                         color: SmxColors.brandAccent,
                                         fontSize: 15,
                                         fontWeight: FontWeight.w700,

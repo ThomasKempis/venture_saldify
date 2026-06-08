@@ -56,8 +56,8 @@ class SmxPerfil_controller extends SmxTmpCtl {
       return false;
     }
 
-    if (!(controllerMain.esMayorDe16(getDate('SYSUSER10_FECHA')))) {
-      showValidDialog(context, mensaje:"Debe ingresar una edad mayor a 16 años");
+    if (!(controllerMain.isMayorEdad(getDate('SYSUSER10_FECHA')))) {
+      showValidDialog(context, mensaje:"Debe ingresar una edad mayor a ${SmxLogonMovil_controller.edad_maxima} años");
       return false;
     }
 

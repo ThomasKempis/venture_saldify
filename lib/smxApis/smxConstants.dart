@@ -4,9 +4,23 @@ import 'package:venture_core_connect/smxConstants_core.dart';
 import 'package:venture_widgets/smxConstants_widgets.dart';
 import '../firebase_options.dart';
 
-
 abstract class SmxConstants {
+  static const String uuidInvitadoParam = 'uuid_invitado';
+  static const String uuidAnfitrionParam = 'uuid_anfitrion';
+
   static Map<String, String> startParametersUrl = {};
+
+  static String get uuidInvitado {
+    return startParametersUrl[uuidInvitadoParam]?.trim() ?? '';
+  }
+
+  static String get uuidAnfitrion {
+    return startParametersUrl[uuidAnfitrionParam]?.trim() ?? '';
+  }
+
+  static bool get isClienteInvitado {
+    return uuidInvitado.isNotEmpty && uuidAnfitrion.isNotEmpty;
+  }
 
   static Future<void> smxAppStartUp({
     required bool produccion,
@@ -25,7 +39,7 @@ abstract class SmxConstants {
 
     try {
       await SmxConstants_widgets.startUpFireAuth(
-          DefaultFirebaseOptions.currentPlatform
+        DefaultFirebaseOptions.currentPlatform,
       );
 
       // ================================================================================================ //

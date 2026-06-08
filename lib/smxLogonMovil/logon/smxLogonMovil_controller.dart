@@ -3,6 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
+import 'package:uuid/uuid.dart';
+import 'package:venture_saldify/smxApis/smxConstants.dart';
 import 'package:venture_core_connect/smxConstants_core.dart';
 import 'package:venture_core_connect/smxJson/SmxJsonUtil.dart';
 import 'package:venture_core_connect/smxJson/smxJsonFiles.dart';
@@ -13,8 +15,10 @@ import 'package:venture_core_connect/smxDataBase/smxRowSet.dart';
 import 'package:venture_widgets/smxShowDialog/smxShowDialogs.dart';
 
 import '../../smxSaldify/smxSaldify.dart';
+import '../../smxSaldifyCliente/smxSaldifyCliente.dart';
 
 class SmxLogonMovil_controller extends SmxTmpCtl {
+  static const edad_maxima = 14;
   late SmxRowSet rstSysUser10;
   late final SmxInfoUser infoUser;
 
@@ -38,7 +42,9 @@ class SmxLogonMovil_controller extends SmxTmpCtl {
     };
 
     try {
-      final stream = await html.window.navigator.mediaDevices!.getUserMedia(mediaConstraints);
+      final stream = await html.window.navigator.mediaDevices!.getUserMedia(
+        mediaConstraints,
+      );
       stream.getTracks().forEach((track) => track.stop());
     } catch (e) {
       print('Permiso de cámara denegado o fallido: $e');
@@ -71,7 +77,14 @@ class SmxLogonMovil_controller extends SmxTmpCtl {
   }
 
   void navigateToAppMovil(BuildContext context) async {
-    addSql('SYSUSER10',"Select * from SYSUSER10_CAB_MOVIL where SYSUSER10_CORREO = '${getCorreo()}'");
+    SmxConstants_core.instancia = 'SALDIFY';
+
+    resetJsonSend();
+
+    addSql(
+      'SYSUSER10',
+      "Select * from SYSUSER10_CAB_MOVIL where SYSUSER10_CORREO = '${getCorreo()}'",
+    );
 
     await showDialogWait(context, () async {
       await getRowSetFuture('SYSUSER10');
@@ -93,12 +106,19 @@ class SmxLogonMovil_controller extends SmxTmpCtl {
         rstSysUser10.update('SYSUSER10_CORREO', getCorreo());
         rstSysUser10.update('SYSUSER10_CORREO_01', getCorreo());
         rstSysUser10.update('SYSUSER10_FECHA', DateTime.now());
-        rstSysUser10.update('SYSUSER10_GEOLOC_ULT', SmxConstants_core.geoLocalizacion);
+        rstSysUser10.update(
+          'SYSUSER10_GEOLOC_ULT',
+          SmxConstants_core.geoLocalizacion,
+        );
+        rstSysUser10.update('SYSUSER10_UUID', const Uuid().v4());
 
         await callTroncalSave(rstSysUser10);
 
         removeSql('SYSUSER10');
-        addSql('SYSUSER10',"Select * from SYSUSER10_CAB_MOVIL where SYSUSER10_CORREO = '${getCorreo()}'");
+        addSql(
+          'SYSUSER10',
+          "Select * from SYSUSER10_CAB_MOVIL where SYSUSER10_CORREO = '${getCorreo()}'",
+        );
 
         await getRowSetFuture('SYSUSER10');
         rstSysUser10 = getRowset('SYSUSER10');
@@ -114,11 +134,12 @@ class SmxLogonMovil_controller extends SmxTmpCtl {
       await callTroncalSave(rstSysUser10);
     }
 
-
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: (_) => SmxSaldiFy(controllerMain: this),
+        builder: (_) => SmxConstants.isClienteInvitado
+            ? SmxSaldiFyCliente(controllerMain: this)
+            : SmxSaldiFy(controllerMain: this),
       ),
     );
   }
@@ -128,8 +149,8 @@ class SmxLogonMovil_controller extends SmxTmpCtl {
   }
 
   String getNombres() {
-    String nombres = rstSysUser10.getValue('SYSUSER10_NOMBRES')??'';
-    String apellidos = rstSysUser10.getValue('SYSUSER10_APELLIDOS')??'';
+    String nombres = rstSysUser10.getValue('SYSUSER10_NOMBRES') ?? '';
+    String apellidos = rstSysUser10.getValue('SYSUSER10_APELLIDOS') ?? '';
 
     if (nombres.isEmpty || apellidos.isEmpty) {
       return html.window.localStorage['nombres']!.toUpperCase();
@@ -151,17 +172,18 @@ class SmxLogonMovil_controller extends SmxTmpCtl {
     return byteData.buffer.asUint8List();
   }
 
-  bool esMayorDe16(DateTime fechaNacimiento) {
+  bool isMayorEdad(DateTime fechaNacimiento) {
     final ahora = DateTime.now();
     final edad = ahora.year - fechaNacimiento.year;
 
     // Verificar si ya pasó el cumpleaños este año
     if (ahora.month < fechaNacimiento.month ||
-        (ahora.month == fechaNacimiento.month && ahora.day < fechaNacimiento.day)) {
-      return edad - 1 >= 16;
+        (ahora.month == fechaNacimiento.month &&
+            ahora.day < fechaNacimiento.day)) {
+      return edad - 1 >= edad_maxima;
     }
 
-    return edad >= 16;
+    return edad >= edad_maxima;
   }
 
   Future<int> _callWSImageLoad() async {

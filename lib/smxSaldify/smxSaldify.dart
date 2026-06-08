@@ -82,18 +82,18 @@ class _SmxSaldiFy extends State<SmxSaldiFy> {
             adminName: adminName,
             isMobile: layout.isMobile,
             isDesktop: layout.isDesktop,
-            maxContentWidth: layout.maxContentWidth,
-            pagePadding: layout.pagePadding,
-            metricColumnsFor: layout.metricColumnsFor,
-            quickActionCardWidth: layout.quickActionCardWidth,
+            maxContentWidth: layout.saldifyMaxContentWidth,
+            pagePadding: layout.saldifyPagePadding,
+            metricColumnsFor: layout.saldifyMetricColumnsFor,
+            quickActionCardWidth: layout.saldifyQuickActionCardWidth,
             menuButton: menuButton,
           )
         : SmxSaldiFyPerfil(
             controllerMain: widget.controllerMain,
             onNavigateToHome: () => _selectPage(0),
             isMobile: layout.isMobile,
-            maxContentWidth: layout.maxContentWidth,
-            pagePadding: layout.pagePadding,
+            maxContentWidth: layout.saldifyMaxContentWidth,
+            pagePadding: layout.saldifyPagePadding,
             menuButton: menuButton,
           );
   }
@@ -118,31 +118,4 @@ class _SmxSaldiFy extends State<SmxSaldiFy> {
       return 'Administrador';
     }
   }
-}
-
-extension _SaldifyLayoutValues on SmxLayoutSize {
-  double get maxContentWidth => switch (this) {
-    SmxLayoutSize.mobile => 460,
-    SmxLayoutSize.tablet => 860,
-    SmxLayoutSize.desktop => 1180,
-  };
-
-  EdgeInsets get pagePadding => switch (this) {
-    SmxLayoutSize.mobile => const EdgeInsets.fromLTRB(20, 20, 20, 28),
-    SmxLayoutSize.tablet => const EdgeInsets.fromLTRB(28, 28, 28, 34),
-    SmxLayoutSize.desktop => const EdgeInsets.fromLTRB(36, 34, 36, 40),
-  };
-
-  int metricColumnsFor(double width) {
-    if (width >= 980) return 4;
-    if (width >= 700) return 3;
-    if (width >= 300) return 2;
-    return 1;
-  }
-
-  double get quickActionCardWidth => switch (this) {
-    SmxLayoutSize.mobile => 136,
-    SmxLayoutSize.tablet => 180,
-    SmxLayoutSize.desktop => 220,
-  };
 }

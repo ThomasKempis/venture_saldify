@@ -15,6 +15,31 @@ enum SmxLayoutSize {
   bool get isMobile => this == SmxLayoutSize.mobile;
   bool get isTablet => this == SmxLayoutSize.tablet;
   bool get isDesktop => this == SmxLayoutSize.desktop;
+
+  double get saldifyMaxContentWidth => switch (this) {
+    SmxLayoutSize.mobile => 460,
+    SmxLayoutSize.tablet => 860,
+    SmxLayoutSize.desktop => 1180,
+  };
+
+  EdgeInsets get saldifyPagePadding => switch (this) {
+    SmxLayoutSize.mobile => const EdgeInsets.fromLTRB(20, 20, 20, 28),
+    SmxLayoutSize.tablet => const EdgeInsets.fromLTRB(28, 28, 28, 34),
+    SmxLayoutSize.desktop => const EdgeInsets.fromLTRB(36, 34, 36, 40),
+  };
+
+  int saldifyMetricColumnsFor(double width) {
+    if (width >= 980) return 4;
+    if (width >= 700) return 3;
+    if (width >= 300) return 2;
+    return 1;
+  }
+
+  double get saldifyQuickActionCardWidth => switch (this) {
+    SmxLayoutSize.mobile => 136,
+    SmxLayoutSize.tablet => 180,
+    SmxLayoutSize.desktop => 220,
+  };
 }
 
 class SmxLayout {
