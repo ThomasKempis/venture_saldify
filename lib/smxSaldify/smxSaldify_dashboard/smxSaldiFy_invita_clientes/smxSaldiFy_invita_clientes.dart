@@ -5,8 +5,13 @@ import 'smxSaldiFy_invita_modal.dart';
 
 class SmxSaldiFyInvitaClientes extends StatefulWidget {
   final String uuidAnfitrion;
+  final String anfitrionNombre;
 
-  const SmxSaldiFyInvitaClientes({super.key, required this.uuidAnfitrion});
+  const SmxSaldiFyInvitaClientes({
+    super.key,
+    required this.uuidAnfitrion,
+    required this.anfitrionNombre,
+  });
 
   @override
   State<SmxSaldiFyInvitaClientes> createState() =>
@@ -82,9 +87,7 @@ class _SmxSaldiFyInvitaClientesState extends State<SmxSaldiFyInvitaClientes> {
                     _InvitePill(
                       label: 'WhatsApp',
                       filled: _whatsAppSelected,
-                      onTap: () {
-                        setState(() => _whatsAppSelected = true);
-                      },
+                      onTap: _openWhatsAppModal,
                     ),
                   ],
                 ),
@@ -102,6 +105,19 @@ class _SmxSaldiFyInvitaClientesState extends State<SmxSaldiFyInvitaClientes> {
     await showSmxSaldiFyInvitaModal(
       context: context,
       uuidAnfitrion: widget.uuidAnfitrion,
+      anfitrionNombre: widget.anfitrionNombre,
+      action: SmxSaldiFyInvitaAction.copiarLink,
+    );
+  }
+
+  Future<void> _openWhatsAppModal() async {
+    setState(() => _whatsAppSelected = true);
+
+    await showSmxSaldiFyInvitaModal(
+      context: context,
+      uuidAnfitrion: widget.uuidAnfitrion,
+      anfitrionNombre: widget.anfitrionNombre,
+      action: SmxSaldiFyInvitaAction.whatsApp,
     );
   }
 }

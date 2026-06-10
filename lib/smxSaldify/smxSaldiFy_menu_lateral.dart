@@ -245,7 +245,7 @@ class SmxSaldiFyDrawer extends StatelessWidget {
 
     if (systemTopInset > 0) return systemTopInset;
 
-    return SmxLayout.isMobileWidth(context) ? 44 : 0;
+    return SmxLayout.topContentInset(context);
   }
 }
 

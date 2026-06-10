@@ -79,7 +79,10 @@ class SmxSaldiFyDashboard extends StatelessWidget {
                               _openUnderConstruction(context, title),
                         ),
                         SizedBox(height: isMobile ? 16 : 20),
-                        SmxSaldiFyInvitaClientes(uuidAnfitrion: uuidAnfitrion),
+                        SmxSaldiFyInvitaClientes(
+                          uuidAnfitrion: uuidAnfitrion,
+                          anfitrionNombre: adminName,
+                        ),
                         SizedBox(height: isMobile ? 24 : 30),
                         SmxSaldiFyAccionesRapidas(
                           isMobile: isMobile,

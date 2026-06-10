@@ -50,6 +50,26 @@ class SmxSaldiFyClienteController extends SmxController {
     await getRowSetFuture('QRY_SYSUSER10_SYSUSER11');
 
     rstInvitacion = getRowset('QRY_SYSUSER10_SYSUSER11');
+
+    if(rstInvitacion.getRowCount() == 0 &&
+        SmxConstants.hasCorreoInvitado &&
+        controllerMain.getCorreo() == SmxConstants.correoInvitado) {
+
+      removeSql('QRY_SYSUSER10_SYSUSER11');
+
+      addSql(
+        'QRY_SYSUSER10_SYSUSER11',
+        "select * from ADD_SYSUSER10_SYSUSER11("
+              "'${SmxConstants.uuidAnfitrion}', "
+              "'${SmxConstants.correoInvitado}')"
+      );
+
+      await getRowSetFuture('QRY_SYSUSER10_SYSUSER11');
+
+      rstInvitacion = getRowset('QRY_SYSUSER10_SYSUSER11');
+    }
+
+
     status = _getStatusInvitacion();
   }
 

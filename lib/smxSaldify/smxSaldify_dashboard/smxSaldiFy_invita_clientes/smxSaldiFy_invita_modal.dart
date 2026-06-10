@@ -1,41 +1,142 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show Clipboard, ClipboardData;
+import 'package:url_launcher/url_launcher.dart';
 import 'package:venture_core_connect/smxDataBase/smxRowSet.dart';
 import 'package:venture_saldify/smxApis/smxConstants.dart';
 import 'package:venture_saldify/smxColors.dart';
 
 import '../smxSaldiFy_clientes/smxSaldiFy_clientes_mock.dart';
 
+enum SmxSaldiFyInvitaAction { copiarLink, whatsApp }
+
 Future<void> showSmxSaldiFyInvitaModal({
   required BuildContext context,
   required String uuidAnfitrion,
+  required String anfitrionNombre,
+  required SmxSaldiFyInvitaAction action,
 }) async {
   await showDialog<void>(
     context: context,
     builder: (_) {
       return _InviteLinkDialog(
         uuidAnfitrion: uuidAnfitrion,
-        onCopy: (link) async {
-          await Clipboard.setData(ClipboardData(text: link));
-
-          if (!context.mounted) return;
-
-          ScaffoldMessenger.of(context)
-            ..hideCurrentSnackBar()
-            ..showSnackBar(
-              const SnackBar(content: Text('Link de invitacion copiado.')),
-            );
-        },
+        action: action,
+        onInvite: (invite) =>
+            _runInviteAction(context, invite, action, anfitrionNombre),
       );
     },
   );
 }
 
+Future<void> _runInviteAction(
+  BuildContext context,
+  _InviteActionData invite,
+  SmxSaldiFyInvitaAction action,
+  String anfitrionNombre,
+) async {
+  if (action == SmxSaldiFyInvitaAction.copiarLink) {
+    await Clipboard.setData(ClipboardData(text: invite.link));
+
+    if (!context.mounted) return;
+
+    _showPageMessage(context, 'Link de invitacion copiado.');
+    return;
+  }
+
+  final whatsAppUrl = _buildWhatsAppUrl(
+    telefono: invite.telefono,
+    link: invite.link,
+    anfitrionNombre: anfitrionNombre,
+  );
+
+  if (whatsAppUrl == null) {
+    if (!context.mounted) return;
+    _showPageMessage(context, 'Ingresa un telefono valido.');
+    return;
+  }
+
+  await launchUrl(whatsAppUrl, mode: LaunchMode.externalApplication);
+}
+
+Uri? _buildWhatsAppUrl({
+  required String telefono,
+  required String link,
+  required String anfitrionNombre,
+}) {
+  final phone = _normalizeWhatsAppPhone(telefono);
+  if (phone.length < 8) return null;
+
+  return Uri.https('api.whatsapp.com', '/send', {
+    'phone': phone,
+    'text': _buildWhatsAppMessage(link: link, anfitrionNombre: anfitrionNombre),
+  });
+}
+
+String _buildWhatsAppMessage({
+  required String link,
+  required String anfitrionNombre,
+}) {
+  final anfitrion = anfitrionNombre.trim().isEmpty
+      ? 'Tu anfitrion'
+      : anfitrionNombre.trim();
+
+  return [
+    'SALDIFY',
+    'Anfitrion: $anfitrion',
+    'Te comparto tu invitacion para entrar a mi red de clientes.',
+    link,
+  ].join('\n');
+}
+
+String _normalizeWhatsAppPhone(String telefono) {
+  var phone = telefono.replaceAll(RegExp(r'[^0-9]'), '');
+
+  if (phone.startsWith('00')) {
+    phone = phone.substring(2);
+  }
+
+  if (phone.startsWith('044') || phone.startsWith('045')) {
+    phone = phone.substring(3);
+  }
+
+  if (phone.startsWith('01') && phone.length == 12) {
+    phone = phone.substring(2);
+  }
+
+  if (phone.length == 10) {
+    phone = '52$phone';
+  }
+
+  if (phone.startsWith('521') && phone.length == 13) {
+    phone = '52${phone.substring(3)}';
+  }
+
+  return phone;
+}
+
+void _showPageMessage(BuildContext context, String message) {
+  ScaffoldMessenger.of(context)
+    ..hideCurrentSnackBar()
+    ..showSnackBar(SnackBar(content: Text(message)));
+}
+
+class _InviteActionData {
+  final String link;
+  final String telefono;
+
+  const _InviteActionData({required this.link, this.telefono = ''});
+}
+
 class _InviteLinkDialog extends StatefulWidget {
   final String uuidAnfitrion;
-  final Future<void> Function(String link) onCopy;
+  final SmxSaldiFyInvitaAction action;
+  final Future<void> Function(_InviteActionData invite) onInvite;
 
-  const _InviteLinkDialog({required this.uuidAnfitrion, required this.onCopy});
+  const _InviteLinkDialog({
+    required this.uuidAnfitrion,
+    required this.action,
+    required this.onInvite,
+  });
 
   @override
   State<_InviteLinkDialog> createState() => _InviteLinkDialogState();
@@ -44,19 +145,24 @@ class _InviteLinkDialog extends StatefulWidget {
 class _InviteLinkDialogState extends State<_InviteLinkDialog> {
   late final SmxRowSet _clientes;
   late final TextEditingController _correoController;
+  late final TextEditingController _telefonoController;
 
   @override
   void initState() {
     super.initState();
     _clientes = getRstSmxSaldiFyClientesMock();
     _correoController = TextEditingController();
+    _telefonoController = TextEditingController();
   }
 
   @override
   void dispose() {
     _correoController.dispose();
+    _telefonoController.dispose();
     super.dispose();
   }
+
+  bool get _isWhatsApp => widget.action == SmxSaldiFyInvitaAction.whatsApp;
 
   @override
   Widget build(BuildContext context) {
@@ -137,11 +243,14 @@ class _InviteLinkDialogState extends State<_InviteLinkDialog> {
                       children: [
                         _ClienteExistenteTab(
                           clientes: _clientes,
-                          onCopy: _copyClienteLink,
+                          action: widget.action,
+                          onInvite: _sendClienteLink,
                         ),
                         _CorreoInvitadoTab(
-                          controller: _correoController,
-                          onCopy: _copyCorreoLink,
+                          correoController: _correoController,
+                          telefonoController: _telefonoController,
+                          action: widget.action,
+                          onInvite: _sendCorreoLink,
                         ),
                       ],
                     ),
@@ -155,22 +264,35 @@ class _InviteLinkDialogState extends State<_InviteLinkDialog> {
     );
   }
 
-  Future<void> _copyClienteLink(String uuidInvitado) async {
-    final link = _buildInviteLink(uuidInvitado: uuidInvitado);
-    await widget.onCopy(link);
+  Future<void> _sendClienteLink(_ClienteInvitadoInfo cliente) async {
+    if (_isWhatsApp && !_isValidPhone(cliente.telefono)) {
+      _showModalMessage('El cliente no tiene un telefono valido.');
+      return;
+    }
+
+    final link = _buildInviteLink(uuidInvitado: cliente.uuidInvitado);
+    await widget.onInvite(
+      _InviteActionData(link: link, telefono: cliente.telefono),
+    );
     if (mounted) Navigator.of(context).pop();
   }
 
-  Future<void> _copyCorreoLink() async {
+  Future<void> _sendCorreoLink() async {
     final correo = _correoController.text.trim().toLowerCase();
+    final telefono = _telefonoController.text.trim();
 
     if (!_isValidEmail(correo)) {
       _showModalMessage('Ingresa un correo valido.');
       return;
     }
 
+    if (_isWhatsApp && !_isValidPhone(telefono)) {
+      _showModalMessage('Ingresa un telefono valido.');
+      return;
+    }
+
     final link = _buildInviteLink(correoInvitado: correo);
-    await widget.onCopy(link);
+    await widget.onInvite(_InviteActionData(link: link, telefono: telefono));
     if (mounted) Navigator.of(context).pop();
   }
 
@@ -194,6 +316,10 @@ class _InviteLinkDialogState extends State<_InviteLinkDialog> {
     return RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(value);
   }
 
+  bool _isValidPhone(String value) {
+    return _normalizeWhatsAppPhone(value).length >= 8;
+  }
+
   void _showModalMessage(String message) {
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
@@ -201,11 +327,28 @@ class _InviteLinkDialogState extends State<_InviteLinkDialog> {
   }
 }
 
+class _ClienteInvitadoInfo {
+  final String uuidInvitado;
+  final String telefono;
+
+  const _ClienteInvitadoInfo({
+    required this.uuidInvitado,
+    required this.telefono,
+  });
+}
+
 class _ClienteExistenteTab extends StatelessWidget {
   final SmxRowSet clientes;
-  final ValueChanged<String> onCopy;
+  final SmxSaldiFyInvitaAction action;
+  final ValueChanged<_ClienteInvitadoInfo> onInvite;
 
-  const _ClienteExistenteTab({required this.clientes, required this.onCopy});
+  const _ClienteExistenteTab({
+    required this.clientes,
+    required this.action,
+    required this.onInvite,
+  });
+
+  bool get _isWhatsApp => action == SmxSaldiFyInvitaAction.whatsApp;
 
   @override
   Widget build(BuildContext context) {
@@ -240,6 +383,7 @@ class _ClienteExistenteTab extends StatelessWidget {
               final status = clientes.getValue('STATUS')?.toString() ?? '';
               final uuidInvitado =
                   clientes.getValue('UUID_INVITADO')?.toString() ?? '';
+              final telefono = clientes.getValue('TELEFONO')?.toString() ?? '';
 
               return Material(
                 color: SmxColors.whiteAlpha(.92),
@@ -247,7 +391,12 @@ class _ClienteExistenteTab extends StatelessWidget {
                 child: InkWell(
                   onTap: uuidInvitado.isEmpty
                       ? null
-                      : () => onCopy(uuidInvitado),
+                      : () => onInvite(
+                          _ClienteInvitadoInfo(
+                            uuidInvitado: uuidInvitado,
+                            telefono: telefono,
+                          ),
+                        ),
                   borderRadius: BorderRadius.circular(14),
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(14, 12, 12, 12),
@@ -281,11 +430,22 @@ class _ClienteExistenteTab extends StatelessWidget {
                                   fontWeight: FontWeight.w700,
                                 ),
                               ),
+                              if (_isWhatsApp) ...[
+                                const SizedBox(height: 3),
+                                Text(
+                                  telefono.isEmpty ? 'Sin telefono' : telefono,
+                                  style: const TextStyle(
+                                    color: SmxColors.textMuted,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
                             ],
                           ),
                         ),
-                        const Icon(
-                          Icons.copy_rounded,
+                        Icon(
+                          _isWhatsApp ? Icons.chat_rounded : Icons.copy_rounded,
                           color: SmxColors.brandSecondary,
                           size: 20,
                         ),
@@ -303,10 +463,24 @@ class _ClienteExistenteTab extends StatelessWidget {
 }
 
 class _CorreoInvitadoTab extends StatelessWidget {
-  final TextEditingController controller;
-  final VoidCallback onCopy;
+  final TextEditingController correoController;
+  final TextEditingController telefonoController;
+  final SmxSaldiFyInvitaAction action;
+  final VoidCallback onInvite;
 
-  const _CorreoInvitadoTab({required this.controller, required this.onCopy});
+  const _CorreoInvitadoTab({
+    required this.correoController,
+    required this.telefonoController,
+    required this.action,
+    required this.onInvite,
+  });
+
+  bool get _isWhatsApp => action == SmxSaldiFyInvitaAction.whatsApp;
+
+  String get _buttonLabel => _isWhatsApp ? 'Enviar WhatsApp' : 'Copiar link';
+
+  IconData get _buttonIcon =>
+      _isWhatsApp ? Icons.chat_rounded : Icons.copy_rounded;
 
   @override
   Widget build(BuildContext context) {
@@ -332,10 +506,14 @@ class _CorreoInvitadoTab extends StatelessWidget {
         ),
         const SizedBox(height: 18),
         TextField(
-          controller: controller,
+          controller: correoController,
           keyboardType: TextInputType.emailAddress,
-          textInputAction: TextInputAction.done,
-          onSubmitted: (_) => onCopy(),
+          textInputAction: _isWhatsApp
+              ? TextInputAction.next
+              : TextInputAction.done,
+          onSubmitted: (_) {
+            if (!_isWhatsApp) onInvite();
+          },
           decoration: InputDecoration(
             filled: true,
             fillColor: SmxColors.whiteAlpha(.94),
@@ -350,11 +528,33 @@ class _CorreoInvitadoTab extends StatelessWidget {
             ),
           ),
         ),
+        if (_isWhatsApp) ...[
+          const SizedBox(height: 12),
+          TextField(
+            controller: telefonoController,
+            keyboardType: TextInputType.phone,
+            textInputAction: TextInputAction.done,
+            onSubmitted: (_) => onInvite(),
+            decoration: InputDecoration(
+              filled: true,
+              fillColor: SmxColors.whiteAlpha(.94),
+              prefixIcon: const Icon(
+                Icons.phone_rounded,
+                color: SmxColors.brandPrimary,
+              ),
+              hintText: 'Telefono WhatsApp',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(14),
+                borderSide: BorderSide.none,
+              ),
+            ),
+          ),
+        ],
         const Spacer(),
         ElevatedButton.icon(
-          onPressed: onCopy,
-          icon: const Icon(Icons.copy_rounded),
-          label: const Text('Copiar link'),
+          onPressed: onInvite,
+          icon: Icon(_buttonIcon),
+          label: Text(_buttonLabel),
         ),
       ],
     );

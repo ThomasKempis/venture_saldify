@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:universal_html/html.dart' as html;
 
 enum SmxLayoutSize {
   mobile,
@@ -62,6 +63,15 @@ class SmxLayout {
     return kIsWeb && isMobileWidth(context) && isMobilePlatform;
   }
 
+  static bool get isWebStandalone {
+    if (!kIsWeb) return false;
+
+    final standalone = html.window.matchMedia('(display-mode: standalone)');
+    final fullscreen = html.window.matchMedia('(display-mode: fullscreen)');
+
+    return standalone.matches || fullscreen.matches;
+  }
+
   static double topContentInset(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
     final systemTopInset = mediaQuery.padding.top > 0
@@ -70,6 +80,6 @@ class SmxLayout {
 
     if (systemTopInset > 0) return 0;
 
-    return isWebMobile(context) ? 44 : 0;
+    return isWebMobile(context) && isWebStandalone ? 44 : 0;
   }
 }

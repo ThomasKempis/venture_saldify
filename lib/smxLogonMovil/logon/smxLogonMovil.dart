@@ -23,8 +23,8 @@ class _SmxLogonMovilState extends State<SmxLogonMovil> {
   void initState() {
     super.initState();
     controller = SmxLogonMovil_controller();
-    controller.checkPermissionLocation();
-    controller.checkPermissionCamara();
+    //controller.checkPermissionLocation();
+    //controller.checkPermissionCamara();
   }
 
   @override

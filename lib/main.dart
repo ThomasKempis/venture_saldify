@@ -9,7 +9,7 @@ import 'package:venture_saldify/smxThemeData.dart';
 const String devUuidAnfitrion = 'ce9db2f5-dfb5-4b0e-9d35-941c0387f6de';
 const String devCorreoInvitado = 'santiago.azael.mohr@gmail.com';
 const String devUuidInvitado = 'bdfed92f-4e29-4565-9851-1a11068901c4';
-const SmxInvitacionMode devModalidad = SmxInvitacionMode.uuid_invitado;
+const SmxInvitacionMode devModalidad = SmxInvitacionMode.admin;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
