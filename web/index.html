@@ -90,17 +90,18 @@
     }
 
     .splash-content {
-      width: min(100%, 720px);
+      width: min(100%, 560px);
+      min-height: 696px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 24px;
+      padding: 24px 28px;
       box-sizing: border-box;
     }
 
     .logo-container {
       width: 260px;
-      height: 180px;
+      height: 173px;
       margin-bottom: 8px;
       display: flex;
       align-items: center;
@@ -110,12 +111,24 @@
 
     .logo-container img {
       width: 100%;
-      height: auto;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    @media (max-width: 430px) {
+      .splash-content {
+        min-height: 613px;
+      }
+
+      .logo-container {
+        width: 210px;
+        height: 140px;
+      }
     }
 
     .app-name {
       color: #ffffff;
-      font-size: 42px;
+      font-size: 60px;
       font-weight: 800;
       line-height: 1;
       letter-spacing: 4px;
@@ -127,9 +140,9 @@
 
     .app-slogan {
       color: #58D9A4;
-      font-size: 13px;
+      font-size: 18px;
       font-weight: 700;
-      margin-top: 4px;
+      margin-top: 10px;
       letter-spacing: 1px;
       opacity: 0;
       animation: fadeIn 1s ease-out forwards;
@@ -144,6 +157,12 @@
       border-top-color: #ffffff;
       border-radius: 50%;
       animation: spin 0.8s linear infinite;
+    }
+
+    @media (max-width: 430px) {
+      .app-name {
+        font-size: 48px;
+      }
     }
 
     flutter-loader,
@@ -185,7 +204,7 @@
   <div id="splash">
     <div class="splash-content">
       <div class="logo-container">
-        <img src="logo.png" alt="Saldify Icon">
+        <img src="icons/Icon-512.png" alt="Saldify Icon">
       </div>
       <div class="app-name">SALDIFY</div>
       <div class="app-slogan">SMART BALANCE & CREDITS CONTROL</div>
