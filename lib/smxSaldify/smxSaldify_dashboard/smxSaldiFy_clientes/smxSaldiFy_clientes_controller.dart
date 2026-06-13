@@ -2,6 +2,7 @@ import 'package:venture_core_connect/smxDataBase/smxRowSet.dart';
 import 'package:venture_widgets/smxClassDrivers.dart';
 import 'package:venture_widgets/smxController/smxController.dart';
 
+import '../../../smxApis/smxConstants.dart';
 import 'smxSaldiFy_clientes_mock.dart';
 
 class SmxSaldiFyClientesController extends SmxController {
@@ -14,20 +15,26 @@ class SmxSaldiFyClientesController extends SmxController {
     if (isBeginDB()) return;
 
     beginDB();
-    rstClientes = getRstSmxSaldiFyClientesMock();
+
+    addSql('QRY_SYSUSER11', "select * from QRY_SYSUSER11(${SmxConstants.controllerMain.rstSysUser10.getId()})");
+
+    await getRowSetFuture('QRY_SYSUSER11');
+
+    rstClientes = getRowset('QRY_SYSUSER11');
+    //rstClientes = getRstSmxSaldiFyClientesMock();
     rstClientes.first();
   }
 
   String getClientName() {
-    return rstClientes.getValue('NAME')?.toString() ?? '';
+    return rstClientes.getValue('SYSUSER10_INVITADO')?.toString() ?? '';
   }
 
   String getClientStatus() {
-    return rstClientes.getValue('STATUS')?.toString() ?? '';
+    return rstClientes.getValue('SYSUSER12_STATUS')?.toString() ?? '';
   }
 
   String getClientStatusType() {
-    return rstClientes.getValue('STATUS_TYPE')?.toString() ?? '';
+    return rstClientes.getValue('SYSUSER12_STATUS_TIPO')?.toString() ?? '';
   }
 
   String getClientCutDate() {
@@ -35,11 +42,11 @@ class SmxSaldiFyClientesController extends SmxController {
   }
 
   String getClientCredit() {
-    return rstClientes.getValue('CREDIT')?.toString() ?? '';
+    return rstClientes.getValue('SYSUSER12_CREDITO')?.toString() ?? '';
   }
 
   String getClientBalance() {
-    return rstClientes.getValue('BALANCE')?.toString() ?? '';
+    return rstClientes.getValue('SYSUSER12_BALANCE')?.toString() ?? '';
   }
 
   @override

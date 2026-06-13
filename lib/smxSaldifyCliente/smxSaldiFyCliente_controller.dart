@@ -14,14 +14,13 @@ enum SmxSaldiFyClienteStatus {
 }
 
 class SmxSaldiFyClienteController extends SmxController {
-  final SmxLogonMovil_controller controllerMain;
+  final SmxLogonMovil_controller controllerMain = SmxConstants.controllerMain;
   late SmxRowSet rstInvitacion;
   SmxSaldiFyClienteStatus status = SmxSaldiFyClienteStatus.invalido;
 
   SmxSaldiFyClienteController({
     required super.alias,
     required super.data,
-    required this.controllerMain,
   });
 
   @override
@@ -43,7 +42,7 @@ class SmxSaldiFyClienteController extends SmxController {
     addSql(
       'QRY_SYSUSER10_SYSUSER11',
       "select * from QRY_SYSUSER10_SYSUSER11 "
-          "where UUID_ANFITRION = '${SmxConstants.uuidAnfitrion}' "
+          "where UUID_ANFITRION = '${SmxConstants.uuidAnfitrionParam}' "
           "and ${_getInvitadoSqlCondition()}",
     );
 
@@ -53,15 +52,15 @@ class SmxSaldiFyClienteController extends SmxController {
 
     if(rstInvitacion.getRowCount() == 0 &&
         SmxConstants.hasCorreoInvitado &&
-        controllerMain.getCorreo() == SmxConstants.correoInvitado) {
+        controllerMain.getCorreo() == SmxConstants.correoInvitadoParam) {
 
       removeSql('QRY_SYSUSER10_SYSUSER11');
 
       addSql(
         'QRY_SYSUSER10_SYSUSER11',
         "select * from ADD_SYSUSER10_SYSUSER11("
-              "'${SmxConstants.uuidAnfitrion}', "
-              "'${SmxConstants.correoInvitado}')"
+              "'${SmxConstants.uuidAnfitrionParam}', "
+              "'${SmxConstants.correoInvitadoParam}')"
       );
 
       await getRowSetFuture('QRY_SYSUSER10_SYSUSER11');
@@ -96,23 +95,20 @@ class SmxSaldiFyClienteController extends SmxController {
   String? get mensajeValidacion {
     return switch (status) {
       SmxSaldiFyClienteStatus.aceptado => null,
-      SmxSaldiFyClienteStatus.pendiente =>
-        'Su invitacion esta pendiente de aprobacion por el anfitrion.',
-      SmxSaldiFyClienteStatus.rechazado =>
-        'Su invitacion fue rechazada por el anfitrion.',
+      SmxSaldiFyClienteStatus.pendiente => 'Su invitacion esta pendiente de aprobacion por el anfitrion.',
+      SmxSaldiFyClienteStatus.rechazado => 'Su invitacion fue rechazada por el anfitrion.',
       SmxSaldiFyClienteStatus.invalido => 'Su invitacion no es valida.',
-      SmxSaldiFyClienteStatus.usuarioNoCorresponde =>
-        'Esta invitacion pertenece a otro usuario.',
+      SmxSaldiFyClienteStatus.usuarioNoCorresponde => 'Esta invitacion pertenece a otro usuario.',
     };
   }
 
   bool _isUsuarioInvitado() {
     if (SmxConstants.hasUuidInvitado) {
-      return uuidUsuarioLogueado == SmxConstants.uuidInvitado;
+      return uuidUsuarioLogueado == SmxConstants.uuidInvitadoParam;
     }
 
     if (SmxConstants.hasCorreoInvitado) {
-      return controllerMain.getCorreo() == SmxConstants.correoInvitado;
+      return controllerMain.getCorreo() == SmxConstants.correoInvitadoParam;
     }
 
     return false;
@@ -120,10 +116,10 @@ class SmxSaldiFyClienteController extends SmxController {
 
   String _getInvitadoSqlCondition() {
     if (SmxConstants.hasUuidInvitado) {
-      return "UUID_INVITADO = '${SmxConstants.uuidInvitado}'";
+      return "UUID_INVITADO = '${SmxConstants.uuidInvitadoParam}'";
     }
 
-    return "upper(INVITADO_CORREO) = upper('${SmxConstants.correoInvitado}')";
+    return "upper(INVITADO_CORREO) = upper('${SmxConstants.correoInvitadoParam}')";
   }
 
   String get uuidUsuarioLogueado {

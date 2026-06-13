@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:venture_saldify/smxApis/smxConstants.dart';
 import 'package:venture_saldify/smxColors.dart';
 import 'package:venture_saldify/smxLayout.dart';
 import '../smxLogonMovil/logon/smxLogonMovil_controller.dart';
@@ -7,9 +8,9 @@ import 'smxSaldiFy_menu_lateral.dart';
 import 'smxSaldify_screens/smxSaldiFy_perfil.dart';
 
 class SmxSaldiFy extends StatefulWidget {
-  final SmxLogonMovil_controller controllerMain;
+  final SmxLogonMovil_controller controllerMain = SmxConstants.controllerMain;
 
-  const SmxSaldiFy({super.key, required this.controllerMain});
+  SmxSaldiFy({super.key});
 
   @override
   State<SmxSaldiFy> createState() => _SmxSaldiFy();
@@ -17,6 +18,7 @@ class SmxSaldiFy extends StatefulWidget {
 
 class _SmxSaldiFy extends State<SmxSaldiFy> {
   int _selectedIndex = 0;
+  int _dashboardRefreshRevision = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -79,8 +81,8 @@ class _SmxSaldiFy extends State<SmxSaldiFy> {
   }) {
     return _selectedIndex == 0
         ? SmxSaldiFyDashboard(
+            key: ValueKey('saldify-dashboard-$_dashboardRefreshRevision'),
             adminName: adminName,
-            uuidAnfitrion: widget.controllerMain.getUuid(),
             isMobile: layout.isMobile,
             isDesktop: layout.isDesktop,
             maxContentWidth: layout.saldifyMaxContentWidth,
@@ -88,9 +90,9 @@ class _SmxSaldiFy extends State<SmxSaldiFy> {
             metricColumnsFor: layout.saldifyMetricColumnsFor,
             quickActionCardWidth: layout.saldifyQuickActionCardWidth,
             menuButton: menuButton,
+            onRefresh: _refreshDashboard,
           )
         : SmxSaldiFyPerfil(
-            controllerMain: widget.controllerMain,
             onNavigateToHome: () => _selectPage(0),
             isMobile: layout.isMobile,
             maxContentWidth: layout.saldifyMaxContentWidth,
@@ -107,6 +109,14 @@ class _SmxSaldiFy extends State<SmxSaldiFy> {
     setState(() {
       _selectedIndex = index;
     });
+  }
+
+  Future<void> _refreshDashboard() async {
+    setState(() {
+      _dashboardRefreshRevision++;
+    });
+
+    await Future<void>.delayed(const Duration(milliseconds: 350));
   }
 
   String _getAdminName() {

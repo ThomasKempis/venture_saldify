@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:venture_saldify/smxColors.dart';
 import 'package:venture_saldify/smxLayout.dart';
@@ -16,6 +17,7 @@ class SmxSaldiFyClienteDashboard extends StatelessWidget {
   final EdgeInsets pagePadding;
   final int Function(double width) metricColumnsFor;
   final Widget? menuButton;
+  final Future<void> Function()? onRefresh;
 
   const SmxSaldiFyClienteDashboard({
     super.key,
@@ -27,6 +29,7 @@ class SmxSaldiFyClienteDashboard extends StatelessWidget {
     required this.pagePadding,
     required this.metricColumnsFor,
     this.menuButton,
+    this.onRefresh,
   });
 
   static const _backgroundGradient = SmxGradients.saldifyBackground;
@@ -34,70 +37,86 @@ class SmxSaldiFyClienteDashboard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final topContentInset = SmxLayout.topContentInset(context);
+    final bottomContentInset = SmxLayout.bottomContentInset(context);
 
     return SizedBox.expand(
       child: DecoratedBox(
         decoration: const BoxDecoration(gradient: _backgroundGradient),
         child: SafeArea(
+          top: false,
+          bottom: false,
           child: Align(
             alignment: Alignment.topCenter,
             child: ConstrainedBox(
               constraints: BoxConstraints(maxWidth: maxContentWidth),
-              child: CustomScrollView(
-                slivers: [
-                  SliverPadding(
-                    padding: EdgeInsets.fromLTRB(
-                      pagePadding.left,
-                      pagePadding.top + topContentInset,
-                      pagePadding.right,
-                      pagePadding.bottom,
-                    ),
-                    sliver: SliverList(
-                      delegate: SliverChildListDelegate([
-                        _ClienteHeader(menuButton: menuButton),
-                        SizedBox(height: isMobile ? 26 : 34),
-                        Text(
-                          'Hola, $clientName',
-                          style: const TextStyle(
-                            color: SmxColors.white70,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w700,
+              child: RefreshIndicator(
+                onRefresh: onRefresh ?? () async {},
+                color: SmxColors.brandAccent,
+                backgroundColor: SmxColors.white,
+                child: CustomScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  slivers: [
+                    SliverPadding(
+                      padding: EdgeInsets.fromLTRB(
+                        pagePadding.left,
+                        pagePadding.top + topContentInset,
+                        pagePadding.right,
+                        pagePadding.bottom + bottomContentInset,
+                      ),
+                      sliver: SliverList(
+                        delegate: SliverChildListDelegate([
+                          _ClienteHeader(
+                            menuButton: menuButton,
+                            onRefresh: onRefresh,
+                            showRefreshButton:
+                                kIsWeb &&
+                                !SmxLayout.isWebMobile(context) &&
+                                !SmxLayout.isWebStandalone,
                           ),
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          'Anfitrion: $anfitrionNombreCompleto',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            color: SmxColors.white54,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
+                          SizedBox(height: isMobile ? 26 : 34),
+                          Text(
+                            'Hola, $clientName',
+                            style: const TextStyle(
+                              color: SmxColors.white70,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 12),
-                        SmxSaldiFyClienteResumen(
-                          isMobile: isMobile,
-                          metricColumnsFor: metricColumnsFor,
-                          onMetricTap: (title) =>
-                              _openUnderConstruction(context, title),
-                        ),
-                        SizedBox(height: isMobile ? 16 : 20),
-                        SmxSaldiFyClienteNegocio(
-                          onContactTap: () =>
-                              _openUnderConstruction(context, 'Contacto'),
-                        ),
-                        SizedBox(height: isMobile ? 26 : 30),
-                        SmxSaldiFyClientePedidos(
-                          isMobile: isMobile,
-                          isDesktop: isDesktop,
-                          onPedidoTap: (title) =>
-                              _openUnderConstruction(context, title),
-                        ),
-                      ]),
+                          const SizedBox(height: 6),
+                          Text(
+                            'Anfitrion: $anfitrionNombreCompleto',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              color: SmxColors.white54,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          SmxSaldiFyClienteResumen(
+                            isMobile: isMobile,
+                            metricColumnsFor: metricColumnsFor,
+                            onMetricTap: (title) =>
+                                _openUnderConstruction(context, title),
+                          ),
+                          SizedBox(height: isMobile ? 16 : 20),
+                          SmxSaldiFyClienteNegocio(
+                            onContactTap: () =>
+                                _openUnderConstruction(context, 'Contacto'),
+                          ),
+                          SizedBox(height: isMobile ? 26 : 30),
+                          SmxSaldiFyClientePedidos(
+                            isMobile: isMobile,
+                            isDesktop: isDesktop,
+                            onPedidoTap: (title) =>
+                                _openUnderConstruction(context, title),
+                          ),
+                        ]),
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
@@ -109,8 +128,14 @@ class SmxSaldiFyClienteDashboard extends StatelessWidget {
 
 class _ClienteHeader extends StatelessWidget {
   final Widget? menuButton;
+  final Future<void> Function()? onRefresh;
+  final bool showRefreshButton;
 
-  const _ClienteHeader({this.menuButton});
+  const _ClienteHeader({
+    this.menuButton,
+    this.onRefresh,
+    required this.showRefreshButton,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -160,6 +185,22 @@ class _ClienteHeader extends StatelessWidget {
             ],
           ),
         ),
+        if (showRefreshButton && onRefresh != null) ...[
+          const SizedBox(width: 12),
+          Tooltip(
+            message: 'Refrescar',
+            child: IconButton(
+              onPressed: () => onRefresh?.call(),
+              icon: const Icon(Icons.refresh_rounded),
+              color: SmxColors.white,
+              style: IconButton.styleFrom(
+                backgroundColor: SmxColors.whiteAlpha(.12),
+                hoverColor: SmxColors.whiteAlpha(.18),
+                fixedSize: const Size(44, 44),
+              ),
+            ),
+          ),
+        ],
       ],
     );
   }

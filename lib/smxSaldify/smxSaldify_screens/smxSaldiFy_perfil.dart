@@ -3,19 +3,19 @@ import 'package:venture_saldify/smxColors.dart';
 import 'package:venture_saldify/smxLayout.dart';
 import 'package:venture_saldify/smxLogonMovil/logon/smxPerfil/smxPerfil.dart';
 
+import '../../smxApis/smxConstants.dart';
 import '../../smxLogonMovil/logon/smxLogonMovil_controller.dart';
 
 class SmxSaldiFyPerfil extends StatelessWidget {
-  final SmxLogonMovil_controller controllerMain;
+  final SmxLogonMovil_controller controllerMain = SmxConstants.controllerMain;
   final VoidCallback onNavigateToHome;
   final bool isMobile;
   final double maxContentWidth;
   final EdgeInsets pagePadding;
   final Widget? menuButton;
 
-  const SmxSaldiFyPerfil({
+  SmxSaldiFyPerfil({
     super.key,
-    required this.controllerMain,
     required this.onNavigateToHome,
     required this.isMobile,
     required this.maxContentWidth,
@@ -28,11 +28,14 @@ class SmxSaldiFyPerfil extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final topContentInset = SmxLayout.topContentInset(context);
+    final bottomContentInset = SmxLayout.bottomContentInset(context);
 
     return SizedBox.expand(
       child: DecoratedBox(
         decoration: const BoxDecoration(gradient: _backgroundGradient),
         child: SafeArea(
+          top: false,
+          bottom: false,
           child: Align(
             alignment: Alignment.topCenter,
             child: ConstrainedBox(
@@ -50,9 +53,9 @@ class SmxSaldiFyPerfil extends StatelessWidget {
                   ),
                   const SizedBox(height: 18),
                   Expanded(
-                    child: SmxPerfil(
-                      controllerMain: controllerMain,
-                      onNavigateToHome: onNavigateToHome,
+                    child: Padding(
+                      padding: EdgeInsets.only(bottom: bottomContentInset),
+                      child: SmxPerfil(onNavigateToHome: onNavigateToHome),
                     ),
                   ),
                 ],

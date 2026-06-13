@@ -5,14 +5,16 @@ import 'dart:typed_data';
 import 'package:venture_widgets/smxShowDialog/smxShowDialogs.dart';
 import 'package:venture_widgets/smxTextField/smxTextField.dart';
 
+import '../../../smxApis/smxConstants.dart';
 import '../smxLogonMovil_controller.dart';
 
 class SmxPerfil_controller extends SmxTmpCtl {
-  final SmxLogonMovil_controller controllerMain;
+  final SmxLogonMovil_controller controllerMain = SmxConstants.controllerMain;
+
   @override
   final BuildContext context;
 
-  SmxPerfil_controller(this.context, this.controllerMain) {
+  SmxPerfil_controller(this.context) {
     data.context = context;
     data.tablaTroncalRst = controllerMain.rstSysUser10;
   }

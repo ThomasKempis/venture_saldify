@@ -10,7 +10,8 @@ class SmxSaldiFyScreenTmp extends StatelessWidget {
   const SmxSaldiFyScreenTmp({
     super.key,
     required this.title,
-    this.mensaje = 'Este modulo esta preparado para conectar su controller y flujo operativo.',
+    this.mensaje =
+        'Este modulo esta preparado para conectar su controller y flujo operativo.',
     this.btoBack = true,
   });
 
@@ -23,6 +24,7 @@ class SmxSaldiFyScreenTmp extends StatelessWidget {
         final layout = SmxLayout.sizeFromWidth(constraints.maxWidth);
         final pagePadding = layout.pagePadding;
         final topContentInset = SmxLayout.topContentInset(context);
+        final bottomContentInset = SmxLayout.bottomContentInset(context);
 
         return Scaffold(
           backgroundColor: SmxColors.transparent,
@@ -30,6 +32,8 @@ class SmxSaldiFyScreenTmp extends StatelessWidget {
             child: DecoratedBox(
               decoration: const BoxDecoration(gradient: _backgroundGradient),
               child: SafeArea(
+                top: false,
+                bottom: false,
                 child: Align(
                   alignment: Alignment.topCenter,
                   child: ConstrainedBox(
@@ -48,9 +52,9 @@ class SmxSaldiFyScreenTmp extends StatelessWidget {
                           child: Row(
                             children: [
                               if (btoBack)
-                              _BackButton(
-                                onPressed: () => Navigator.of(context).pop(),
-                              ),
+                                _BackButton(
+                                  onPressed: () => Navigator.of(context).pop(),
+                                ),
                               const SizedBox(width: 14),
                               Expanded(
                                 child: Text(
@@ -72,7 +76,12 @@ class SmxSaldiFyScreenTmp extends StatelessWidget {
                             child: ConstrainedBox(
                               constraints: const BoxConstraints(maxWidth: 720),
                               child: Padding(
-                                padding: const EdgeInsets.all(28),
+                                padding: EdgeInsets.fromLTRB(
+                                  28,
+                                  28,
+                                  28,
+                                  28 + bottomContentInset,
+                                ),
                                 child: Column(
                                   mainAxisSize: MainAxisSize.min,
                                   crossAxisAlignment:

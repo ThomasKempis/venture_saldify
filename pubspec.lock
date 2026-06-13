@@ -1424,7 +1424,7 @@ packages:
     description:
       path: "packages/venture_widgets"
       ref: main
-      resolved-ref: "9de37a223ecca504e8d661240b346ad88eb2d66f"
+      resolved-ref: "9136b5dc9443c3af552bb65eebe95f0e293503c2"
       url: "https://github.com/ThomasKempis/venture.git"
     source: git
     version: "2.0.16"

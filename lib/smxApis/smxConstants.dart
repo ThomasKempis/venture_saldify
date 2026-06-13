@@ -3,38 +3,41 @@ import 'package:universal_html/html.dart' as html;
 import 'package:venture_core_connect/smxConstants_core.dart';
 import 'package:venture_widgets/smxConstants_widgets.dart';
 import '../firebase_options.dart';
+import '../smxLogonMovil/logon/smxLogonMovil_controller.dart';
 
 enum SmxInvitacionMode { admin, uuid_invitado, correo_invitado }
 
 abstract class SmxConstants {
-  static const String uuidInvitadoParam = 'uuid_invitado';
-  static const String correoInvitadoParam = 'correo_invitado';
-  static const String uuidAnfitrionParam = 'uuid_anfitrion';
+  static late SmxLogonMovil_controller controllerMain;
+
+  static const String _uuidInvitadoParam = 'uuid_invitado';
+  static const String _correoInvitadoParam = 'correo_invitado';
+  static const String _uuidAnfitrionParam = 'uuid_anfitrion';
 
   static Map<String, String> startParametersUrl = {};
 
-  static String get correoInvitado {
-    return startParametersUrl[correoInvitadoParam]?.trim() ?? '';
+  static String get correoInvitadoParam {
+    return startParametersUrl[_correoInvitadoParam]?.trim() ?? '';
   }
 
-  static String get uuidInvitado {
-    return startParametersUrl[uuidInvitadoParam]?.trim() ?? '';
+  static String get uuidInvitadoParam {
+    return startParametersUrl[_uuidInvitadoParam]?.trim() ?? '';
   }
 
-  static String get uuidAnfitrion {
-    return startParametersUrl[uuidAnfitrionParam]?.trim() ?? '';
+  static String get uuidAnfitrionParam {
+    return startParametersUrl[_uuidAnfitrionParam]?.trim() ?? '';
   }
 
   static bool get hasUuidInvitado {
-    return uuidAnfitrion.isNotEmpty &&
-        uuidInvitado.isNotEmpty &&
-        correoInvitado.isEmpty;
+    return uuidAnfitrionParam.isNotEmpty &&
+        uuidInvitadoParam.isNotEmpty &&
+        correoInvitadoParam.isEmpty;
   }
 
   static bool get hasCorreoInvitado {
-    return uuidAnfitrion.isNotEmpty &&
-        correoInvitado.isNotEmpty &&
-        uuidInvitado.isEmpty;
+    return uuidAnfitrionParam.isNotEmpty &&
+        correoInvitadoParam.isNotEmpty &&
+        uuidInvitadoParam.isEmpty;
   }
 
   static bool get isClienteInvitado {
@@ -50,9 +53,9 @@ abstract class SmxConstants {
 
   static bool get hasParametrosInvitacionInvalidos {
     final hasAnyParam =
-        uuidAnfitrion.isNotEmpty ||
-        uuidInvitado.isNotEmpty ||
-        correoInvitado.isNotEmpty;
+        uuidAnfitrionParam.isNotEmpty ||
+        uuidInvitadoParam.isNotEmpty ||
+        correoInvitadoParam.isNotEmpty;
 
     return hasAnyParam && !isClienteInvitado;
   }

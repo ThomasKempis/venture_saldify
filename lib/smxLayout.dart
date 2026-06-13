@@ -77,9 +77,43 @@ class SmxLayout {
     final systemTopInset = mediaQuery.padding.top > 0
         ? mediaQuery.padding.top
         : mediaQuery.viewPadding.top;
+    final cssTopInset = _cssPixelValue('--saldify-safe-area-top');
 
-    if (systemTopInset > 0) return 0;
+    if (systemTopInset > 0 || cssTopInset > 0) {
+      return systemTopInset > cssTopInset ? systemTopInset : cssTopInset;
+    }
 
-    return isWebMobile(context) && isWebStandalone ? 44 : 0;
+    return 0;
+  }
+
+  static double bottomContentInset(BuildContext context) {
+    final mediaQuery = MediaQuery.of(context);
+    final systemBottomInset = mediaQuery.padding.bottom > 0
+        ? mediaQuery.padding.bottom
+        : mediaQuery.viewPadding.bottom;
+    final cssBottomInset = _cssPixelValue('--saldify-safe-area-bottom');
+
+    if (systemBottomInset > 0 || cssBottomInset > 0) {
+      return systemBottomInset > cssBottomInset
+          ? systemBottomInset
+          : cssBottomInset;
+    }
+
+    return 0;
+  }
+
+  static double _cssPixelValue(String propertyName) {
+    if (!kIsWeb) return 0;
+
+    final root = html.document.documentElement;
+    if (root == null) return 0;
+
+    final rawValue = root
+        .getComputedStyle()
+        .getPropertyValue(propertyName)
+        .trim();
+    if (rawValue.isEmpty) return 0;
+
+    return double.tryParse(rawValue.replaceAll('px', '').trim()) ?? 0;
   }
 }

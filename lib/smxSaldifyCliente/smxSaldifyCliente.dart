@@ -3,8 +3,6 @@ import 'package:venture_saldify/smxColors.dart';
 import 'package:venture_saldify/smxLayout.dart';
 import 'package:venture_widgets/smxCallBaseStateful.dart';
 import 'package:venture_widgets/smxController/smxControllerSendData.dart';
-
-import '../smxLogonMovil/logon/smxLogonMovil_controller.dart';
 import '../smxSaldify/smxSaldify_screens/smxSaldiFy_screen_tmp.dart';
 import '../smxSaldify/smxSaldify_screens/smxSaldiFy_perfil.dart';
 import 'smxSaldiFyCliente_controller.dart';
@@ -12,9 +10,7 @@ import 'smxSaldiFyCliente_menu_lateral.dart';
 import 'smxSaldifyCliente_dashboard/smxSaldiFyCliente_dashboard.dart';
 
 class SmxSaldiFyCliente extends StatefulWidget {
-  final SmxLogonMovil_controller controllerMain;
-
-  const SmxSaldiFyCliente({super.key, required this.controllerMain});
+  const SmxSaldiFyCliente({super.key});
 
   @override
   State<SmxSaldiFyCliente> createState() => _SmxSaldiFyClienteState();
@@ -22,6 +18,7 @@ class SmxSaldiFyCliente extends StatefulWidget {
 
 class _SmxSaldiFyClienteState extends State<SmxSaldiFyCliente> {
   int _selectedIndex = 0;
+  int _dashboardRefreshRevision = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +26,6 @@ class _SmxSaldiFyClienteState extends State<SmxSaldiFyCliente> {
       controllerBuilder: (context) => SmxSaldiFyClienteController(
         alias: 'SMXSALDIFY_CLIENTE',
         data: SmxControllerSendData(context: context),
-        controllerMain: widget.controllerMain,
       ),
       builder: (context, controller) {
         final mensajeValidacion = controller.mensajeValidacion;
@@ -110,6 +106,9 @@ class _SmxSaldiFyClienteState extends State<SmxSaldiFyCliente> {
   }) {
     return _selectedIndex == 0
         ? SmxSaldiFyClienteDashboard(
+            key: ValueKey(
+              'saldify-cliente-dashboard-$_dashboardRefreshRevision',
+            ),
             clientName: clientName,
             anfitrionNombreCompleto: anfitrionNombreCompleto,
             isMobile: layout.isMobile,
@@ -118,9 +117,9 @@ class _SmxSaldiFyClienteState extends State<SmxSaldiFyCliente> {
             pagePadding: layout.saldifyPagePadding,
             metricColumnsFor: layout.saldifyMetricColumnsFor,
             menuButton: menuButton,
+            onRefresh: _refreshDashboard,
           )
         : SmxSaldiFyPerfil(
-            controllerMain: widget.controllerMain,
             onNavigateToHome: () => _selectPage(0),
             isMobile: layout.isMobile,
             maxContentWidth: layout.saldifyMaxContentWidth,
@@ -137,6 +136,14 @@ class _SmxSaldiFyClienteState extends State<SmxSaldiFyCliente> {
     setState(() {
       _selectedIndex = index;
     });
+  }
+
+  Future<void> _refreshDashboard() async {
+    setState(() {
+      _dashboardRefreshRevision++;
+    });
+
+    await Future<void>.delayed(const Duration(milliseconds: 350));
   }
 
   String _getClientName(SmxSaldiFyClienteController controller) {

@@ -1,8 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
 import 'package:venture_saldify/smxColors.dart';
+import 'package:venture_saldify/smxLayout.dart';
 import 'package:venture_saldify/smxLogonMovil/logon/smxAuth/AuthRepository.dart';
 import 'package:venture_saldify/smxLogonMovil/logon/smxAuth/AuthService.dart';
 import 'package:venture_saldify/smxLogonMovil/logon/smxAuth/AuthViewModel.dart';
@@ -67,9 +67,9 @@ class _LogonFrontEndBodyState extends State<_LogonFrontEndBody> {
   }
 
   Future<void> _getVersion() async {
-    final info = await PackageInfo.fromPlatform();
+    final info = await widget.controller.infoUser.getVersion();
     setState(() {
-      _version = info.version;
+      _version = info;
     });
   }
 
@@ -112,40 +112,51 @@ class _LogonFrontEndBodyState extends State<_LogonFrontEndBody> {
   }
 
   Widget _buildAuth() {
+    final topContentInset = SmxLayout.topContentInset(context);
+    final bottomContentInset = SmxLayout.bottomContentInset(context);
+
     return SafeArea(
-      child: Center(
-        child: SingleChildScrollView(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 560),
-            child: Consumer<AuthViewModel>(
-              builder: (context, viewModel, _) {
-                return StreamBuilder<User?>(
-                  stream: viewModel.authStateChanges,
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const CircularProgressIndicator(
-                        color: Colors.white,
-                      );
-                    }
+      top: false,
+      bottom: false,
+      child: Padding(
+        padding: EdgeInsets.only(
+          top: topContentInset,
+          bottom: bottomContentInset,
+        ),
+        child: Center(
+          child: SingleChildScrollView(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 560),
+              child: Consumer<AuthViewModel>(
+                builder: (context, viewModel, _) {
+                  return StreamBuilder<User?>(
+                    stream: viewModel.authStateChanges,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const CircularProgressIndicator(
+                          color: Colors.white,
+                        );
+                      }
 
-                    if (snapshot.hasData && snapshot.data != null) {
-                      final user = snapshot.data!;
-                      Future.microtask(() async {
-                        await widget.controller.saveCredentials(user);
+                      if (snapshot.hasData && snapshot.data != null) {
+                        final user = snapshot.data!;
+                        Future.microtask(() async {
+                          await widget.controller.saveCredentials(user);
 
-                        if (!mounted) return;
+                          if (!mounted) return;
 
-                        widget.controller.navigateToAppMovil(context);
-                      });
+                          widget.controller.navigateToAppMovil(context);
+                        });
 
-                      return const SizedBox.shrink();
-                    }
+                        return const SizedBox.shrink();
+                      }
 
-                    // No está logueado, mostrar botón login
-                    return _buildLoginButton(viewModel);
-                  },
-                );
-              },
+                      // No está logueado, mostrar botón login
+                      return _buildLoginButton(viewModel);
+                    },
+                  );
+                },
+              ),
             ),
           ),
         ),

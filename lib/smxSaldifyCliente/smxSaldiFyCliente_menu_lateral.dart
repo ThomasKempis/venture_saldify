@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:venture_saldify/smxColors.dart';
 import 'package:venture_saldify/smxLayout.dart';
+import 'package:venture_saldify/smxMenuVersion.dart';
 
 class SmxSaldiFyClienteMenuButton extends StatelessWidget {
   final VoidCallback onPressed;
@@ -91,8 +92,7 @@ class SmxSaldiFyClienteNavigationPanel extends StatelessWidget {
                 ),
                 const Spacer(),
                 if (expanded)
-                  const Text(
-                    'Portal cliente operativo',
+                  const SmxMenuVersion(
                     style: TextStyle(
                       color: SmxColors.white54,
                       fontSize: 12,
@@ -220,8 +220,8 @@ class SmxSaldiFyClienteDrawer extends StatelessWidget {
                 const Spacer(),
                 const Padding(
                   padding: EdgeInsets.fromLTRB(20, 0, 20, 20),
-                  child: Text(
-                    'Portal cliente operativo',
+                  child: SmxMenuVersion(
+                    textAlign: TextAlign.center,
                     style: TextStyle(
                       color: SmxColors.white54,
                       fontSize: 12,

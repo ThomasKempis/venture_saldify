@@ -24,6 +24,7 @@ class SmxLogonMovil_controller extends SmxTmpCtl {
 
   SmxLogonMovil_controller() {
     infoUser = SmxInfoUser();
+    SmxConstants.controllerMain = this;
   }
 
   Future<void> checkPermissionLocation() async {
@@ -139,8 +140,8 @@ class SmxLogonMovil_controller extends SmxTmpCtl {
       MaterialPageRoute(
         builder: (_) =>
             SmxConstants.isClienteInvitado || SmxConstants.hasParametrosInvitacionInvalidos
-            ? SmxSaldiFyCliente(controllerMain: this)
-            : SmxSaldiFy(controllerMain: this),
+            ? SmxSaldiFyCliente()
+            : SmxSaldiFy(),
       ),
     );
   }

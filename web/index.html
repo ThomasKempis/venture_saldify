@@ -1,38 +1,31 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <!-- Configuración y metadatos -->
   <base href="/venture_saldify/">
   <meta charset="UTF-8">
-  <meta property="og:title" content="Saldify">
-  <meta property="og:description" content="Gestión de créditos y saldos en línea">
-  <meta property="og:image" content="https://venture.jars.mx/venture_saldify/logo.png">
-  <meta property="og:url" content="https://venture.jars.mx/venture_saldify/">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="description" content="Venture Web">
-  <meta name="color-scheme" content="dark">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+  <meta property="og:title" content="Saldify">
+  <meta property="og:description" content="Gestion de creditos y saldos en linea">
+  <meta property="og:image" content="https://venture.jars.mx/venture_saldify/logo.png">
+  <meta property="og:url" content="https://venture.jars.mx/venture_saldify/">
+
   <meta name="theme-color" content="#155C37">
-  <meta name="theme-color" content="#155C37" media="(prefers-color-scheme: light)">
-  <meta name="theme-color" content="#155C37" media="(prefers-color-scheme: dark)">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-touch-fullscreen" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <meta name="apple-mobile-web-app-title" content="Saldify">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 
+  <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-  <link rel="icon" type="image/png" href="logo.png">
+  <link rel="icon" type="image/png" href="favicon.png">
   <title>Saldify</title>
 
   <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
-  <link rel="manifest" href="manifest.json">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
 
-  <!-- Favicon -->
-  <link rel="icon" type="image/png" href="favicon.png"/>
-
-  <!-- Configuración _flutter.buildConfig -->
   <script>
     window._flutter = {
       buildConfig: {
@@ -47,88 +40,27 @@
 
     const serviceWorkerVersion = '{{flutter_service_worker_version}}';
   </script>
-
   <script src="flutter.js" defer></script>
 
-  <!-- ESTILOS EXCLUSIVOS DEL SPLASH ANIMADO DE SALDIFY -->
-  <style id="splash-screen-style">
+  <style>
     :root {
       --saldify-background: linear-gradient(180deg, #155C37 0%, #1B5E20 26%, #0D47A1 100%);
-      --saldify-top-browser-color: #155C37;
-      --saldify-bottom-browser-color: #0D47A1;
-      --saldify-app-height: 100lvh;
-      --saldify-overscan: 160px;
-      color-scheme: dark;
     }
 
-    html {
-      background-color: var(--saldify-top-browser-color) !important;
-      background: var(--saldify-background) fixed !important;
-    }
-
-    html, body {
+    html,
+    body {
+      width: 100%;
       height: 100%;
-      min-height: 100vh;
-      min-height: -webkit-fill-available;
-      min-height: 100dvh;
-      min-height: 100lvh;
+      min-height: 100%;
       margin: 0;
-      overflow: hidden;
-      color-scheme: dark;
-      background-color: var(--saldify-top-browser-color) !important;
-      background: var(--saldify-background) fixed !important;
+      background: var(--saldify-background);
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
 
-    body {
-      width: 100%;
-      height: var(--saldify-app-height);
-      min-height: 100vh;
-      min-height: -webkit-fill-available;
-      min-height: 100dvh;
-      min-height: 100lvh;
-      min-height: var(--saldify-app-height);
-      overscroll-behavior: none;
-      background-color: var(--saldify-top-browser-color) !important;
-      background: var(--saldify-background) fixed !important;
-    }
-
     #flutter-host {
-      position: fixed;
-      inset: 0;
-      width: 100vw;
-      height: var(--saldify-app-height);
-      min-height: 100vh;
-      min-height: -webkit-fill-available;
-      min-height: 100dvh;
-      min-height: 100lvh;
-      min-height: var(--saldify-app-height);
-      overflow: hidden;
-      background-color: var(--saldify-top-browser-color) !important;
-      background: var(--saldify-background) fixed !important;
-    }
-
-    #flutter-host::before {
-      content: '';
-      position: fixed;
-      top: 0;
-      right: 0;
-      left: 0;
-      height: env(safe-area-inset-top, 0px);
-      background: var(--saldify-top-browser-color);
-      pointer-events: none;
-      z-index: 1;
-    }
-
-    #flutter-host::after {
-      display: none;
-    }
-
-    @media (pointer: coarse) {
-      html, body {
-        overflow-x: hidden;
-        overflow-y: auto;
-      }
+      width: 100%;
+      height: 100%;
+      background: transparent;
     }
 
     flutter-view,
@@ -142,40 +74,14 @@
 
     #splash {
       position: fixed;
-      top: calc(var(--saldify-overscan) * -1);
-      right: 0;
-      bottom: calc(var(--saldify-overscan) * -1);
-      left: 0;
-      width: 100%;
-      min-height: calc(var(--saldify-app-height) + (var(--saldify-overscan) * 2));
-      box-sizing: border-box;
-      overflow: visible;
-      background: var(--saldify-background) fixed !important;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--saldify-background);
       opacity: 1;
       transition: opacity 0.5s ease-out;
       z-index: 2147483647;
-    }
-
-    .splash-content {
-      position: fixed;
-      top: 160px;
-      left: 50%;
-      width: min(100%, 720px);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      transform: translateX(-50%);
-    }
-
-    flutter-loader,
-    flt-progress-bar,
-    .flutter-loader,
-    .flutter-progress,
-    progress {
-      display: none !important;
-      visibility: hidden !important;
-      opacity: 0 !important;
-      height: 0 !important;
     }
 
     #splash.hidden {
@@ -183,14 +89,22 @@
       pointer-events: none;
     }
 
-    /* CAMBIO: Logo más grande (220px) y rotación infinita constante */
+    .splash-content {
+      width: min(100%, 720px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px;
+      box-sizing: border-box;
+    }
+
     .logo-container {
       width: 260px;
       height: 180px;
       margin-bottom: 8px;
       display: flex;
-      justify-content: center;
       align-items: center;
+      justify-content: center;
       animation: spinContinuous 4s linear infinite;
     }
 
@@ -199,7 +113,6 @@
       height: auto;
     }
 
-    /* Animación del Nombre (Aparece desvanecido desde abajo) */
     .app-name {
       color: #ffffff;
       font-size: 42px;
@@ -209,7 +122,7 @@
       opacity: 0;
       transform: translateY(8px);
       animation: fadeInUp 1s ease-out forwards;
-      animation-delay: 0.5s; /* Un poco más rápido para acoplar los tiempos */
+      animation-delay: 0.5s;
     }
 
     .app-slogan {
@@ -223,25 +136,30 @@
       animation-delay: 1s;
     }
 
-    /* Indicador de carga circular */
     .loader {
-      margin-top: 40px;
       width: 32px;
       height: 32px;
-      border: 3px solid rgba(255,255,255,0.2);
+      margin-top: 40px;
+      border: 3px solid rgba(255, 255, 255, 0.2);
       border-top-color: #ffffff;
       border-radius: 50%;
       animation: spin 0.8s linear infinite;
     }
 
-    /* NUEVO KEYFRAME: Rotación fluida e infinita de 0 a 360 grados */
+    flutter-loader,
+    flt-progress-bar,
+    .flutter-loader,
+    .flutter-progress,
+    progress {
+      display: none !important;
+      visibility: hidden !important;
+      opacity: 0 !important;
+      height: 0 !important;
+    }
+
     @keyframes spinContinuous {
-      from {
-        transform: rotate(0deg);
-      }
-      to {
-        transform: rotate(360deg);
-      }
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
     }
 
     @keyframes fadeInUp {
@@ -262,92 +180,59 @@
 </head>
 
 <body>
-<div id="flutter-host"></div>
+  <div id="flutter-host"></div>
 
-<!-- Contenedor visual de la animación inicial -->
-<div id="splash">
-  <div class="splash-content">
-    <div class="logo-container">
-      <img src="logo.png" alt="Saldify Icon">
+  <div id="splash">
+    <div class="splash-content">
+      <div class="logo-container">
+        <img src="logo.png" alt="Saldify Icon">
+      </div>
+      <div class="app-name">SALDIFY</div>
+      <div class="app-slogan">SMART BALANCE & CREDITS CONTROL</div>
+      <div class="loader"></div>
     </div>
-    <div class="app-name">SALDIFY</div>
-    <div class="app-slogan">SMART BALANCE & CREDITS CONTROL</div>
-    <div class="loader"></div>
   </div>
-</div>
 
-<!-- Script controlador del ciclo de vida de la carga -->
-<script>
-  function syncSaldifyAppHeight() {
-    const viewportHeight = window.visualViewport ? window.visualViewport.height : 0;
-    const isTouchViewport = window.matchMedia('(pointer: coarse)').matches;
-    const isMobileWidth = Math.min(window.innerWidth || 0, window.screen ? window.screen.width || 0 : 0) <= 700;
-    const screenHeight = window.screen ? window.screen.height || 0 : 0;
-    const heightCandidates = [
-      window.innerHeight || 0,
-      viewportHeight || 0,
-      document.documentElement.clientHeight || 0,
-    ];
-
-    if (isTouchViewport && isMobileWidth) {
-      heightCandidates.push(screenHeight);
+  <script>
+    function removeFlutterProgressBars() {
+      document.querySelectorAll(
+        'flutter-loader, flt-progress-bar, .flutter-loader, .flutter-progress, progress'
+      ).forEach(function(element) {
+        element.remove();
+      });
     }
 
-    const height = Math.ceil(Math.max.apply(null, heightCandidates));
-
-    if (height > 0) {
-      document.documentElement.style.setProperty('--saldify-app-height', height + 'px');
-    }
-  }
-
-  syncSaldifyAppHeight();
-  window.addEventListener('resize', syncSaldifyAppHeight);
-  window.addEventListener('orientationchange', syncSaldifyAppHeight);
-  if (window.visualViewport) {
-    window.visualViewport.addEventListener('resize', syncSaldifyAppHeight);
-  }
-
-  function removeFlutterProgressBars() {
-    document.querySelectorAll(
-      'flutter-loader, flt-progress-bar, .flutter-loader, .flutter-progress, progress'
-    ).forEach(function(element) {
-      element.remove();
+    const flutterProgressObserver = new MutationObserver(removeFlutterProgressBars);
+    flutterProgressObserver.observe(document.documentElement, {
+      childList: true,
+      subtree: true
     });
-  }
+    removeFlutterProgressBars();
 
-  const flutterProgressObserver = new MutationObserver(removeFlutterProgressBars);
-  flutterProgressObserver.observe(document.documentElement, {
-    childList: true,
-    subtree: true
-  });
-  removeFlutterProgressBars();
-
-  function hideSplash() {
-    var splash = document.getElementById('splash');
-    if (splash) {
-      splash.classList.add('hidden');
-      setTimeout(function() {
-        splash.remove();
-        flutterProgressObserver.disconnect();
-      }, 500);
-    }
-  }
-
-  window.addEventListener('load', function(ev) {
-    _flutter.loader.load({
-      serviceWorkerSettings: {
-        serviceWorkerVersion: serviceWorkerVersion,
-      },
-      onEntrypointLoaded: function(engineInitializer) {
-        engineInitializer.initializeEngine({
-          hostElement: document.getElementById('flutter-host')
-        }).then(function(appRunner) {
-          appRunner.runApp();
-          setTimeout(hideSplash, 200);
-        });
+    function hideSplash() {
+      const splash = document.getElementById('splash');
+      if (splash) {
+        splash.classList.add('hidden');
+        setTimeout(function() {
+          splash.remove();
+          flutterProgressObserver.disconnect();
+        }, 500);
       }
+    }
+
+    window.addEventListener('load', function() {
+      _flutter.loader.load({
+        serviceWorkerSettings: {
+          serviceWorkerVersion: serviceWorkerVersion,
+        },
+        onEntrypointLoaded: function(engineInitializer) {
+          engineInitializer.initializeEngine().then(function(appRunner) {
+            appRunner.runApp();
+            setTimeout(hideSplash, 200);
+          });
+        }
+      });
     });
-  });
-</script>
+  </script>
 </body>
 </html>

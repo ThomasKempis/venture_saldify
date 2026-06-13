@@ -5,21 +5,15 @@ import 'package:venture_saldify/smxLogonMovil/logon/smxPerfil/smxPerfil_controll
 import 'package:venture_saldify/smxSaldify/smxSaldify_screens/smxSaldiFy_screen_tmp.dart';
 import 'package:venture_widgets/smxDatePicker/smxDatePicker.dart';
 import 'package:venture_widgets/smxTextField/smxTextField.dart';
-import '../smxLogonMovil_controller.dart';
 
 class SmxPerfil extends StatefulWidget {
   final VoidCallback onNavigateToHome;
-  final SmxLogonMovil_controller controllerMain;
 
   // Key interna para manejar el estado
   @override
   final GlobalKey<_SmxPerfil> key = GlobalKey();
 
-  SmxPerfil({
-    super.key,
-    required this.onNavigateToHome,
-    required this.controllerMain,
-  });
+  SmxPerfil({super.key, required this.onNavigateToHome});
   @override
   _SmxPerfil createState() => _SmxPerfil();
 
@@ -44,10 +38,10 @@ class _SmxPerfil extends State<SmxPerfil> {
   @override
   void initState() {
     super.initState();
-    controller = SmxPerfil_controller(context, widget.controllerMain);
+    controller = SmxPerfil_controller(context);
     _originalValues = {
       for (final field in _profileFields)
-        field: widget.controllerMain.rstSysUser10.getValue(field),
+        field: controller.controllerMain.rstSysUser10.getValue(field),
     };
   }
 
@@ -223,7 +217,7 @@ class _SmxPerfil extends State<SmxPerfil> {
 
   void _restoreOriginalValues() {
     for (final entry in _originalValues.entries) {
-      widget.controllerMain.rstSysUser10.update(entry.key, entry.value);
+      controller.controllerMain.rstSysUser10.update(entry.key, entry.value);
 
       if (entry.value is DateTime) {
         controller.setDate(entry.key, entry.value as DateTime);
