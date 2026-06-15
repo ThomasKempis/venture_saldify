@@ -53,7 +53,7 @@ class _SmxSaldiFyAccionesRapidasView extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _ActionsHeader(corte: controller.corte),
+        _ActionsHeader(),
         const SizedBox(height: 12),
         _QuickActions(
           isMobile: isMobile,
@@ -68,9 +68,7 @@ class _SmxSaldiFyAccionesRapidasView extends StatelessWidget {
 }
 
 class _ActionsHeader extends StatelessWidget {
-  final String corte;
-
-  const _ActionsHeader({required this.corte});
+  const _ActionsHeader();
 
   @override
   Widget build(BuildContext context) {
@@ -83,20 +81,6 @@ class _ActionsHeader extends StatelessWidget {
               color: SmxColors.white,
               fontSize: 22,
               fontWeight: FontWeight.w900,
-            ),
-          ),
-        ),
-        InkWell(
-          borderRadius: BorderRadius.circular(999),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-            child: Text(
-              corte,
-              style: const TextStyle(
-                color: SmxColors.white70,
-                fontSize: 13,
-                fontWeight: FontWeight.w800,
-              ),
             ),
           ),
         ),

@@ -9,7 +9,7 @@ import 'smxSaldiFy_clientes_controller.dart';
 class SmxSaldiFyClientes extends StatefulWidget {
   final bool isMobile;
   final bool isDesktop;
-  final ValueChanged<String> onClientTap;
+  final ValueChanged<int> onClientTap;
 
   const SmxSaldiFyClientes({
     super.key,
@@ -51,7 +51,7 @@ class _SmxSaldiFyClientesState extends State<SmxSaldiFyClientes> {
 class _SmxSaldiFyClientesView extends StatelessWidget {
   final bool isMobile;
   final bool isDesktop;
-  final ValueChanged<String> onClientTap;
+  final ValueChanged<int> onClientTap;
   final SmxSaldiFyClientesController controller;
   final bool showAllClients;
   final ValueChanged<bool> onShowAllClientsChanged;
@@ -142,7 +142,7 @@ class _ClientCards extends StatelessWidget {
   final SmxRowSet clientes;
   final SmxSaldiFyClientesController controller;
   final bool showAll;
-  final ValueChanged<String> onClientTap;
+  final ValueChanged<int> onClientTap;
 
   const _ClientCards({
     required this.isMobile,
@@ -168,9 +168,16 @@ class _ClientCards extends StatelessWidget {
           ),
           cutDate: _getClientValue(index, controller.getClientCutDate),
           credit: _getClientValue(index, controller.getClientCredit),
+          availableCredit: _getClientValue(
+            index,
+            controller.getClientAvailableCredit,
+          ),
+          purchases: _getClientValue(index, controller.getClientPurchases),
+          payments: _getClientValue(index, controller.getClientPayments),
           balance: _getClientValue(index, controller.getClientBalance),
-          onTap: () =>
-              onClientTap(_getClientValue(index, controller.getClientName)),
+          onTap: () => onClientTap(
+            _getClientIntValue(index, controller.getClientRelationId),
+          ),
         ),
     ];
 
@@ -189,7 +196,7 @@ class _ClientCards extends StatelessWidget {
       crossAxisCount: isDesktop ? 3 : 2,
       mainAxisSpacing: 14,
       crossAxisSpacing: 14,
-      childAspectRatio: isDesktop ? 1.55 : 1.65,
+      childAspectRatio: isDesktop ? 1.22 : 1.28,
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       children: cards,
@@ -197,6 +204,11 @@ class _ClientCards extends StatelessWidget {
   }
 
   String _getClientValue(int index, String Function() getValue) {
+    clientes.index(index);
+    return getValue();
+  }
+
+  int _getClientIntValue(int index, int Function() getValue) {
     clientes.index(index);
     return getValue();
   }
@@ -222,6 +234,9 @@ class _ClientCard extends StatelessWidget {
   final _ClientStatusType statusType;
   final String cutDate;
   final String credit;
+  final String availableCredit;
+  final String purchases;
+  final String payments;
   final String balance;
   final VoidCallback onTap;
 
@@ -231,6 +246,9 @@ class _ClientCard extends StatelessWidget {
     required this.statusType,
     required this.cutDate,
     required this.credit,
+    required this.availableCredit,
+    required this.purchases,
+    required this.payments,
     required this.balance,
     required this.onTap,
   });
@@ -283,6 +301,26 @@ class _ClientCard extends StatelessWidget {
                   const SizedBox(width: 10),
                   Expanded(
                     child: _ClientData(label: 'Credito', value: credit),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: _ClientData(
+                      label: 'Disponible',
+                      value: availableCredit,
+                      emphasis: true,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  Expanded(
+                    child: _ClientData(label: 'Compras', value: purchases),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: _ClientData(label: 'Pagos', value: payments),
                   ),
                   const SizedBox(width: 10),
                   Expanded(
@@ -342,15 +380,20 @@ class _StatusBadge extends StatelessWidget {
 class _ClientData extends StatelessWidget {
   final String label;
   final String value;
+  final bool emphasis;
 
-  const _ClientData({required this.label, required this.value});
+  const _ClientData({
+    required this.label,
+    required this.value,
+    this.emphasis = false,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: SmxColors.surfaceData,
+        color: emphasis ? SmxColors.accentAlpha(.16) : SmxColors.surfaceData,
         borderRadius: BorderRadius.circular(14),
       ),
       child: Column(

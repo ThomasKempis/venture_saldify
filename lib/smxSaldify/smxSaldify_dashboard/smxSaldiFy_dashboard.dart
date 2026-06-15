@@ -6,6 +6,7 @@ import 'package:venture_saldify/smxLayout.dart';
 import '../../smxApis/smxConstants.dart';
 import 'smxSaldiFy_acciones_rapidas/smxSaldiFy_acciones_rapidas.dart';
 import 'smxSaldiFy_clientes/smxSaldiFy_clientes.dart';
+import 'smxSaldiFy_clientes/crud/update/smxSaldiFy_cliente_update.dart';
 import 'smxSaldiFy_invita_clientes/smxSaldiFy_invita_clientes.dart';
 import 'smxSaldiFy_red_clientes/smxSaldiFy_red_clientes.dart';
 import '../smxSaldify_screens/smxSaldiFy_screen_tmp.dart';
@@ -117,8 +118,15 @@ class SmxSaldiFyDashboard extends StatelessWidget {
                           SmxSaldiFyClientes(
                             isMobile: isMobile,
                             isDesktop: isDesktop,
-                            onClientTap: (name) =>
-                                _openUnderConstruction(context, name),
+                            onClientTap: (idSysuser11) async {
+                              final saved = await _openClienteUpdate(
+                                context,
+                                idSysuser11,
+                              );
+                              if (saved == true) {
+                                await onRefresh?.call();
+                              }
+                            },
                           ),
                         ]),
                       ),
@@ -217,5 +225,18 @@ class _SaldifyHeader extends StatelessWidget {
 void _openUnderConstruction(BuildContext context, String title) {
   Navigator.of(context).push(
     MaterialPageRoute<void>(builder: (_) => SmxSaldiFyScreenTmp(title: title)),
+  );
+}
+
+Future<bool?> _openClienteUpdate(BuildContext context, int idSysuser11) async {
+  if (idSysuser11 <= 0) {
+    _openUnderConstruction(context, 'Cliente sin relacion');
+    return false;
+  }
+
+  return Navigator.of(context).push<bool>(
+    MaterialPageRoute(
+      builder: (_) => SmxSaldiFyClienteUpdate(idSysuser11: idSysuser11),
+    ),
   );
 }

@@ -1,7 +1,5 @@
 import 'package:venture_core_connect/smxDataBase/smxRowSet.dart';
 
-const smxSaldiFyAccionesRapidasCorteMock = 'Corte: 15 Jun';
-
 SmxRowSet getRstSmxSaldiFyAccionesRapidasMock() {
   return SmxRowSet.newRowSet(_rstSmxSaldiFyAccionesRapidasMock);
 }

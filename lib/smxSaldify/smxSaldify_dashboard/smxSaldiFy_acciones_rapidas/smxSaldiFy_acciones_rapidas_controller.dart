@@ -7,7 +7,6 @@ import 'smxSaldiFy_acciones_rapidas_mock.dart';
 
 class SmxSaldiFyAccionesRapidasController extends SmxController {
   late SmxRowSet rstAcciones;
-  late String corte;
 
   SmxSaldiFyAccionesRapidasController({
     required super.alias,
@@ -19,7 +18,7 @@ class SmxSaldiFyAccionesRapidasController extends SmxController {
     if (isBeginDB()) return;
 
     beginDB();
-    corte = smxSaldiFyAccionesRapidasCorteMock;
+
     rstAcciones = getRstSmxSaldiFyAccionesRapidasMock();
     rstAcciones.first();
   }
