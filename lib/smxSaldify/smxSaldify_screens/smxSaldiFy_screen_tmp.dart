@@ -22,7 +22,7 @@ class SmxSaldiFyScreenTmp extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final layout = SmxLayout.sizeFromWidth(constraints.maxWidth);
-        final pagePadding = layout.pagePadding;
+        final pagePadding = layout.saldifyPagePadding;
         final topContentInset = SmxLayout.topContentInset(context);
         final bottomContentInset = SmxLayout.bottomContentInset(context);
 
@@ -38,7 +38,7 @@ class SmxSaldiFyScreenTmp extends StatelessWidget {
                   alignment: Alignment.topCenter,
                   child: ConstrainedBox(
                     constraints: BoxConstraints(
-                      maxWidth: layout.maxContentWidth,
+                      maxWidth: layout.saldifyMaxContentWidth,
                     ),
                     child: Column(
                       children: [
@@ -125,20 +125,6 @@ class SmxSaldiFyScreenTmp extends StatelessWidget {
       },
     );
   }
-}
-
-extension _ScreenTmpLayoutValues on SmxLayoutSize {
-  double get maxContentWidth => switch (this) {
-    SmxLayoutSize.mobile => 460,
-    SmxLayoutSize.tablet => 860,
-    SmxLayoutSize.desktop => 1180,
-  };
-
-  EdgeInsets get pagePadding => switch (this) {
-    SmxLayoutSize.mobile => const EdgeInsets.fromLTRB(20, 20, 20, 28),
-    SmxLayoutSize.tablet => const EdgeInsets.fromLTRB(28, 28, 28, 34),
-    SmxLayoutSize.desktop => const EdgeInsets.fromLTRB(36, 34, 36, 40),
-  };
 }
 
 class _BackButton extends StatelessWidget {

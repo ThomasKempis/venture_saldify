@@ -1,17 +1,18 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:venture_core_connect/smxDataBase/smxRowSet.dart';
 import 'package:venture_saldify/smxColors.dart';
 import 'package:venture_saldify/smxLayout.dart';
 
 import '../../smxApis/smxConstants.dart';
 import 'smxSaldiFy_acciones_rapidas/smxSaldiFy_acciones_rapidas.dart';
 import 'smxSaldiFy_clientes/smxSaldiFy_clientes.dart';
-import 'smxSaldiFy_clientes/crud/update/smxSaldiFy_cliente_update.dart';
+import 'smxSaldiFy_clientes_pendientes/smxSaldiFy_clientes_pendientes.dart';
+import 'smxSaldiFy_dashboard_controller.dart';
 import 'smxSaldiFy_invita_clientes/smxSaldiFy_invita_clientes.dart';
 import 'smxSaldiFy_red_clientes/smxSaldiFy_red_clientes.dart';
-import '../smxSaldify_screens/smxSaldiFy_screen_tmp.dart';
 
-class SmxSaldiFyDashboard extends StatelessWidget {
+class SmxSaldiFyDashboard extends StatefulWidget {
   final String adminName;
   final String uuidAnfitrion = SmxConstants.controllerMain.getUuid();
   final bool isMobile;
@@ -39,96 +40,167 @@ class SmxSaldiFyDashboard extends StatelessWidget {
   static const _backgroundGradient = SmxGradients.saldifyBackground;
 
   @override
+  State<SmxSaldiFyDashboard> createState() => _SmxSaldiFyDashboardState();
+}
+
+class _SmxSaldiFyDashboardState extends State<SmxSaldiFyDashboard> {
+  final SmxSaldiFyDashboardController _controller =
+      SmxSaldiFyDashboardController();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final topContentInset = SmxLayout.topContentInset(context);
     final bottomContentInset = SmxLayout.bottomContentInset(context);
 
     return SizedBox.expand(
       child: DecoratedBox(
-        decoration: const BoxDecoration(gradient: _backgroundGradient),
+        decoration: const BoxDecoration(
+          gradient: SmxSaldiFyDashboard._backgroundGradient,
+        ),
         child: SafeArea(
           top: false,
           bottom: false,
           child: Align(
             alignment: Alignment.topCenter,
             child: ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: maxContentWidth),
+              constraints: BoxConstraints(maxWidth: widget.maxContentWidth),
               child: RefreshIndicator(
-                onRefresh: onRefresh ?? () async {},
+                onRefresh: _refreshDashboard,
                 color: SmxColors.brandAccent,
                 backgroundColor: SmxColors.white,
                 child: CustomScrollView(
                   physics: const AlwaysScrollableScrollPhysics(),
                   slivers: [
-                    SliverPadding(
-                      padding: EdgeInsets.fromLTRB(
-                        pagePadding.left,
-                        pagePadding.top + topContentInset,
-                        pagePadding.right,
-                        pagePadding.bottom + bottomContentInset,
-                      ),
-                      sliver: SliverList(
-                        delegate: SliverChildListDelegate([
-                          _SaldifyHeader(
-                            menuButton: menuButton,
-                            onRefresh: onRefresh,
-                            showRefreshButton:
-                                kIsWeb &&
-                                !SmxLayout.isWebMobile(context) &&
-                                !SmxLayout.isWebStandalone,
-                          ),
-                          SizedBox(height: isMobile ? 26 : 34),
-                          Text(
-                            'Hola, $adminName',
-                            style: const TextStyle(
-                              color: SmxColors.white70,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w700,
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: EdgeInsets.fromLTRB(
+                          widget.pagePadding.left,
+                          widget.pagePadding.top + topContentInset,
+                          widget.pagePadding.right,
+                          widget.pagePadding.bottom + bottomContentInset,
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            _SaldifyHeader(
+                              menuButton: widget.menuButton,
+                              onRefresh: widget.onRefresh == null
+                                  ? null
+                                  : _refreshDashboard,
+                              showRefreshButton:
+                                  kIsWeb &&
+                                  !SmxLayout.isWebMobile(context) &&
+                                  !SmxLayout.isWebStandalone,
                             ),
-                          ),
-                          const SizedBox(height: 8),
-                          SmxSaldiFyRedClientes(
-                            isMobile: isMobile,
-                            metricColumnsFor: metricColumnsFor,
-                            onHeaderTap: () => _openUnderConstruction(
-                              context,
-                              'Red de clientes',
+                            SizedBox(height: widget.isMobile ? 26 : 34),
+                            Text(
+                              'Hola, ${widget.adminName}',
+                              style: const TextStyle(
+                                color: SmxColors.white70,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w700,
+                              ),
                             ),
-                            onMetricTap: (title) =>
-                                _openUnderConstruction(context, title),
-                          ),
-                          SizedBox(height: isMobile ? 16 : 20),
-                          SmxSaldiFyInvitaClientes(
-                            uuidAnfitrion: uuidAnfitrion,
-                            anfitrionNombre: adminName,
-                          ),
-                          SizedBox(height: isMobile ? 24 : 30),
-                          SmxSaldiFyAccionesRapidas(
-                            isMobile: isMobile,
-                            cardWidth: quickActionCardWidth,
-                            onActionTap: (title) {
-                              if (title == 'Cliente') {
-                                title = 'Nuevo Cliente';
-                              }
+                            const SizedBox(height: 8),
+                            SmxSaldiFyRedClientes(
+                              isMobile: widget.isMobile,
+                              metricColumnsFor: widget.metricColumnsFor,
+                              onHeaderTap: () =>
+                                  _controller.openUnderConstruction(
+                                    context,
+                                    'Red de clientes',
+                                  ),
+                              onMetricTap: (title) => _controller
+                                  .openUnderConstruction(context, title),
+                            ),
+                            SizedBox(height: widget.isMobile ? 16 : 20),
+                            ValueListenableBuilder<SmxRowSet?>(
+                              valueListenable:
+                                  _controller.clientesInvitacionNotifier,
+                              builder: (context, rstClientes, _) {
+                                final enabled = rstClientes != null;
 
-                              _openUnderConstruction(context, title);
-                            },
-                          ),
-                          SizedBox(height: isMobile ? 26 : 30),
-                          SmxSaldiFyClientes(
-                            isMobile: isMobile,
-                            isDesktop: isDesktop,
-                            onClientTap: (idSysuser11) async {
-                              final saved = await _openClienteUpdate(
-                                context,
-                                idSysuser11,
-                              );
-                              if (saved == true) {
-                                await onRefresh?.call();
-                              }
-                            },
-                          ),
-                        ]),
+                                return AbsorbPointer(
+                                  absorbing: !enabled,
+                                  child: Opacity(
+                                    opacity: enabled ? 1 : .55,
+                                    child: SmxSaldiFyInvitaClientes(
+                                      uuidAnfitrion: widget.uuidAnfitrion,
+                                      anfitrionNombre: widget.adminName,
+                                      clientes: rstClientes,
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                            SizedBox(height: widget.isMobile ? 24 : 30),
+                            SmxSaldiFyAccionesRapidas(
+                              isMobile: widget.isMobile,
+                              cardWidth: widget.quickActionCardWidth,
+                              onActionTap: (title) async {
+                                if (title == 'Cliente') {
+                                  final saved = await _controller.openCliente(
+                                    context,
+                                  );
+                                  if (saved == true) {
+                                    await _refreshDashboard();
+                                  }
+                                  return;
+                                }
+
+                                _controller.openUnderConstruction(
+                                  context,
+                                  title,
+                                );
+                              },
+                            ),
+                            SizedBox(height: widget.isMobile ? 26 : 30),
+                            SmxSaldiFyClientes(
+                              isMobile: widget.isMobile,
+                              isDesktop: widget.isDesktop,
+                              onLoaded: _controller.onClientesLoadedRst,
+                              onClientTap: (client) async {
+                                final saved = await _controller
+                                    .openClienteCredito(context, client);
+                                if (saved == true) {
+                                  await _refreshDashboard();
+                                }
+                              },
+                            ),
+                            ValueListenableBuilder<SmxRowSet?>(
+                              valueListenable:
+                                  _controller.clientesActivosNotifier,
+                              builder: (context, rstClientes, _) {
+                                if (rstClientes == null) {
+                                  return const SizedBox.shrink();
+                                }
+
+                                return SmxSaldiFyClientesPendientes(
+                                  isMobile: widget.isMobile,
+                                  isDesktop: widget.isDesktop,
+                                  onLoaded:
+                                      _controller.onClientesPendientesLoadedRst,
+                                  onClientPendienteTap: (client) async {
+                                    final saved = await _controller.openCliente(
+                                      context,
+                                      relaSysuser10Cliente:
+                                          client.relaSysuser10Cliente,
+                                    );
+                                    if (saved == true) {
+                                      await _refreshDashboard();
+                                    }
+                                  },
+                                );
+                              },
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ],
@@ -139,6 +211,11 @@ class SmxSaldiFyDashboard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Future<void> _refreshDashboard() async {
+    _controller.clearClientes();
+    await widget.onRefresh?.call();
   }
 }
 
@@ -220,23 +297,4 @@ class _SaldifyHeader extends StatelessWidget {
       ],
     );
   }
-}
-
-void _openUnderConstruction(BuildContext context, String title) {
-  Navigator.of(context).push(
-    MaterialPageRoute<void>(builder: (_) => SmxSaldiFyScreenTmp(title: title)),
-  );
-}
-
-Future<bool?> _openClienteUpdate(BuildContext context, int idSysuser11) async {
-  if (idSysuser11 <= 0) {
-    _openUnderConstruction(context, 'Cliente sin relacion');
-    return false;
-  }
-
-  return Navigator.of(context).push<bool>(
-    MaterialPageRoute(
-      builder: (_) => SmxSaldiFyClienteUpdate(idSysuser11: idSysuser11),
-    ),
-  );
 }

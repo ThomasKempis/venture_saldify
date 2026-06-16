@@ -1,16 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:venture_core_connect/smxDataBase/smxRowSet.dart';
 import 'package:venture_saldify/smxColors.dart';
 
+import 'smxSaldiFy_invita_clientes_controller.dart';
 import 'smxSaldiFy_invita_modal.dart';
 
 class SmxSaldiFyInvitaClientes extends StatefulWidget {
   final String uuidAnfitrion;
   final String anfitrionNombre;
+  final SmxRowSet? clientes;
 
   const SmxSaldiFyInvitaClientes({
     super.key,
     required this.uuidAnfitrion,
     required this.anfitrionNombre,
+    this.clientes,
   });
 
   @override
@@ -19,7 +23,14 @@ class SmxSaldiFyInvitaClientes extends StatefulWidget {
 }
 
 class _SmxSaldiFyInvitaClientesState extends State<SmxSaldiFyInvitaClientes> {
-  bool _whatsAppSelected = false;
+  final SmxSaldiFyInvitaClientesController _controller =
+      SmxSaldiFyInvitaClientesController();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -76,48 +87,41 @@ class _SmxSaldiFyInvitaClientesState extends State<SmxSaldiFyInvitaClientes> {
                   ),
                 ),
                 const SizedBox(height: 12),
-                Row(
-                  children: [
-                    _InvitePill(
-                      label: 'Copiar link',
-                      filled: !_whatsAppSelected,
-                      onTap: _openCopyLinkModal,
-                    ),
-                    const SizedBox(width: 8),
-                    _InvitePill(
-                      label: 'WhatsApp',
-                      filled: _whatsAppSelected,
-                      onTap: _openWhatsAppModal,
-                    ),
-                  ],
+                ValueListenableBuilder<SmxSaldiFyInvitaAction>(
+                  valueListenable: _controller.actionNotifier,
+                  builder: (context, action, _) {
+                    return Row(
+                      children: [
+                        _InvitePill(
+                          label: 'Copiar link',
+                          filled: action == SmxSaldiFyInvitaAction.copiarLink,
+                          onTap: () => _controller.openCopyLinkModal(
+                            context: context,
+                            uuidAnfitrion: widget.uuidAnfitrion,
+                            anfitrionNombre: widget.anfitrionNombre,
+                            clientes: widget.clientes,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        _InvitePill(
+                          label: 'WhatsApp',
+                          filled: action == SmxSaldiFyInvitaAction.whatsApp,
+                          onTap: () => _controller.openWhatsAppModal(
+                            context: context,
+                            uuidAnfitrion: widget.uuidAnfitrion,
+                            anfitrionNombre: widget.anfitrionNombre,
+                            clientes: widget.clientes,
+                          ),
+                        ),
+                      ],
+                    );
+                  },
                 ),
               ],
             ),
           ),
         ],
       ),
-    );
-  }
-
-  Future<void> _openCopyLinkModal() async {
-    setState(() => _whatsAppSelected = false);
-
-    await showSmxSaldiFyInvitaModal(
-      context: context,
-      uuidAnfitrion: widget.uuidAnfitrion,
-      anfitrionNombre: widget.anfitrionNombre,
-      action: SmxSaldiFyInvitaAction.copiarLink,
-    );
-  }
-
-  Future<void> _openWhatsAppModal() async {
-    setState(() => _whatsAppSelected = true);
-
-    await showSmxSaldiFyInvitaModal(
-      context: context,
-      uuidAnfitrion: widget.uuidAnfitrion,
-      anfitrionNombre: widget.anfitrionNombre,
-      action: SmxSaldiFyInvitaAction.whatsApp,
     );
   }
 }

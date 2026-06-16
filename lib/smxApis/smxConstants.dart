@@ -10,22 +10,22 @@ enum SmxInvitacionMode { admin, uuid_invitado, correo_invitado }
 abstract class SmxConstants {
   static late SmxLogonMovil_controller controllerMain;
 
-  static const String _uuidInvitadoParam = 'uuid_invitado';
-  static const String _correoInvitadoParam = 'correo_invitado';
-  static const String _uuidAnfitrionParam = 'uuid_anfitrion';
+  static const String uuidInvitadoKey = 'uuid_invitado';
+  static const String correoInvitadoKey = 'correo_invitado';
+  static const String uuidAnfitrionKey = 'uuid_anfitrion';
 
   static Map<String, String> startParametersUrl = {};
 
   static String get correoInvitadoParam {
-    return startParametersUrl[_correoInvitadoParam]?.trim() ?? '';
+    return startParametersUrl[correoInvitadoKey]?.trim() ?? '';
   }
 
   static String get uuidInvitadoParam {
-    return startParametersUrl[_uuidInvitadoParam]?.trim() ?? '';
+    return startParametersUrl[uuidInvitadoKey]?.trim() ?? '';
   }
 
   static String get uuidAnfitrionParam {
-    return startParametersUrl[_uuidAnfitrionParam]?.trim() ?? '';
+    return startParametersUrl[uuidAnfitrionKey]?.trim() ?? '';
   }
 
   static bool get hasUuidInvitado {

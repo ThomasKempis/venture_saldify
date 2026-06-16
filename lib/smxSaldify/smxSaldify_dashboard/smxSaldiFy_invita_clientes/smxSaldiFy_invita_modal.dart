@@ -5,8 +5,6 @@ import 'package:venture_core_connect/smxDataBase/smxRowSet.dart';
 import 'package:venture_saldify/smxApis/smxConstants.dart';
 import 'package:venture_saldify/smxColors.dart';
 
-import '../smxSaldiFy_clientes/smxSaldiFy_clientes_mock.dart';
-
 enum SmxSaldiFyInvitaAction { copiarLink, whatsApp }
 
 Future<void> showSmxSaldiFyInvitaModal({
@@ -14,6 +12,7 @@ Future<void> showSmxSaldiFyInvitaModal({
   required String uuidAnfitrion,
   required String anfitrionNombre,
   required SmxSaldiFyInvitaAction action,
+  SmxRowSet? clientes,
 }) async {
   await showDialog<void>(
     context: context,
@@ -21,6 +20,7 @@ Future<void> showSmxSaldiFyInvitaModal({
       return _InviteLinkDialog(
         uuidAnfitrion: uuidAnfitrion,
         action: action,
+        clientes: clientes,
         onInvite: (invite) =>
             _runInviteAction(context, invite, action, anfitrionNombre),
       );
@@ -130,11 +130,13 @@ class _InviteActionData {
 class _InviteLinkDialog extends StatefulWidget {
   final String uuidAnfitrion;
   final SmxSaldiFyInvitaAction action;
+  final SmxRowSet? clientes;
   final Future<void> Function(_InviteActionData invite) onInvite;
 
   const _InviteLinkDialog({
     required this.uuidAnfitrion,
     required this.action,
+    this.clientes,
     required this.onInvite,
   });
 
@@ -150,7 +152,7 @@ class _InviteLinkDialogState extends State<_InviteLinkDialog> {
   @override
   void initState() {
     super.initState();
-    _clientes = getRstSmxSaldiFyClientesMock();
+    _clientes = widget.clientes ?? SmxRowSet.newRowSet([]);
     _correoController = TextEditingController();
     _telefonoController = TextEditingController();
   }
@@ -298,15 +300,15 @@ class _InviteLinkDialogState extends State<_InviteLinkDialog> {
 
   String _buildInviteLink({String? uuidInvitado, String? correoInvitado}) {
     final queryParameters = {
-      SmxConstants.uuidAnfitrionParam: widget.uuidAnfitrion,
+      SmxConstants.uuidAnfitrionKey: widget.uuidAnfitrion,
     };
 
     if (uuidInvitado != null) {
-      queryParameters[SmxConstants.uuidInvitadoParam] = uuidInvitado;
+      queryParameters[SmxConstants.uuidInvitadoKey] = uuidInvitado;
     }
 
     if (correoInvitado != null) {
-      queryParameters[SmxConstants.correoInvitadoParam] = correoInvitado;
+      queryParameters[SmxConstants.correoInvitadoKey] = correoInvitado;
     }
 
     return Uri.base.replace(queryParameters: queryParameters).toString();
@@ -379,11 +381,10 @@ class _ClienteExistenteTab extends StatelessWidget {
             separatorBuilder: (context, index) => const SizedBox(height: 10),
             itemBuilder: (context, index) {
               clientes.index(index);
-              final name = clientes.getValue('NAME')?.toString() ?? '';
-              final status = clientes.getValue('STATUS')?.toString() ?? '';
-              final uuidInvitado =
-                  clientes.getValue('UUID_INVITADO')?.toString() ?? '';
-              final telefono = clientes.getValue('TELEFONO')?.toString() ?? '';
+              final name = clientes.getValue('SYSUSER10_INVITADO')?.toString() ?? '';
+              final status = clientes.getValue('SYSUSER12_STATUS')?.toString() ?? '';
+              final uuidInvitado = clientes.getValue('SYSUSER10_UUID')?.toString() ?? '';
+              final telefono = clientes.getValue('SYSUSER10_TELEFONO')?.toString() ?? '';
 
               return Material(
                 color: SmxColors.whiteAlpha(.92),

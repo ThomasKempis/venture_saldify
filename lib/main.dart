@@ -8,7 +8,7 @@ import 'package:venture_saldify/smxThemeData.dart';
 const String devUuidAnfitrion = 'ce9db2f5-dfb5-4b0e-9d35-941c0387f6de';
 const String devCorreoInvitado = 'santiago.azael.mohr@gmail.com';
 const String devUuidInvitado = 'bdfed92f-4e29-4565-9851-1a11068901c4';
-const SmxInvitacionMode devModalidad = SmxInvitacionMode.uuid_invitado;
+const SmxInvitacionMode devModalidad = SmxInvitacionMode.admin;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -28,9 +28,9 @@ void main() async {
 void _applyDevInvitacionCliente() {
   if (!kDebugMode || devModalidad == SmxInvitacionMode.admin) return;
 
-  if (Uri.base.queryParameters.containsKey(SmxConstants.uuidInvitadoParam) ||
-      Uri.base.queryParameters.containsKey(SmxConstants.correoInvitadoParam) ||
-      Uri.base.queryParameters.containsKey(SmxConstants.uuidAnfitrionParam)) {
+  if (Uri.base.queryParameters.containsKey(SmxConstants.uuidInvitadoKey) ||
+      Uri.base.queryParameters.containsKey(SmxConstants.correoInvitadoKey) ||
+      Uri.base.queryParameters.containsKey(SmxConstants.uuidAnfitrionKey)) {
     return;
   }
 
@@ -54,16 +54,16 @@ Map<String, String> _getDevInvitacionParameters() {
   if (devModalidad == SmxInvitacionMode.uuid_invitado &&
       uuidInvitado.isNotEmpty) {
     return {
-      SmxConstants.uuidAnfitrionParam: uuidAnfitrion,
-      SmxConstants.uuidInvitadoParam: uuidInvitado,
+      SmxConstants.uuidAnfitrionKey: uuidAnfitrion,
+      SmxConstants.uuidInvitadoKey: uuidInvitado,
     };
   }
 
   if (devModalidad == SmxInvitacionMode.correo_invitado &&
       correoInvitado.isNotEmpty) {
     return {
-      SmxConstants.uuidAnfitrionParam: uuidAnfitrion,
-      SmxConstants.correoInvitadoParam: correoInvitado,
+      SmxConstants.uuidAnfitrionKey: uuidAnfitrion,
+      SmxConstants.correoInvitadoKey: correoInvitado,
     };
   }
 

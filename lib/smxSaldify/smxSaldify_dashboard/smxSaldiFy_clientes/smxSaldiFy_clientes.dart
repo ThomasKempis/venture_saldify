@@ -9,13 +9,15 @@ import 'smxSaldiFy_clientes_controller.dart';
 class SmxSaldiFyClientes extends StatefulWidget {
   final bool isMobile;
   final bool isDesktop;
-  final ValueChanged<int> onClientTap;
+  final ValueChanged<SmxSaldiFyClientTapData> onClientTap;
+  final ValueChanged<SmxRowSet> onLoaded;
 
   const SmxSaldiFyClientes({
     super.key,
     required this.isMobile,
     required this.isDesktop,
     required this.onClientTap,
+    required this.onLoaded,
   });
 
   @override
@@ -24,6 +26,7 @@ class SmxSaldiFyClientes extends StatefulWidget {
 
 class _SmxSaldiFyClientesState extends State<SmxSaldiFyClientes> {
   bool _showAllClients = false;
+  bool _loadedNotified = false;
 
   @override
   Widget build(BuildContext context) {
@@ -32,26 +35,40 @@ class _SmxSaldiFyClientesState extends State<SmxSaldiFyClientes> {
         alias: 'SMXSALDIFY_CLIENTES',
         data: SmxControllerSendData(context: context),
       ),
-      builder: (context, controller) => _SmxSaldiFyClientesView(
-        isMobile: widget.isMobile,
-        isDesktop: widget.isDesktop,
-        onClientTap: widget.onClientTap,
-        controller: controller,
-        showAllClients: _showAllClients,
-        onShowAllClientsChanged: (value) {
-          setState(() {
-            _showAllClients = value;
-          });
-        },
-      ),
+      builder: (context, controller) {
+        _notifyLoadedOnce(controller.rstClientes);
+
+        return _SmxSaldiFyClientesView(
+          isMobile: widget.isMobile,
+          isDesktop: widget.isDesktop,
+          onClientTap: widget.onClientTap,
+          controller: controller,
+          showAllClients: _showAllClients,
+          onShowAllClientsChanged: (value) {
+            setState(() {
+              _showAllClients = value;
+            });
+          },
+        );
+      },
     );
+  }
+
+  void _notifyLoadedOnce(SmxRowSet rstClientes) {
+    if (_loadedNotified) return;
+
+    _loadedNotified = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      widget.onLoaded.call(rstClientes);
+    });
   }
 }
 
 class _SmxSaldiFyClientesView extends StatelessWidget {
   final bool isMobile;
   final bool isDesktop;
-  final ValueChanged<int> onClientTap;
+  final ValueChanged<SmxSaldiFyClientTapData> onClientTap;
   final SmxSaldiFyClientesController controller;
   final bool showAllClients;
   final ValueChanged<bool> onShowAllClientsChanged;
@@ -142,7 +159,7 @@ class _ClientCards extends StatelessWidget {
   final SmxRowSet clientes;
   final SmxSaldiFyClientesController controller;
   final bool showAll;
-  final ValueChanged<int> onClientTap;
+  final ValueChanged<SmxSaldiFyClientTapData> onClientTap;
 
   const _ClientCards({
     required this.isMobile,
@@ -176,7 +193,17 @@ class _ClientCards extends StatelessWidget {
           payments: _getClientValue(index, controller.getClientPayments),
           balance: _getClientValue(index, controller.getClientBalance),
           onTap: () => onClientTap(
-            _getClientIntValue(index, controller.getClientRelationId),
+            SmxSaldiFyClientTapData(
+              idSysuser11: _getClientIntValue(
+                index,
+                controller.getClientRelationId,
+              ),
+              relaSysuser10Cliente: _getClientIntValue(
+                index,
+                controller.getClientUserId,
+              ),
+              name: _getClientValue(index, controller.getClientName),
+            ),
           ),
         ),
     ];
@@ -212,6 +239,18 @@ class _ClientCards extends StatelessWidget {
     clientes.index(index);
     return getValue();
   }
+}
+
+class SmxSaldiFyClientTapData {
+  final int idSysuser11;
+  final int relaSysuser10Cliente;
+  final String name;
+
+  const SmxSaldiFyClientTapData({
+    required this.idSysuser11,
+    required this.relaSysuser10Cliente,
+    required this.name,
+  });
 }
 
 enum _ClientStatusType {

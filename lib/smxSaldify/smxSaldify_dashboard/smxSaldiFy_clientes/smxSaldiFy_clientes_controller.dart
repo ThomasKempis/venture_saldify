@@ -16,13 +16,12 @@ class SmxSaldiFyClientesController extends SmxController {
 
     addSql(
       'QRY_SYSUSER11',
-      "select * from QRY_SYSUSER11(${SmxConstants.controllerMain.rstSysUser10.getId()})",
+      "select * from QRY_SYSUSER11(1, ${SmxConstants.controllerMain.rstSysUser10.getId()})",
     );
 
     await getRowSetFuture('QRY_SYSUSER11');
 
     rstClientes = getRowset('QRY_SYSUSER11');
-    //rstClientes = getRstSmxSaldiFyClientesMock();
     rstClientes.first();
   }
 
@@ -63,7 +62,11 @@ class SmxSaldiFyClientesController extends SmxController {
   }
 
   int getClientRelationId() {
-    final value = rstClientes.getValue('ID_SYSUSER11');
+    return rstClientes.getId();
+  }
+
+  int getClientUserId() {
+    final value = rstClientes.getValue('RELA_SYSUSER10_CLIENTE');
     if (value is int) return value;
     if (value is double) return value.toInt();
     return int.tryParse(value?.toString() ?? '') ?? -1;
