@@ -5,6 +5,7 @@ import 'package:venture_widgets/smxCallBaseStateful.dart';
 import 'package:venture_widgets/smxController/smxControllerSendData.dart';
 
 import 'smxSaldiFy_clientes_controller.dart';
+import 'smxSaldiFy_clientes_skeleton.dart';
 
 class SmxSaldiFyClientes extends StatefulWidget {
   final bool isMobile;
@@ -34,6 +35,10 @@ class _SmxSaldiFyClientesState extends State<SmxSaldiFyClientes> {
       controllerBuilder: (context) => SmxSaldiFyClientesController(
         alias: 'SMXSALDIFY_CLIENTES',
         data: SmxControllerSendData(context: context),
+      ),
+      loadingBuilder: (_) => SmxSaldiFyClientesSkeleton(
+        isMobile: widget.isMobile,
+        isDesktop: widget.isDesktop,
       ),
       builder: (context, controller) {
         _notifyLoadedOnce(controller.rstClientes);
@@ -203,6 +208,12 @@ class _ClientCards extends StatelessWidget {
                 controller.getClientUserId,
               ),
               name: _getClientValue(index, controller.getClientName),
+              credit: _getClientValue(index, controller.getClientCredit),
+              availableCredit: _getClientValue(
+                index,
+                controller.getClientAvailableCredit,
+              ),
+              balance: _getClientValue(index, controller.getClientBalance),
             ),
           ),
         ),
@@ -219,15 +230,29 @@ class _ClientCards extends StatelessWidget {
       );
     }
 
-    return GridView.count(
-      crossAxisCount: isDesktop ? 3 : 2,
-      mainAxisSpacing: 14,
-      crossAxisSpacing: 14,
-      childAspectRatio: isDesktop ? 1.22 : 1.28,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      children: cards,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        const spacing = 14.0;
+        final maxColumns = _getMaxColumns(constraints.maxWidth);
+        final columns = visibleCount.clamp(1, maxColumns).toInt();
+        final cardWidth =
+            (constraints.maxWidth - (spacing * (columns - 1))) / columns;
+
+        return Wrap(
+          spacing: spacing,
+          runSpacing: spacing,
+          children: [
+            for (final card in cards) SizedBox(width: cardWidth, child: card),
+          ],
+        );
+      },
     );
+  }
+
+  int _getMaxColumns(double width) {
+    if (isDesktop && width >= 1180) return 4;
+    if (isDesktop && width >= 820) return 3;
+    return 2;
   }
 
   String _getClientValue(int index, String Function() getValue) {
@@ -245,11 +270,17 @@ class SmxSaldiFyClientTapData {
   final int idSysuser11;
   final int relaSysuser10Cliente;
   final String name;
+  final String credit;
+  final String availableCredit;
+  final String balance;
 
   const SmxSaldiFyClientTapData({
     required this.idSysuser11,
     required this.relaSysuser10Cliente,
     required this.name,
+    this.credit = '0',
+    this.availableCredit = '0',
+    this.balance = '0',
   });
 }
 

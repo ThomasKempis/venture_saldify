@@ -2,6 +2,7 @@ import 'package:venture_core_connect/smxDataBase/smxRowSet.dart';
 import 'package:venture_widgets/smxClassDrivers.dart';
 import 'package:venture_widgets/smxController/smxController.dart';
 import '../../../smxApis/smxConstants.dart';
+import '../../../smxApis/smxRowSetTrack.dart';
 
 class SmxSaldiFyClientesController extends SmxController {
   late SmxRowSet rstClientes;
@@ -19,7 +20,10 @@ class SmxSaldiFyClientesController extends SmxController {
       "select * from QRY_SYSUSER11(1, ${SmxConstants.controllerMain.rstSysUser10.getId()})",
     );
 
-    await getRowSetFuture('QRY_SYSUSER11');
+    await SmxRowSetTrack.run(
+      controller: this,
+      call: () => getRowSetFuture('QRY_SYSUSER11'),
+    );
 
     rstClientes = getRowset('QRY_SYSUSER11');
     rstClientes.first();

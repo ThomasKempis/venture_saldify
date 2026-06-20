@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:universal_html/html.dart' as html;
 import 'package:venture_core_connect/smxConstants_core.dart';
+import 'package:venture_core_connect/smxDataBase/smxRowSet.dart';
 import 'package:venture_widgets/smxConstants_widgets.dart';
 import '../firebase_options.dart';
 import '../smxLogonMovil/logon/smxLogonMovil_controller.dart';
@@ -9,6 +10,8 @@ enum SmxInvitacionMode { admin, uuid_invitado, correo_invitado }
 
 abstract class SmxConstants {
   static late SmxLogonMovil_controller controllerMain;
+  static SmxRowSet? rstCompraVacia;
+  static SmxRowSet? rstPagoVacio;
 
   static const String uuidInvitadoKey = 'uuid_invitado';
   static const String correoInvitadoKey = 'correo_invitado';

@@ -5,8 +5,9 @@ import 'package:venture_widgets/smxCallBaseStateful.dart';
 import 'package:venture_widgets/smxController/smxControllerSendData.dart';
 
 import 'smxSaldiFy_red_clientes_controller.dart';
+import 'smxSaldiFy_red_clientes_skeleton.dart';
 
-class SmxSaldiFyRedClientes extends StatelessWidget {
+class SmxSaldiFyRedClientes extends StatefulWidget {
   final bool isMobile;
   final int Function(double width) metricColumnsFor;
   final VoidCallback onHeaderTap;
@@ -21,19 +22,30 @@ class SmxSaldiFyRedClientes extends StatelessWidget {
   });
 
   @override
+  State<SmxSaldiFyRedClientes> createState() => _SmxSaldiFyRedClientesState();
+}
+
+class _SmxSaldiFyRedClientesState extends State<SmxSaldiFyRedClientes> {
+  @override
   Widget build(BuildContext context) {
     return SmxCallBaseStateful<SmxSaldiFyRedClientesController>(
       controllerBuilder: (context) => SmxSaldiFyRedClientesController(
         alias: 'SMXSALDIFY_RED_CLIENTES',
         data: SmxControllerSendData(context: context),
       ),
-      builder: (context, controller) => _SmxSaldiFyRedClientesView(
-        isMobile: isMobile,
-        metricColumnsFor: metricColumnsFor,
-        onHeaderTap: onHeaderTap,
-        onMetricTap: onMetricTap,
-        controller: controller,
+      loadingBuilder: (_) => SmxSaldiFyMetricasSkeleton(
+        isMobile: widget.isMobile,
+        metricColumnsFor: widget.metricColumnsFor,
       ),
+      builder: (context, controller) {
+        return _SmxSaldiFyRedClientesView(
+          isMobile: widget.isMobile,
+          metricColumnsFor: widget.metricColumnsFor,
+          onHeaderTap: widget.onHeaderTap,
+          onMetricTap: widget.onMetricTap,
+          controller: controller,
+        );
+      },
     );
   }
 }
@@ -79,11 +91,17 @@ class _SmxSaldiFyRedClientesView extends StatelessWidget {
           ),
         ),
         SizedBox(height: isMobile ? 22 : 28),
-        _MetricsGrid(
-          isMobile: isMobile,
-          metricColumnsFor: metricColumnsFor,
-          metricas: controller.rstMetricas,
-          onMetricTap: onMetricTap,
+        ValueListenableBuilder<SmxRowSet?>(
+          valueListenable: controller.rstMetricas,
+          builder: (context, rstMetricas, _) {
+            return _MetricsGrid(
+              key: ValueKey(rstMetricas),
+              isMobile: isMobile,
+              metricColumnsFor: metricColumnsFor,
+              metricas: rstMetricas,
+              onMetricTap: onMetricTap,
+            );
+          },
         ),
       ],
     );
@@ -93,10 +111,11 @@ class _SmxSaldiFyRedClientesView extends StatelessWidget {
 class _MetricsGrid extends StatelessWidget {
   final bool isMobile;
   final int Function(double width) metricColumnsFor;
-  final SmxRowSet metricas;
+  final SmxRowSet? metricas;
   final ValueChanged<String> onMetricTap;
 
   const _MetricsGrid({
+    super.key,
     required this.isMobile,
     required this.metricColumnsFor,
     required this.metricas,
@@ -108,6 +127,7 @@ class _MetricsGrid extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final columns = metricColumnsFor(constraints.maxWidth);
+        final cards = _buildMetricCards();
 
         return GridView.builder(
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -116,24 +136,100 @@ class _MetricsGrid extends StatelessWidget {
             crossAxisSpacing: 12,
             mainAxisExtent: isMobile ? 128 : 138,
           ),
-          itemCount: metricas.getRowCount(),
+          itemCount: cards.length,
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           itemBuilder: (context, index) {
-            metricas.index(index);
-            final label = metricas.getValue('LABEL')?.toString() ?? '';
+            final card = cards[index];
 
             return _MetricCard(
-              label: label,
-              value: metricas.getValue('VALUE')?.toString() ?? '',
-              note: metricas.getValue('NOTE')?.toString() ?? '',
-              onTap: () => onMetricTap(label),
+              label: card.label,
+              value: card.value,
+              note: card.note,
+              onTap: () => onMetricTap(card.label),
             );
           },
         );
       },
     );
   }
+
+  List<_MetricData> _buildMetricCards() {
+    final rstMetricas = metricas;
+
+    if (rstMetricas == null || rstMetricas.getRowCount() == 0) {
+      return const [
+        _MetricData(
+          label: 'Credito entregado',
+          value: r'$0',
+          note: 'Sin datos',
+        ),
+        _MetricData(label: 'Disponible total', value: r'$0', note: 'Sin datos'),
+        _MetricData(
+          label: 'Compras realizadas',
+          value: r'$0',
+          note: 'Sin datos',
+        ),
+        _MetricData(label: 'Saldo pendiente', value: r'$0', note: 'Sin datos'),
+      ];
+    }
+
+    rstMetricas.first();
+
+    return [
+      _MetricData(
+        label: 'Credito entregado',
+        value: _formatMoney(rstMetricas.getValue('SYSUSER12_CREDITO')),
+        note: 'Credito total',
+      ),
+      _MetricData(
+        label: 'Disponible total',
+        value: _formatMoney(rstMetricas.getValue('SYSUSER12_DISPONIBLE')),
+        note: 'Disponible',
+      ),
+      _MetricData(
+        label: 'Compras realizadas',
+        value: _formatMoney(rstMetricas.getValue('SYSUSER12_COMPRAS')),
+        note: 'Compras',
+      ),
+      _MetricData(
+        label: 'Saldo pendiente',
+        value: _formatMoney(rstMetricas.getValue('SYSUSER12_BALANCE')),
+        note: 'Por cobrar',
+      ),
+    ];
+  }
+
+  String _formatMoney(dynamic value) {
+    final amount = _toDouble(value);
+    final sign = amount < 0 ? '-' : '';
+    final fixed = amount.abs().toStringAsFixed(0);
+    final parts = <String>[];
+
+    for (var end = fixed.length; end > 0; end -= 3) {
+      final start = end - 3 > 0 ? end - 3 : 0;
+      parts.insert(0, fixed.substring(start, end));
+    }
+
+    return '$sign\$${parts.join(',')}';
+  }
+
+  double _toDouble(dynamic value) {
+    if (value is num) return value.toDouble();
+    return double.tryParse(value?.toString() ?? '') ?? 0;
+  }
+}
+
+class _MetricData {
+  final String label;
+  final String value;
+  final String note;
+
+  const _MetricData({
+    required this.label,
+    required this.value,
+    required this.note,
+  });
 }
 
 class _MetricCard extends StatelessWidget {

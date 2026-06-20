@@ -167,7 +167,7 @@ class _SmxSaldiFyDashboardState extends State<SmxSaldiFyDashboard> {
                               onLoaded: _controller.onClientesLoadedRst,
                               onClientTap: (client) async {
                                 final saved = await _controller
-                                    .openClienteCredito(context, client);
+                                    .openClienteActions(context, client);
                                 if (saved == true) {
                                   await _refreshDashboard();
                                 }
@@ -186,6 +186,13 @@ class _SmxSaldiFyDashboardState extends State<SmxSaldiFyDashboard> {
                                   isDesktop: widget.isDesktop,
                                   onLoaded:
                                       _controller.onClientesPendientesLoadedRst,
+                                  onClientActivated: (rstActivated) {
+                                    setState(() {
+                                      _controller.onClientePendienteActivated(
+                                        rstActivated,
+                                      );
+                                    });
+                                  },
                                   onClientPendienteTap: (client) async {
                                     final saved = await _controller.openCliente(
                                       context,

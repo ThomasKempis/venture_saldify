@@ -1,11 +1,13 @@
+import 'package:flutter/foundation.dart';
 import 'package:venture_core_connect/smxDataBase/smxRowSet.dart';
 import 'package:venture_widgets/smxClassDrivers.dart';
 import 'package:venture_widgets/smxController/smxController.dart';
 
-import 'smxSaldiFy_red_clientes_mock.dart';
+import '../../../smxApis/smxConstants.dart';
+import '../../../smxApis/smxRowSetTrack.dart';
 
 class SmxSaldiFyRedClientesController extends SmxController {
-  late SmxRowSet rstMetricas;
+  final ValueNotifier<SmxRowSet?> rstMetricas = ValueNotifier<SmxRowSet?>(null);
 
   SmxSaldiFyRedClientesController({required super.alias, required super.data});
 
@@ -14,8 +16,19 @@ class SmxSaldiFyRedClientesController extends SmxController {
     if (isBeginDB()) return;
 
     beginDB();
-    rstMetricas = getRstSmxSaldiFyMetricasMock();
-    rstMetricas.first();
+
+    addSql(
+      'QRY_SYSUSER11_SALDOS_ANFITRION',
+      'select * from QRY_SYSUSER11_SALDOS_ANFITRION(${SmxConstants.controllerMain.rstSysUser10.getId()})',
+    );
+
+    await SmxRowSetTrack.run(
+      controller: this,
+      call: () => getRowSetFuture('QRY_SYSUSER11_SALDOS_ANFITRION'),
+    );
+
+    rstMetricas.value = getRowset('QRY_SYSUSER11_SALDOS_ANFITRION');
+    rstMetricas.value!.first();
   }
 
   @override
