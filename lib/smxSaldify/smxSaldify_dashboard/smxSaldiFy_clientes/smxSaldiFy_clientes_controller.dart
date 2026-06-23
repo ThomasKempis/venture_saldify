@@ -1,10 +1,15 @@
 import 'package:venture_core_connect/smxDataBase/smxRowSet.dart';
+import 'package:venture_core_connect/smxJson/SmxJsonUtil.dart';
 import 'package:venture_widgets/smxClassDrivers.dart';
 import 'package:venture_widgets/smxController/smxController.dart';
 import 'package:venture_widgets/smxController/smxRowSetTrack.dart';
+import 'package:venture_widgets/smxShowDialog/smxShowDialogs.dart';
+
 import '../../../smxApis/smxConstants.dart';
 
 class SmxSaldiFyClientesController extends SmxController {
+  static const int statusArchivado = 2;
+
   late SmxRowSet rstClientes;
 
   SmxSaldiFyClientesController({required super.alias, required super.data});
@@ -74,6 +79,61 @@ class SmxSaldiFyClientesController extends SmxController {
     if (value is int) return value;
     if (value is double) return value.toInt();
     return int.tryParse(value?.toString() ?? '') ?? -1;
+  }
+
+  Future<bool> archiveClienteAt(int index) async {
+    final context = data.context;
+    if (context == null) return false;
+
+    rstClientes.index(index);
+    final idSysuser11 = rstClientes.getId();
+    if (idSysuser11 <= 0) return false;
+
+    final aliasUpdate = 'SYSUSER11_ARCHIVAR_$idSysuser11';
+    addSql(
+      aliasUpdate,
+      'select * from SYSUSER11_DET_CONTACTOS where ID_SYSUSER11 = $idSysuser11',
+    );
+    await getRowSetFuture(aliasUpdate);
+
+    if (jsonSend.getError() != null) {
+      if (context.mounted) {
+        showSystemErrorDialog(context, message: jsonSend.error!);
+      }
+      return false;
+    }
+
+    final rstUpdate = getRowset(aliasUpdate);
+    if (rstUpdate.getRowCount() == 0) {
+      if (context.mounted) {
+        showSystemErrorDialog(
+          context,
+          message: 'No se encontro la relacion activa del cliente.',
+        );
+      }
+      return false;
+    }
+
+    data.accion = AccionNN.W;
+    rstUpdate.tabla = 'SYSUSER11_DET_CONTACTOS';
+    rstUpdate.first();
+    rstUpdate.setAccion(AccionNN.W);
+    rstUpdate.update('SYSUSER11_STATUS', statusArchivado);
+
+    await showDialogWait(context, () async {
+      await callTroncalSave(rstUpdate);
+    });
+
+    if (jsonSend.getError() != null) {
+      if (context.mounted) {
+        showSystemErrorDialog(context, message: jsonSend.error!);
+      }
+      return false;
+    }
+
+    rstClientes.index(index);
+    rstClientes.deleteBuffer();
+    return true;
   }
 
   @override

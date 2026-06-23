@@ -7,7 +7,7 @@ import '../../smxApis/smxConstants.dart';
 import 'smxSaldiFy_dashboard_controller.dart';
 import 'smxSaldiFy_dashboard_ini.dart';
 import 'smxSaldiFy_dashboard_main.dart';
-import 'smxSaldiFy_red_clientes/smxSaldiFy_red_clientes.dart';
+import 'smxSaldiFy_metricas/smxSaldiFy_metricas.dart';
 import '../smxSaldify_screens/smxSaldify_backgrounds/acciones_pendientes_center.dart';
 
 class SmxSaldiFyDashboard extends StatefulWidget {
@@ -106,13 +106,8 @@ class _SmxSaldiFyDashboardState extends State<SmxSaldiFyDashboard> {
                                   ),
                                 ),
                                 const SizedBox(height: 8),
-                                SmxSaldiFyRedClientes(
+                                SmxSaldiFyMetricas(
                                   isMobile: widget.isMobile,
-                                  onHeaderTap: () =>
-                                      _controller.openUnderConstruction(
-                                        context,
-                                        'Red de clientes',
-                                      ),
                                   onMetricTap: (title) => _controller
                                       .openUnderConstruction(context, title),
                                 ),

@@ -63,6 +63,14 @@ class SmxSaldiFyDashboardMain extends StatelessWidget {
               return;
             }
 
+            if (title == 'Archivados') {
+              final changed = await controller.openArchivados(context);
+              if (changed == true) {
+                await onRefresh();
+              }
+              return;
+            }
+
             controller.openUnderConstruction(context, title);
           },
         ),

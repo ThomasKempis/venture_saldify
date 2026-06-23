@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:venture_core_connect/smxDataBase/smxRowSet.dart';
 import 'package:venture_saldify/smxColors.dart';
 import 'package:venture_widgets/smxCallBaseStateful.dart';
@@ -60,6 +61,9 @@ class _SmxSaldiFyClientesState extends State<SmxSaldiFyClientes> {
             controller: controller,
             clientes: rstClientes,
             showAllClients: _showAllClients,
+            onClientArchive: (index, name) =>
+                _archiveCliente(controller, index, name),
+            onClientArchived: () => _notifyArchived(controller),
             onShowAllClientsChanged: (value) {
               setState(() {
                 _showAllClients = value;
@@ -92,6 +96,41 @@ class _SmxSaldiFyClientesState extends State<SmxSaldiFyClientes> {
       widget.onLoaded.call(rstClientes);
     });
   }
+
+  Future<bool> _archiveCliente(
+    SmxSaldiFyClientesController controller,
+    int index,
+    String name,
+  ) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Archivar cliente'),
+        content: Text(
+          'El cliente saldra de tu lista activa y quedara en Archivados:\n$name',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancelar'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Archivar'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return false;
+
+    return controller.archiveClienteAt(index);
+  }
+
+  void _notifyArchived(SmxSaldiFyClientesController controller) {
+    setState(() {});
+    widget.onLoaded.call(controller.rstClientes.copy());
+  }
 }
 
 class _SmxSaldiFyClientesView extends StatelessWidget {
@@ -101,6 +140,8 @@ class _SmxSaldiFyClientesView extends StatelessWidget {
   final SmxSaldiFyClientesController controller;
   final SmxRowSet clientes;
   final bool showAllClients;
+  final Future<bool> Function(int index, String name) onClientArchive;
+  final VoidCallback onClientArchived;
   final ValueChanged<bool> onShowAllClientsChanged;
 
   const _SmxSaldiFyClientesView({
@@ -110,6 +151,8 @@ class _SmxSaldiFyClientesView extends StatelessWidget {
     required this.controller,
     required this.clientes,
     required this.showAllClients,
+    required this.onClientArchive,
+    required this.onClientArchived,
     required this.onShowAllClientsChanged,
   });
 
@@ -133,6 +176,8 @@ class _SmxSaldiFyClientesView extends StatelessWidget {
           controller: controller,
           showAll: showAllClients,
           onClientTap: onClientTap,
+          onClientArchive: onClientArchive,
+          onClientArchived: onClientArchived,
         ),
       ],
     );
@@ -191,6 +236,8 @@ class _ClientCards extends StatelessWidget {
   final SmxSaldiFyClientesController controller;
   final bool showAll;
   final ValueChanged<SmxSaldiFyClientTapData> onClientTap;
+  final Future<bool> Function(int index, String name) onClientArchive;
+  final VoidCallback onClientArchived;
 
   const _ClientCards({
     required this.isMobile,
@@ -199,6 +246,8 @@ class _ClientCards extends StatelessWidget {
     required this.controller,
     required this.showAll,
     required this.onClientTap,
+    required this.onClientArchive,
+    required this.onClientArchived,
   });
 
   @override
@@ -206,44 +255,59 @@ class _ClientCards extends StatelessWidget {
     final visibleCount = showAll
         ? clientes.getRowCount()
         : clientes.getRowCount().clamp(0, 5).toInt();
-    final cards = [
-      for (var index = 0; index < visibleCount; index++)
-        _ClientCard(
-          name: _getClientValue(index, controller.getClientName),
-          status: _getClientValue(index, controller.getClientStatus),
-          statusType: _ClientStatusType.fromValue(
-            _getClientValue(index, controller.getClientStatusType),
-          ),
-          cutDate: _getClientValue(index, controller.getClientCutDate),
-          credit: _getClientValue(index, controller.getClientCredit),
-          availableCredit: _getClientValue(
-            index,
-            controller.getClientAvailableCredit,
-          ),
-          purchases: _getClientValue(index, controller.getClientPurchases),
-          payments: _getClientValue(index, controller.getClientPayments),
-          balance: _getClientValue(index, controller.getClientBalance),
+    final cards = <Widget>[];
+
+    for (var index = 0; index < visibleCount; index++) {
+      final idSysuser11 = _getClientIntValue(
+        index,
+        controller.getClientRelationId,
+      );
+      final relaSysuser10Cliente = _getClientIntValue(
+        index,
+        controller.getClientUserId,
+      );
+      final name = _getClientValue(index, controller.getClientName);
+      final status = _getClientValue(index, controller.getClientStatus);
+      final statusType = _ClientStatusType.fromValue(
+        _getClientValue(index, controller.getClientStatusType),
+      );
+      final cutDate = _getClientValue(index, controller.getClientCutDate);
+      final credit = _getClientValue(index, controller.getClientCredit);
+      final availableCredit = _getClientValue(
+        index,
+        controller.getClientAvailableCredit,
+      );
+      final purchases = _getClientValue(index, controller.getClientPurchases);
+      final payments = _getClientValue(index, controller.getClientPayments);
+      final balance = _getClientValue(index, controller.getClientBalance);
+
+      cards.add(
+        _SlidableClientCard(
+          key: ValueKey('cliente_activo_$idSysuser11'),
+          name: name,
+          status: status,
+          statusType: statusType,
+          cutDate: cutDate,
+          credit: credit,
+          availableCredit: availableCredit,
+          purchases: purchases,
+          payments: payments,
+          balance: balance,
           onTap: () => onClientTap(
             SmxSaldiFyClientTapData(
-              idSysuser11: _getClientIntValue(
-                index,
-                controller.getClientRelationId,
-              ),
-              relaSysuser10Cliente: _getClientIntValue(
-                index,
-                controller.getClientUserId,
-              ),
-              name: _getClientValue(index, controller.getClientName),
-              credit: _getClientValue(index, controller.getClientCredit),
-              availableCredit: _getClientValue(
-                index,
-                controller.getClientAvailableCredit,
-              ),
-              balance: _getClientValue(index, controller.getClientBalance),
+              idSysuser11: idSysuser11,
+              relaSysuser10Cliente: relaSysuser10Cliente,
+              name: name,
+              credit: credit,
+              availableCredit: availableCredit,
+              balance: balance,
             ),
           ),
+          confirmArchive: () => onClientArchive(index, name),
+          onArchived: onClientArchived,
         ),
-    ];
+      );
+    }
 
     if (isMobile) {
       return Column(
@@ -289,6 +353,81 @@ class _ClientCards extends StatelessWidget {
   int _getClientIntValue(int index, int Function() getValue) {
     clientes.index(index);
     return getValue();
+  }
+}
+
+class _SlidableClientCard extends StatelessWidget {
+  final String name;
+  final String status;
+  final _ClientStatusType statusType;
+  final String cutDate;
+  final String credit;
+  final String availableCredit;
+  final String purchases;
+  final String payments;
+  final String balance;
+  final VoidCallback onTap;
+  final Future<bool> Function() confirmArchive;
+  final VoidCallback onArchived;
+
+  const _SlidableClientCard({
+    super.key,
+    required this.name,
+    required this.status,
+    required this.statusType,
+    required this.cutDate,
+    required this.credit,
+    required this.availableCredit,
+    required this.purchases,
+    required this.payments,
+    required this.balance,
+    required this.onTap,
+    required this.confirmArchive,
+    required this.onArchived,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Slidable(
+      key: key!,
+      groupTag: 'clientes_activos',
+      endActionPane: ActionPane(
+        extentRatio: .24,
+        motion: const BehindMotion(),
+        children: [
+          SlidableAction(
+            onPressed: (_) async {
+              final archived = await confirmArchive();
+              if (archived) {
+                onArchived();
+              }
+            },
+            autoClose: true,
+            backgroundColor: SmxColors.brandAccent,
+            foregroundColor: SmxColors.textDark,
+            icon: Icons.archive_outlined,
+            label: 'Archivar',
+            borderRadius: BorderRadius.circular(18),
+            padding: const EdgeInsets.symmetric(horizontal: 6),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.only(right: 6),
+        child: _ClientCard(
+          name: name,
+          status: status,
+          statusType: statusType,
+          cutDate: cutDate,
+          credit: credit,
+          availableCredit: availableCredit,
+          purchases: purchases,
+          payments: payments,
+          balance: balance,
+          onTap: onTap,
+        ),
+      ),
+    );
   }
 }
 

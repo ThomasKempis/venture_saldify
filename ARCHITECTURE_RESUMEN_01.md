@@ -261,6 +261,21 @@ Luego `getId()` usa la fila activa.
 
 Regla: si se va a usar `getId()`, asegurar que el rowset tenga fila activa.
 
+### Recorrer Todo El RowSet
+
+Para recorrer todas las filas de un `SmxRowSet`, especialmente para sumar una columna o procesar todos los registros, usar el cursor del rowset:
+
+```dart
+double total = 0.0;
+
+rst.beforeFirst();
+while (rst.next()) {
+  total += rst.getValue('CAMPO_IMPORTE');
+}
+```
+
+No es necesario posicionar manualmente con `index(pos)` para estos casos. Si el campo ya viene tipado desde base, por ejemplo como `double`, evitar conversiones innecesarias a string.
+
 ## 6. SmxRowSetTrack
 
 `SmxRowSetTrack` es una mejora de la plataforma, no una utilidad local de Saldify.

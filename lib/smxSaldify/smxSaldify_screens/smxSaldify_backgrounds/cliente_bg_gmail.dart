@@ -64,17 +64,7 @@ class ClienteBgGmail extends StatelessWidget {
                             children: [
                               Row(
                                 crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Expanded(
-                                    flex: isNarrow ? 6 : 5,
-                                    child: field,
-                                  ),
-                                  const SizedBox(width: 14),
-                                  Expanded(
-                                    flex: isNarrow ? 4 : 5,
-                                    child: const _GmailDomainText(),
-                                  ),
-                                ],
+                                children: [Expanded(child: field)],
                               ),
                               const SizedBox(height: 18),
                               Align(
@@ -136,36 +126,6 @@ class _GmailCopy extends StatelessWidget {
   }
 }
 
-class _GmailDomainText extends StatelessWidget {
-  const _GmailDomainText();
-
-  @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final fontSize = constraints.maxWidth < 220 ? 24.0 : 30.0;
-
-        return Padding(
-          padding: const EdgeInsets.only(top: 13),
-          child: Text(
-            '@gmail.com',
-            maxLines: 1,
-            overflow: TextOverflow.fade,
-            softWrap: false,
-            style: TextStyle(
-              color: const Color(0xFF123247).withValues(alpha: .32),
-              fontSize: fontSize,
-              fontWeight: FontWeight.w900,
-              height: 1,
-              letterSpacing: 0,
-            ),
-          ),
-        );
-      },
-    );
-  }
-}
-
 class _GmailBgPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
@@ -209,7 +169,11 @@ class _GmailBgPainter extends CustomPainter {
         ..strokeJoin = StrokeJoin.round,
     );
 
-    final badgeCenter = Offset(size.width * .46, 166);
+    final leftVisualSpaceCenter = Offset(
+      mailRect.left - 96,
+      mailRect.center.dy,
+    );
+    final badgeCenter = leftVisualSpaceCenter.translate(16, 0);
     canvas.drawCircle(badgeCenter, 26, Paint()..color = SmxColors.white);
     canvas.drawArc(
       Rect.fromCircle(center: badgeCenter, radius: 13),
@@ -231,7 +195,7 @@ class _GmailBgPainter extends CustomPainter {
         ..strokeCap = StrokeCap.round,
     );
 
-    canvas.drawCircle(Offset(size.width * .37, 148), 10, green);
+    canvas.drawCircle(leftVisualSpaceCenter.translate(-48, -10), 10, green);
     canvas.drawCircle(Offset(size.width * .91, size.height * .34), 8, yellow);
     canvas.drawCircle(Offset(size.width * .60, size.height * .80), 7, blue);
   }

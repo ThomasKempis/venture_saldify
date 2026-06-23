@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:venture_core_connect/smxDataBase/smxRowSet.dart';
 
 import '../smxSaldify_screens/saldify_cliente/smxSaldiFy_cliente.dart';
+import '../smxSaldify_screens/saldify_archivados/smxSaldiFy_archivados.dart';
 import '../smxSaldify_screens/saldify_compras/smxSaldiFy_compras.dart';
 import '../smxSaldify_screens/saldify_credito/smxSaldiFy_cliente_credito.dart';
+import '../smxSaldify_screens/saldify_historial/smxSaldiFy_historial.dart';
 import '../smxSaldify_screens/saldify_pagos/smxSaldiFy_pagos.dart';
 import 'smxSaldiFy_clientes/smxSaldiFy_clientes.dart';
 import 'smxSaldiFy_dashboard_menu.dart';
@@ -160,6 +162,12 @@ class SmxSaldiFyDashboardController {
     );
   }
 
+  Future<bool?> openArchivados(BuildContext context) {
+    return Navigator.of(context).push<bool>(
+      MaterialPageRoute(builder: (_) => const SmxSaldiFyArchivados()),
+    );
+  }
+
   Future<bool?> openClienteCredito(
     BuildContext context,
     SmxSaldiFyClientTapData client,
@@ -204,6 +212,20 @@ class SmxSaldiFyDashboardController {
     );
   }
 
+  Future<bool?> openClienteHistorial(
+    BuildContext context,
+    SmxSaldiFyClientTapData client,
+  ) async {
+    if (client.relaSysuser10Cliente <= 0) {
+      openUnderConstruction(context, 'Cliente sin relacion');
+      return false;
+    }
+
+    return Navigator.of(context).push<bool>(
+      MaterialPageRoute(builder: (_) => SmxSaldiFyHistorial(client: client)),
+    );
+  }
+
   Future<bool?> openClienteActions(
     BuildContext context,
     SmxSaldiFyClientTapData client,
@@ -226,8 +248,7 @@ class SmxSaldiFyDashboardController {
     }
 
     if (action == 'historial') {
-      openUnderConstruction(context, 'Historial');
-      return false;
+      return openClienteHistorial(context, client);
     }
 
     if (action == 'credito') {
