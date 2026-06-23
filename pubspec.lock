@@ -373,10 +373,10 @@ packages:
     dependency: "direct main"
     description:
       name: firebase_auth
-      sha256: "6b0f6a6d2b092c002dd15006b440f032f129449f87c338e918a35bc5a6565ec2"
+      sha256: "7996a49c4b4054573eac9124c1c412095ae1406ca367bd2373de1ad2eaba04b8"
       url: "https://pub.dev"
     source: hosted
-    version: "6.5.3"
+    version: "6.5.4"
   firebase_auth_platform_interface:
     dependency: transitive
     description:
@@ -1383,7 +1383,7 @@ packages:
     description:
       path: "packages/venture_core_connect"
       ref: main
-      resolved-ref: "57c6639d2af993c9a5a288ce170d35cc61012903"
+      resolved-ref: "4a12e2c025c3494ff4faa7cfe4a5d21b1fbf7aa0"
       url: "https://github.com/ThomasKempis/venture.git"
     source: git
     version: "2.0.14"
@@ -1392,7 +1392,7 @@ packages:
     description:
       path: "packages/venture_widgets"
       ref: main
-      resolved-ref: "57c6639d2af993c9a5a288ce170d35cc61012903"
+      resolved-ref: "4a12e2c025c3494ff4faa7cfe4a5d21b1fbf7aa0"
       url: "https://github.com/ThomasKempis/venture.git"
     source: git
     version: "2.0.16"

@@ -2,9 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'package:venture_core_connect/smxDataBase/smxRowSet.dart';
 import 'package:venture_widgets/smxClassDrivers.dart';
 import 'package:venture_widgets/smxController/smxController.dart';
-
+import 'package:venture_widgets/smxController/smxRowSetTrack.dart';
 import '../../../smxApis/smxConstants.dart';
-import '../../../smxApis/smxRowSetTrack.dart';
 
 class SmxSaldiFyRedClientesController extends SmxController {
   final ValueNotifier<SmxRowSet?> rstMetricas = ValueNotifier<SmxRowSet?>(null);

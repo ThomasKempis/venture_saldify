@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:venture_core_connect/smxDataBase/smxRowSet.dart';
 import 'package:venture_saldify/smxColors.dart';
@@ -12,6 +13,7 @@ class SmxSaldiFyClientes extends StatefulWidget {
   final bool isDesktop;
   final ValueChanged<SmxSaldiFyClientTapData> onClientTap;
   final ValueChanged<SmxRowSet> onLoaded;
+  final ValueListenable<SmxRowSet?>? clientesNotifier;
 
   const SmxSaldiFyClientes({
     super.key,
@@ -19,6 +21,7 @@ class SmxSaldiFyClientes extends StatefulWidget {
     required this.isDesktop,
     required this.onClientTap,
     required this.onLoaded,
+    this.clientesNotifier,
   });
 
   @override
@@ -43,16 +46,37 @@ class _SmxSaldiFyClientesState extends State<SmxSaldiFyClientes> {
       builder: (context, controller) {
         _notifyLoadedOnce(controller.rstClientes);
 
-        return _SmxSaldiFyClientesView(
-          isMobile: widget.isMobile,
-          isDesktop: widget.isDesktop,
-          onClientTap: widget.onClientTap,
-          controller: controller,
-          showAllClients: _showAllClients,
-          onShowAllClientsChanged: (value) {
-            setState(() {
-              _showAllClients = value;
-            });
+        Widget buildView(SmxRowSet rstClientes) {
+          controller.rstClientes = rstClientes;
+
+          if (rstClientes.getRowCount() == 0) {
+            return const SizedBox.shrink();
+          }
+
+          return _SmxSaldiFyClientesView(
+            isMobile: widget.isMobile,
+            isDesktop: widget.isDesktop,
+            onClientTap: widget.onClientTap,
+            controller: controller,
+            clientes: rstClientes,
+            showAllClients: _showAllClients,
+            onShowAllClientsChanged: (value) {
+              setState(() {
+                _showAllClients = value;
+              });
+            },
+          );
+        }
+
+        final clientesNotifier = widget.clientesNotifier;
+        if (clientesNotifier == null) {
+          return buildView(controller.rstClientes);
+        }
+
+        return ValueListenableBuilder<SmxRowSet?>(
+          valueListenable: clientesNotifier,
+          builder: (context, rstClientes, _) {
+            return buildView(rstClientes ?? controller.rstClientes);
           },
         );
       },
@@ -75,6 +99,7 @@ class _SmxSaldiFyClientesView extends StatelessWidget {
   final bool isDesktop;
   final ValueChanged<SmxSaldiFyClientTapData> onClientTap;
   final SmxSaldiFyClientesController controller;
+  final SmxRowSet clientes;
   final bool showAllClients;
   final ValueChanged<bool> onShowAllClientsChanged;
 
@@ -83,6 +108,7 @@ class _SmxSaldiFyClientesView extends StatelessWidget {
     required this.isDesktop,
     required this.onClientTap,
     required this.controller,
+    required this.clientes,
     required this.showAllClients,
     required this.onShowAllClientsChanged,
   });
@@ -103,7 +129,7 @@ class _SmxSaldiFyClientesView extends StatelessWidget {
         _ClientCards(
           isMobile: isMobile,
           isDesktop: isDesktop,
-          clientes: controller.rstClientes,
+          clientes: clientes,
           controller: controller,
           showAll: showAllClients,
           onClientTap: onClientTap,
@@ -179,7 +205,7 @@ class _ClientCards extends StatelessWidget {
   Widget build(BuildContext context) {
     final visibleCount = showAll
         ? clientes.getRowCount()
-        : clientes.getRowCount().clamp(0, 3).toInt();
+        : clientes.getRowCount().clamp(0, 5).toInt();
     final cards = [
       for (var index = 0; index < visibleCount; index++)
         _ClientCard(

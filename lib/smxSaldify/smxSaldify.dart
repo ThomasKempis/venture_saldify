@@ -87,7 +87,6 @@ class _SmxSaldiFy extends State<SmxSaldiFy> {
             isDesktop: layout.isDesktop,
             maxContentWidth: layout.saldifyMaxContentWidth,
             pagePadding: layout.saldifyPagePadding,
-            metricColumnsFor: layout.saldifyMetricColumnsFor,
             quickActionCardWidth: layout.saldifyQuickActionCardWidth,
             menuButton: menuButton,
             onRefresh: _refreshDashboard,
@@ -115,8 +114,6 @@ class _SmxSaldiFy extends State<SmxSaldiFy> {
     setState(() {
       _dashboardRefreshRevision++;
     });
-
-    await Future<void>.delayed(const Duration(milliseconds: 350));
   }
 
   String _getAdminName() {
