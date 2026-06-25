@@ -22,8 +22,11 @@ class SmxSaldiFyClienteCreditoController extends SmxController {
 
   int get plan {
     final value = _toInt(rstSysuser12.getValue('SYSUSER12_PLAN'));
-    return value == 2 ? 2 : 1;
+    return value >= 1 && value <= 3 ? value : 1;
   }
+
+  double get porcentaje =>
+      _toDouble(rstSysuser12.getValue('SYSUSER12_PORCENTAJE'));
 
   int get corteTipo => _toInt(rstSysuser12.getValue('SYSUSER12_CORTE_TIPO'));
 
@@ -70,7 +73,26 @@ class SmxSaldiFyClienteCreditoController extends SmxController {
   }
 
   void setPlan(int value) {
-    rstSysuser12.update('SYSUSER12_PLAN', value == 2 ? 2 : 1);
+    final planValue = value >= 1 && value <= 3 ? value : 1;
+    rstSysuser12.update('SYSUSER12_PLAN', planValue);
+    if (planValue != 3) {
+      rstSysuser12.update('SYSUSER12_PORCENTAJE', 0.0);
+      return;
+    }
+
+    if (!_porcentajesMinimos.contains(porcentaje.round())) {
+      rstSysuser12.update('SYSUSER12_PORCENTAJE', _porcentajesMinimos.first);
+    }
+  }
+
+  void setPorcentaje(double value) {
+    final porcentajeValue = value.round();
+    rstSysuser12.update(
+      'SYSUSER12_PORCENTAJE',
+      _porcentajesMinimos.contains(porcentajeValue)
+          ? porcentajeValue
+          : _porcentajesMinimos.first,
+    );
   }
 
   void setCorteTipo(int value) {
@@ -137,6 +159,8 @@ class SmxSaldiFyClienteCreditoController extends SmxController {
       return;
     }
 
+    _normalizePorcentaje();
+
     if (!_validateCorte(context)) {
       return;
     }
@@ -161,6 +185,7 @@ class SmxSaldiFyClienteCreditoController extends SmxController {
     rstSysuser12.update('RELA_SYSUSER11', idSysuser11);
     rstSysuser12.update('SYSUSER12_CREDITO', 0.0);
     rstSysuser12.update('SYSUSER12_PLAN', 1);
+    rstSysuser12.update('SYSUSER12_PORCENTAJE', 0.0);
     rstSysuser12.update('SYSUSER12_CORTE_TIPO', 1);
     rstSysuser12.update('SYSUSER12_CORTE_SEMANA', '0');
     rstSysuser12.update('SYSUSER12_CORTE_DIA', 5);
@@ -168,9 +193,21 @@ class SmxSaldiFyClienteCreditoController extends SmxController {
 
   void _normalizePlan() {
     final value = _toInt(rstSysuser12.getValue('SYSUSER12_PLAN'));
-    if (value != 1 && value != 2) {
+    if (value < 1 || value > 3) {
       setPlan(1);
     }
+    _normalizePorcentaje();
+  }
+
+  void _normalizePorcentaje() {
+    final currentPlan = plan;
+    final currentPorcentaje = porcentaje;
+    if (currentPlan != 3) {
+      rstSysuser12.update('SYSUSER12_PORCENTAJE', 0.0);
+      return;
+    }
+
+    setPorcentaje(currentPorcentaje);
   }
 
   void _normalizeCorte() {
@@ -189,6 +226,17 @@ class SmxSaldiFyClienteCreditoController extends SmxController {
       showValidDialog(
         context,
         mensaje: 'Debe ingresar un credito mayor a cero.',
+      );
+      return false;
+    }
+
+    final currentPlan = plan;
+    final currentPorcentaje = porcentaje;
+    if (currentPlan == 3 &&
+        !_porcentajesMinimos.contains(currentPorcentaje.round())) {
+      showValidDialog(
+        context,
+        mensaje: 'Debe seleccionar el porcentaje minimo del plan.',
       );
       return false;
     }
@@ -247,4 +295,6 @@ class SmxSaldiFyClienteCreditoController extends SmxController {
     'Jueves',
     'Viernes',
   ];
+
+  static const _porcentajesMinimos = [10, 20, 30, 40, 50, 60];
 }

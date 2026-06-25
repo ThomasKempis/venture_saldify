@@ -4,11 +4,13 @@ import 'package:venture_saldify/smxColors.dart';
 class ClienteBgInicio extends StatelessWidget {
   final bool isMobile;
   final VoidCallback onContinue;
+  final VoidCallback onArchivados;
 
   const ClienteBgInicio({
     super.key,
     required this.isMobile,
     required this.onContinue,
+    required this.onArchivados,
   });
 
   @override
@@ -42,7 +44,19 @@ class ClienteBgInicio extends StatelessWidget {
               Positioned(
                 left: 22,
                 bottom: 22,
-                child: ClienteBgActionButton(onPressed: onContinue),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    ClienteBgActionButton(
+                      onPressed: onArchivados,
+                      label: 'Archivados',
+                      icon: Icons.archive_outlined,
+                      color: const Color(0xFF31566B),
+                    ),
+                    const SizedBox(height: 10),
+                    ClienteBgActionButton(onPressed: onContinue),
+                  ],
+                ),
               ),
             ],
           ),
@@ -55,12 +69,14 @@ class ClienteBgInicio extends StatelessWidget {
 class ClienteBgActionButton extends StatelessWidget {
   final VoidCallback? onPressed;
   final String label;
+  final IconData icon;
   final Color color;
 
   const ClienteBgActionButton({
     super.key,
     required this.onPressed,
     this.label = 'Continuar',
+    this.icon = Icons.arrow_forward_rounded,
     this.color = const Color(0xFF123247),
   });
 
@@ -101,7 +117,7 @@ class ClienteBgActionButton extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Icon(
-                Icons.arrow_forward_rounded,
+                icon,
                 color: enabled ? color : color.withValues(alpha: .42),
                 size: 20,
               ),

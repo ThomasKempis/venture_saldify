@@ -14,6 +14,7 @@ class SmxSaldiFyClientes extends StatefulWidget {
   final bool isDesktop;
   final ValueChanged<SmxSaldiFyClientTapData> onClientTap;
   final ValueChanged<SmxRowSet> onLoaded;
+  final ValueChanged<SmxRowSet>? onArchived;
   final ValueListenable<SmxRowSet?>? clientesNotifier;
 
   const SmxSaldiFyClientes({
@@ -22,6 +23,7 @@ class SmxSaldiFyClientes extends StatefulWidget {
     required this.isDesktop,
     required this.onClientTap,
     required this.onLoaded,
+    this.onArchived,
     this.clientesNotifier,
   });
 
@@ -129,7 +131,13 @@ class _SmxSaldiFyClientesState extends State<SmxSaldiFyClientes> {
 
   void _notifyArchived(SmxSaldiFyClientesController controller) {
     setState(() {});
-    widget.onLoaded.call(controller.rstClientes.copy());
+    final rstClientes = controller.rstClientes.copy();
+    if (widget.onArchived == null) {
+      widget.onLoaded.call(rstClientes);
+      return;
+    }
+
+    widget.onArchived!.call(rstClientes);
   }
 }
 

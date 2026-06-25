@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:venture_saldify/smxColors.dart';
 import 'package:venture_saldify/smxLayout.dart';
 import 'package:venture_saldify/smxSaldify/smxSaldify_screens/saldify_credito/smxSaldiFy_cliente_credito_controller.dart';
+import 'package:venture_saldify/smxSaldify/smxSaldify_screens/saldify_credito/smxSaldiFy_cliente_credito_mock.dart';
 import 'package:venture_saldify/smxSaldify/smxSaldify_screens/saldify_credito/smxSaldiFy_cliente_credito_tarjetas.dart';
 import 'package:venture_widgets/smxCallBaseStateful.dart';
 import 'package:venture_widgets/smxController/smxControllerSendData.dart';
@@ -79,6 +80,11 @@ class _ClienteCreditoViewState extends State<_ClienteCreditoView> {
                       if (_showPlanSelector)
                         SmxSaldiFyCreditoPlanSelector(
                           value: controller.plan,
+                          controller: controller,
+                          onChanged: (value) {
+                            controller.setPlan(value);
+                            setState(() {});
+                          },
                           onSelected: (value) {
                             controller.setPlan(value);
                             setState(() {
@@ -164,6 +170,7 @@ class _FormPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final corteTipo = controller.corteTipo;
+    final plan = smxSaldiFyCreditoPlanById(controller.plan);
 
     return Material(
       color: SmxColors.whiteAlpha(.96),
@@ -174,6 +181,10 @@ class _FormPanel extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            _SelectedPlanHeader(plan: plan),
+            const SizedBox(height: 16),
+            Container(height: 1, color: SmxColors.blackAlpha(.06)),
+            const SizedBox(height: 18),
             SmxNumberField(
               field: 'SYSUSER12_CREDITO',
               controller: controller,
@@ -238,6 +249,70 @@ class _FormPanel extends StatelessWidget {
   }
 }
 
+class _SelectedPlanHeader extends StatelessWidget {
+  final SmxSaldiFyCreditoPlanMock plan;
+
+  const _SelectedPlanHeader({required this.plan});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Container(
+          width: 82,
+          height: 66,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: SmxColors.brandAccent.withValues(alpha: .07),
+            borderRadius: BorderRadius.circular(15),
+            border: Border.all(
+              color: SmxColors.brandAccent.withValues(alpha: .16),
+            ),
+          ),
+          child: Image.asset(
+            plan.imageAsset,
+            width: 68,
+            height: 54,
+            fit: BoxFit.contain,
+            filterQuality: FilterQuality.medium,
+          ),
+        ),
+        const SizedBox(width: 14),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                plan.title,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  color: SmxColors.textDark,
+                  fontSize: 17,
+                  height: 1.08,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              const SizedBox(height: 5),
+              Text(
+                plan.subtitle,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  color: SmxColors.textMuted,
+                  fontSize: 12,
+                  height: 1.2,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 class _CutConfigDivider extends StatelessWidget {
   final int corteTipo;
 
@@ -286,72 +361,93 @@ class _CutTypeSelector extends StatelessWidget {
       (id: 3, label: 'Semanal', description: 'Lunes a viernes'),
     ];
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final columns = constraints.maxWidth < 620 ? 1 : 3;
-
-        return GridView.builder(
-          itemCount: items.length,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: columns,
-            mainAxisSpacing: 8,
-            crossAxisSpacing: 8,
-            childAspectRatio: columns == 1 ? 4.4 : 2.25,
+    return Row(
+      children: [
+        for (var index = 0; index < items.length; index++) ...[
+          if (index > 0) const SizedBox(width: 8),
+          Expanded(
+            child: _CutTypeOption(
+              label: items[index].label,
+              description: items[index].description,
+              selected: value == items[index].id,
+              onTap: () => onChanged(items[index].id),
+            ),
           ),
-          itemBuilder: (context, index) {
-            final item = items[index];
-            final selected = value == item.id;
+        ],
+      ],
+    );
+  }
+}
 
-            return Material(
-              color: selected ? SmxColors.brandAccent : SmxColors.surfaceData,
-              borderRadius: BorderRadius.circular(12),
-              clipBehavior: Clip.antiAlias,
-              child: InkWell(
-                onTap: () => onChanged(item.id),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 10,
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        item.label,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: selected
-                              ? SmxColors.white
-                              : SmxColors.textDark,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w900,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        item.description,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: selected
-                              ? SmxColors.white
-                              : SmxColors.textMuted,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ],
+class _CutTypeOption extends StatelessWidget {
+  final String label;
+  final String description;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _CutTypeOption({
+    required this.label,
+    required this.description,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: SmxColors.transparent,
+      borderRadius: BorderRadius.circular(13),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 170),
+          height: 66,
+          padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 9),
+          decoration: BoxDecoration(
+            color: selected ? SmxColors.brandAccent : SmxColors.surfaceData,
+            borderRadius: BorderRadius.circular(13),
+            border: Border.all(
+              color: selected
+                  ? SmxColors.brandAccent.withValues(alpha: .72)
+                  : SmxColors.blackAlpha(.06),
+            ),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: selected ? SmxColors.white : SmxColors.textDark,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              const SizedBox(height: 4),
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  description,
+                  maxLines: 1,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: selected
+                        ? SmxColors.white.withValues(alpha: .82)
+                        : SmxColors.textMuted,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
               ),
-            );
-          },
-        );
-      },
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

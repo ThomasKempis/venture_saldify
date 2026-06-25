@@ -23,6 +23,7 @@ class SmxSaldiFyDashboardController {
   final ValueNotifier<int> pendingActionsRevisionNotifier = ValueNotifier<int>(
     0,
   );
+  final ValueNotifier<int> metricasRevisionNotifier = ValueNotifier<int>(0);
 
   SmxRowSet? _rstClientesActivos;
   SmxRowSet? _rstClientesPendientes;
@@ -34,6 +35,7 @@ class SmxSaldiFyDashboardController {
     clientesInvitacionNotifier.dispose();
     contentModeNotifier.dispose();
     pendingActionsRevisionNotifier.dispose();
+    metricasRevisionNotifier.dispose();
   }
 
   void clearClientes() {
@@ -49,11 +51,19 @@ class SmxSaldiFyDashboardController {
 
   void onClientesLoadedRst(SmxRowSet rstClientes) {
     if (identical(_rstClientesActivos, rstClientes)) return;
-    _rstClientesActivos = rstClientes;
     _clientesActivosLoaded = true;
-    clientesActivosNotifier.value = rstClientes;
+    _setClientesActivos(rstClientes);
     _updateContentMode();
     _notifyPendingActionsChanged();
+  }
+
+  void onClienteArchivadoRst(SmxRowSet rstClientes) {
+    _clientesActivosLoaded = true;
+    _setClientesActivos(rstClientes);
+    _mergeClientesActivosVsPendientes();
+    _updateContentMode();
+    _notifyPendingActionsChanged();
+    _notifyMetricasChanged();
   }
 
   void onClientesPendientesLoadedRst(SmxRowSet rstClientes) {
@@ -62,6 +72,11 @@ class SmxSaldiFyDashboardController {
     _mergeClientesActivosVsPendientes();
     _updateContentMode();
     _notifyPendingActionsChanged();
+  }
+
+  void _setClientesActivos(SmxRowSet rstClientes) {
+    _rstClientesActivos = rstClientes;
+    clientesActivosNotifier.value = rstClientes;
   }
 
   void onClientePendienteActivated(SmxRowSet rstActivated) {
@@ -83,7 +98,7 @@ class SmxSaldiFyDashboardController {
   bool get hasClientesPendientes =>
       (_rstClientesPendientes?.getRowCount() ?? 0) > 0;
 
-  bool get hasCreditoPendiente => _hasStatusPendiente(_rstClientesActivos);
+  bool get hasCreditoPendiente => _hasStatusPendiente();
 
   void _mergeClientesActivosVsPendientes() {
     final rstActivos = _rstClientesActivos;
@@ -119,27 +134,31 @@ class SmxSaldiFyDashboardController {
     contentModeNotifier.value = SmxSaldiFyDashboardContentMode.loading;
   }
 
-  bool _hasStatusPendiente(SmxRowSet? rstClientes) {
-    if (rstClientes == null || rstClientes.getRowCount() == 0) {
+  bool _hasStatusPendiente() {
+    if (_rstClientesActivos == null ||
+        _rstClientesActivos!.getRowCount() == 0) {
       return false;
     }
 
-    for (var index = 0; index < rstClientes.getRowCount(); index++) {
-      rstClientes.index(index);
-      final status =
-          rstClientes.getValue('SYSUSER12_STATUS')?.toString().trim() ?? '';
+    SmxRowSet rstClientes = _rstClientesActivos!;
+    rstClientes.beforeFirst();
+    while (rstClientes.next()) {
+      final status = rstClientes.getValue('SYSUSER12_STATUS');
       if (status == 'Pendiente') {
         rstClientes.first();
         return true;
       }
     }
 
-    rstClientes.first();
     return false;
   }
 
   void _notifyPendingActionsChanged() {
     pendingActionsRevisionNotifier.value++;
+  }
+
+  void _notifyMetricasChanged() {
+    metricasRevisionNotifier.value++;
   }
 
   void openUnderConstruction(BuildContext context, String title) {

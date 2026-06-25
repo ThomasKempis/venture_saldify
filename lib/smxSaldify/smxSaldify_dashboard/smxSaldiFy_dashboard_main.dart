@@ -79,6 +79,7 @@ class SmxSaldiFyDashboardMain extends StatelessWidget {
           isMobile: isMobile,
           isDesktop: isDesktop,
           onLoaded: controller.onClientesLoadedRst,
+          onArchived: controller.onClienteArchivadoRst,
           clientesNotifier: controller.clientesActivosNotifier,
           onClientTap: (client) async {
             final saved = await controller.openClienteActions(context, client);

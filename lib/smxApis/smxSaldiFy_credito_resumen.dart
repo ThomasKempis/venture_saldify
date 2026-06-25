@@ -10,7 +10,6 @@ class SmxSaldiFyCreditoResumen extends StatelessWidget {
   final double compras;
   final double pagos;
   final double saldo;
-  final ValueChanged<String>? onMetricTap;
 
   const SmxSaldiFyCreditoResumen({
     super.key,
@@ -19,7 +18,6 @@ class SmxSaldiFyCreditoResumen extends StatelessWidget {
     required this.compras,
     required this.pagos,
     required this.saldo,
-    this.onMetricTap,
   });
 
   @override
@@ -58,7 +56,6 @@ class SmxSaldiFyCreditoResumen extends StatelessWidget {
             disponible: disponible,
             saldo: saldo,
             cards: [comprasCard, pagosCard, saldoCard, disponibleCard],
-            onMetricTap: onMetricTap,
           );
         }
 
@@ -79,7 +76,6 @@ class SmxSaldiFyCreditoResumen extends StatelessWidget {
               child: _MetricasResumenGrid(
                 cards: [comprasCard, pagosCard, saldoCard, disponibleCard],
                 columns: 2,
-                onMetricTap: onMetricTap,
               ),
             ),
           ],
@@ -155,14 +151,12 @@ class _CreditoCompactCard extends StatelessWidget {
   final double disponible;
   final double saldo;
   final List<_ResumenMetricData> cards;
-  final ValueChanged<String>? onMetricTap;
 
   const _CreditoCompactCard({
     required this.credito,
     required this.disponible,
     required this.saldo,
     required this.cards,
-    this.onMetricTap,
   });
 
   @override
@@ -218,9 +212,6 @@ class _CreditoCompactCard extends StatelessWidget {
                   data: card,
                   compact: true,
                   showNote: false,
-                  onTap: onMetricTap == null
-                      ? null
-                      : () => onMetricTap!(card.label),
                 );
               },
             ),
@@ -312,13 +303,8 @@ class _CreditoRadialVisual extends StatelessWidget {
 class _MetricasResumenGrid extends StatelessWidget {
   final List<_ResumenMetricData> cards;
   final int columns;
-  final ValueChanged<String>? onMetricTap;
 
-  const _MetricasResumenGrid({
-    required this.cards,
-    required this.columns,
-    this.onMetricTap,
-  });
+  const _MetricasResumenGrid({required this.cards, required this.columns});
 
   @override
   Widget build(BuildContext context) {
@@ -335,10 +321,7 @@ class _MetricasResumenGrid extends StatelessWidget {
       itemBuilder: (context, index) {
         final card = cards[index];
 
-        return _ResumenMetricCard(
-          data: card,
-          onTap: onMetricTap == null ? null : () => onMetricTap!(card.label),
-        );
+        return _ResumenMetricCard(data: card);
       },
     );
   }
@@ -348,92 +331,82 @@ class _ResumenMetricCard extends StatelessWidget {
   final _ResumenMetricData data;
   final bool compact;
   final bool showNote;
-  final VoidCallback? onTap;
 
   const _ResumenMetricCard({
     required this.data,
     this.compact = false,
     this.showNote = true,
-    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: SmxColors.transparent,
-      borderRadius: BorderRadius.circular(18),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(18),
-        child: Container(
-          padding: EdgeInsets.all(compact ? 10 : 14),
-          decoration: BoxDecoration(
-            color: SmxColors.whiteAlpha(.13),
-            borderRadius: BorderRadius.circular(compact ? 14 : 18),
-            border: Border.all(color: SmxColors.whiteAlpha(.18)),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Container(
+      padding: EdgeInsets.all(compact ? 10 : 14),
+      decoration: BoxDecoration(
+        color: SmxColors.whiteAlpha(.13),
+        borderRadius: BorderRadius.circular(compact ? 14 : 18),
+        border: Border.all(color: SmxColors.whiteAlpha(.18)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
             children: [
-              Row(
-                children: [
-                  Container(
-                    width: compact ? 8 : 9,
-                    height: compact ? 8 : 9,
-                    decoration: BoxDecoration(
-                      color: data.color,
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: data.color.withValues(alpha: .42),
-                          blurRadius: 10,
-                        ),
-                      ],
+              Container(
+                width: compact ? 8 : 9,
+                height: compact ? 8 : 9,
+                decoration: BoxDecoration(
+                  color: data.color,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: data.color.withValues(alpha: .42),
+                      blurRadius: 10,
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      data.label,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: SmxColors.white70,
-                        fontSize: compact ? 11 : 12,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              FittedBox(
-                fit: BoxFit.scaleDown,
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  _formatMoney(data.value),
-                  style: TextStyle(
-                    color: SmxColors.white,
-                    fontSize: compact ? 20 : 26,
-                    fontWeight: FontWeight.w900,
-                    height: 1,
-                  ),
+                  ],
                 ),
               ),
-              if (showNote)
-                Text(
-                  data.note,
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  data.label,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    color: data.color,
+                    color: SmxColors.white70,
                     fontSize: compact ? 11 : 12,
-                    fontWeight: FontWeight.w900,
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
+              ),
             ],
           ),
-        ),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              _formatMoney(data.value),
+              style: TextStyle(
+                color: SmxColors.white,
+                fontSize: compact ? 20 : 26,
+                fontWeight: FontWeight.w900,
+                height: 1,
+              ),
+            ),
+          ),
+          if (showNote)
+            Text(
+              data.note,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: data.color,
+                fontSize: compact ? 11 : 12,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+        ],
       ),
     );
   }

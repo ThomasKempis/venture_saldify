@@ -8,7 +8,7 @@ import 'smxSaldiFy_dashboard_controller.dart';
 import 'smxSaldiFy_dashboard_ini.dart';
 import 'smxSaldiFy_dashboard_main.dart';
 import 'smxSaldiFy_metricas/smxSaldiFy_metricas.dart';
-import '../smxSaldify_screens/smxSaldify_backgrounds/acciones_pendientes_center.dart';
+import 'smxSaldify_alertas/acciones_pendientes_center.dart';
 
 class SmxSaldiFyDashboard extends StatefulWidget {
   final String adminName;
@@ -108,8 +108,8 @@ class _SmxSaldiFyDashboardState extends State<SmxSaldiFyDashboard> {
                                 const SizedBox(height: 8),
                                 SmxSaldiFyMetricas(
                                   isMobile: widget.isMobile,
-                                  onMetricTap: (title) => _controller
-                                      .openUnderConstruction(context, title),
+                                  refreshNotifier:
+                                      _controller.metricasRevisionNotifier,
                                 ),
                                 SizedBox(height: widget.isMobile ? 16 : 20),
                                 ValueListenableBuilder<
@@ -147,6 +147,13 @@ class _SmxSaldiFyDashboardState extends State<SmxSaldiFyDashboard> {
                                               final saved = await _controller
                                                   .openCliente(context);
                                               if (saved == true) {
+                                                await _refreshDashboard();
+                                              }
+                                            },
+                                            onArchivados: () async {
+                                              final changed = await _controller
+                                                  .openArchivados(context);
+                                              if (changed == true) {
                                                 await _refreshDashboard();
                                               }
                                             },

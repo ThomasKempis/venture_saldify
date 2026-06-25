@@ -1,13 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:venture_saldify/smxColors.dart';
+import 'package:venture_saldify/smxSaldify/smxSaldify_screens/saldify_credito/smxSaldiFy_cliente_credito_controller.dart';
+import 'package:venture_saldify/smxSaldify/smxSaldify_screens/saldify_credito/smxSaldiFy_cliente_credito_mock.dart';
 
 class SmxSaldiFyCreditoPlanSelector extends StatelessWidget {
   final int value;
+  final SmxSaldiFyClienteCreditoController controller;
+  final ValueChanged<int> onChanged;
   final ValueChanged<int> onSelected;
 
   const SmxSaldiFyCreditoPlanSelector({
     super.key,
     required this.value,
+    required this.controller,
+    required this.onChanged,
     required this.onSelected,
   });
 
@@ -36,25 +42,26 @@ class SmxSaldiFyCreditoPlanSelector extends StatelessWidget {
         const SizedBox(height: 16),
         LayoutBuilder(
           builder: (context, constraints) {
-            final isSingleColumn = constraints.maxWidth < 720;
-            final cards = [
-              SmxSaldiFyCreditoPlanCard(
-                selected: value == 1,
-                title: 'Paga y libera credito',
-                description: 'Cada pago aumenta el disponible.',
-                example: 'Pago de 500 -> disponible sube 500',
-                imageAsset: 'assets/images/saldify_plan_revolvente.png',
-                onTap: () => onSelected(1),
-              ),
-              SmxSaldiFyCreditoPlanCard(
-                selected: value == 2,
-                title: 'Paga completo en el corte',
-                description: 'El credito se libera al liquidar todo.',
-                example: 'Debe 1,000 -> paga 1,000 para comprar',
-                imageAsset: 'assets/images/saldify_plan_pago_completo.png',
-                onTap: () => onSelected(2),
-              ),
-            ];
+            final isSingleColumn = constraints.maxWidth < 900;
+            final cards = smxSaldiFyCreditoPlanesMock
+                .map((plan) {
+                  return SmxSaldiFyCreditoPlanCard(
+                    selected: value == plan.id,
+                    title: plan.title,
+                    description: plan.subtitle,
+                    example: plan.footerTitle,
+                    imageAsset: plan.imageAsset,
+                    extraContent: plan.hasPorcentajeMinimo
+                        ? _PlanPercentageField(
+                            selected: value == plan.id,
+                            controller: controller,
+                            onSelected: () => onChanged(plan.id),
+                          )
+                        : null,
+                    onTap: () => onSelected(plan.id),
+                  );
+                })
+                .toList(growable: false);
 
             if (isSingleColumn) {
               return Column(
@@ -70,9 +77,10 @@ class SmxSaldiFyCreditoPlanSelector extends StatelessWidget {
             return Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(child: cards[0]),
-                const SizedBox(width: 14),
-                Expanded(child: cards[1]),
+                for (var index = 0; index < cards.length; index++) ...[
+                  if (index > 0) const SizedBox(width: 14),
+                  Expanded(child: cards[index]),
+                ],
               ],
             );
           },
@@ -88,6 +96,7 @@ class SmxSaldiFyCreditoPlanCard extends StatelessWidget {
   final String description;
   final String example;
   final String imageAsset;
+  final Widget? extraContent;
   final VoidCallback onTap;
 
   const SmxSaldiFyCreditoPlanCard({
@@ -97,11 +106,14 @@ class SmxSaldiFyCreditoPlanCard extends StatelessWidget {
     required this.description,
     required this.example,
     required this.imageAsset,
+    this.extraContent,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
+    final isExtended = extraContent != null;
+
     return Material(
       color: SmxColors.transparent,
       borderRadius: BorderRadius.circular(22),
@@ -109,7 +121,7 @@ class SmxSaldiFyCreditoPlanCard extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         child: Ink(
-          height: 206,
+          height: isExtended ? 230 : 206,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(22),
             gradient: LinearGradient(
@@ -181,18 +193,32 @@ class SmxSaldiFyCreditoPlanCard extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: 12),
-                    Text(
-                      description,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: selected
-                            ? SmxColors.white.withValues(alpha: .78)
-                            : SmxColors.textMuted,
-                        fontSize: 13,
-                        height: 1.2,
-                        fontWeight: FontWeight.w700,
-                      ),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            description,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: selected
+                                  ? SmxColors.white.withValues(alpha: .78)
+                                  : SmxColors.textMuted,
+                              fontSize: 13,
+                              height: 1.2,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                        if (extraContent != null) ...[
+                          const SizedBox(width: 12),
+                          Transform.translate(
+                            offset: const Offset(0, -3),
+                            child: extraContent!,
+                          ),
+                        ],
+                      ],
                     ),
                     const Spacer(),
                     _PlanExamplePill(example: example, selected: selected),
@@ -200,6 +226,142 @@ class SmxSaldiFyCreditoPlanCard extends StatelessWidget {
                 ),
               ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _PlanPercentageField extends StatelessWidget {
+  final bool selected;
+  final SmxSaldiFyClienteCreditoController controller;
+  final VoidCallback onSelected;
+
+  const _PlanPercentageField({
+    required this.selected,
+    required this.controller,
+    required this.onSelected,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final selectedValue = _porcentajes.contains(controller.porcentaje.round())
+        ? controller.porcentaje.round()
+        : _porcentajes.first;
+
+    return SizedBox(
+      width: 172,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          _PercentageChipRow(
+            values: _porcentajes.take(3),
+            selected: selected,
+            selectedValue: selectedValue,
+            onSelected: _selectPorcentaje,
+          ),
+          const SizedBox(height: 6),
+          _PercentageChipRow(
+            values: _porcentajes.skip(3),
+            selected: selected,
+            selectedValue: selectedValue,
+            onSelected: _selectPorcentaje,
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _selectPorcentaje(int porcentaje) {
+    controller.setPorcentaje(porcentaje.toDouble());
+    onSelected();
+  }
+
+  static const _porcentajes = [10, 20, 30, 40, 50, 60];
+}
+
+class _PercentageChipRow extends StatelessWidget {
+  final Iterable<int> values;
+  final bool selected;
+  final int selectedValue;
+  final ValueChanged<int> onSelected;
+
+  const _PercentageChipRow({
+    required this.values,
+    required this.selected,
+    required this.selectedValue,
+    required this.onSelected,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        for (final porcentaje in values) ...[
+          if (porcentaje != values.first) const SizedBox(width: 6),
+          _PercentageChip(
+            selected: selected,
+            active: selectedValue == porcentaje,
+            label: '$porcentaje%',
+            onTap: () => onSelected(porcentaje),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+class _PercentageChip extends StatelessWidget {
+  final bool selected;
+  final bool active;
+  final String label;
+  final VoidCallback onTap;
+
+  const _PercentageChip({
+    required this.selected,
+    required this.active,
+    required this.label,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final activeColor = selected ? SmxColors.white : SmxColors.brandAccent;
+    final idleColor = selected
+        ? SmxColors.white.withValues(alpha: .14)
+        : SmxColors.white;
+
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 160),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+        decoration: BoxDecoration(
+          color: active ? activeColor : idleColor,
+          borderRadius: BorderRadius.circular(9),
+          border: Border.all(
+            color: active
+                ? activeColor
+                : selected
+                ? SmxColors.white.withValues(alpha: .24)
+                : SmxColors.blackAlpha(.1),
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: active
+                ? selected
+                      ? const Color(0xFF0E5F74)
+                      : SmxColors.white
+                : selected
+                ? SmxColors.white.withValues(alpha: .86)
+                : SmxColors.textDark,
+            fontSize: 11,
+            fontWeight: FontWeight.w900,
           ),
         ),
       ),
