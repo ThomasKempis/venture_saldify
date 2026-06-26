@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:venture_saldify/smxColors.dart';
-import 'package:venture_saldify/smxLayout.dart';
+import 'package:venture_saldify/smxLayout/smxLayout.dart';
 import 'package:venture_widgets/smxCallBaseStateful.dart';
 import 'package:venture_widgets/smxController/smxControllerSendData.dart';
 import 'package:venture_widgets/smxDatePicker/smxDatePicker.dart';
@@ -91,10 +91,7 @@ class _ClienteViewState extends State<_ClienteView> {
     return Scaffold(
       backgroundColor: SmxColors.transparent,
       body: SizedBox.expand(
-        child: DecoratedBox(
-          decoration: const BoxDecoration(
-            gradient: SmxGradients.saldifyBackground,
-          ),
+        child: SmxSaldifyBackground(
           child: SafeArea(
             top: false,
             bottom: false,

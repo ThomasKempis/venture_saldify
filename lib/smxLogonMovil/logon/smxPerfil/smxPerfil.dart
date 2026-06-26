@@ -2,7 +2,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:venture_saldify/smxColors.dart';
 import 'package:venture_saldify/smxLogonMovil/logon/smxPerfil/smxPerfil_controller.dart';
-import 'package:venture_saldify/smxSaldify/smxSaldify_screens/smxSaldiFy_screen_tmp.dart';
+import 'package:venture_saldify/smxLayout/smxScreenTmp.dart';
 import 'package:venture_widgets/smxDatePicker/smxDatePicker.dart';
 import 'package:venture_widgets/smxTextField/smxTextField.dart';
 

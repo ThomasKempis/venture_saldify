@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:venture_saldify/smxColors.dart';
-import 'package:venture_saldify/smxLayout.dart';
+import 'package:venture_saldify/smxLayout/smxLayout.dart';
 
 class SmxSaldiFyScreenTmp extends StatelessWidget {
   final String title;
@@ -15,8 +15,6 @@ class SmxSaldiFyScreenTmp extends StatelessWidget {
     this.btoBack = true,
   });
 
-  static const _backgroundGradient = SmxGradients.saldifyBackground;
-
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
@@ -29,8 +27,7 @@ class SmxSaldiFyScreenTmp extends StatelessWidget {
         return Scaffold(
           backgroundColor: SmxColors.transparent,
           body: SizedBox.expand(
-            child: DecoratedBox(
-              decoration: const BoxDecoration(gradient: _backgroundGradient),
+            child: SmxSaldifyBackground(
               child: SafeArea(
                 top: false,
                 bottom: false,

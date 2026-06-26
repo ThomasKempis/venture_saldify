@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:venture_saldify/smxColors.dart';
-import 'package:venture_saldify/smxLayout.dart';
+import 'package:venture_saldify/smxLayout/smxLayout.dart';
 
 import '../../smxApis/smxConstants.dart';
 import 'smxSaldiFy_dashboard_controller.dart';
@@ -33,8 +33,6 @@ class SmxSaldiFyDashboard extends StatefulWidget {
     this.onRefresh,
   });
 
-  static const _backgroundGradient = SmxGradients.saldifyBackground;
-
   @override
   State<SmxSaldiFyDashboard> createState() => _SmxSaldiFyDashboardState();
 }
@@ -55,10 +53,7 @@ class _SmxSaldiFyDashboardState extends State<SmxSaldiFyDashboard> {
     final bottomContentInset = SmxLayout.bottomContentInset(context);
 
     return SizedBox.expand(
-      child: DecoratedBox(
-        decoration: const BoxDecoration(
-          gradient: SmxSaldiFyDashboard._backgroundGradient,
-        ),
+      child: SmxSaldifyBackground(
         child: SafeArea(
           top: false,
           bottom: false,

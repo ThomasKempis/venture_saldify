@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:venture_saldify/smxColors.dart';
-import 'package:venture_saldify/smxLayout.dart';
+import 'package:venture_saldify/smxLayout/smxLayout.dart';
 import 'package:venture_saldify/smxMenuVersion.dart';
 
 class SmxSaldiFyMenuButton extends StatelessWidget {

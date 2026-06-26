@@ -1,8 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:venture_saldify/smxColors.dart';
-import 'package:venture_saldify/smxLayout.dart';
-import 'package:venture_saldify/smxSaldify/smxSaldify_screens/smxSaldiFy_screen_tmp.dart';
+import 'package:venture_saldify/smxLayout/smxLayout.dart';
+import 'package:venture_saldify/smxLayout/smxScreenTmp.dart';
 
 import 'smxSaldiFyCliente_negocio/smxSaldiFyCliente_negocio.dart';
 import 'smxSaldiFyCliente_pedidos/smxSaldiFyCliente_pedidos.dart';
@@ -32,16 +32,13 @@ class SmxSaldiFyClienteDashboard extends StatelessWidget {
     this.onRefresh,
   });
 
-  static const _backgroundGradient = SmxGradients.saldifyBackground;
-
   @override
   Widget build(BuildContext context) {
     final topContentInset = SmxLayout.topContentInset(context);
     final bottomContentInset = SmxLayout.bottomContentInset(context);
 
     return SizedBox.expand(
-      child: DecoratedBox(
-        decoration: const BoxDecoration(gradient: _backgroundGradient),
+      child: SmxSaldifyBackground(
         child: SafeArea(
           top: false,
           bottom: false,

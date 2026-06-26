@@ -100,14 +100,14 @@ class SmxSaldiFyClienteCreditoController extends SmxController {
     rstSysuser12.update('SYSUSER12_CORTE_TIPO', value);
 
     if (value == 1) {
-      rstSysuser12.update('SYSUSER12_CORTE_SEMANA', '0');
+      rstSysuser12.update('SYSUSER12_CORTE_SEMANA', '');
       final dia = _toInt(rstSysuser12.getValue('SYSUSER12_CORTE_DIA'));
       rstSysuser12.update('SYSUSER12_CORTE_DIA', dia.clamp(1, 28));
       return;
     }
 
     if (value == 2) {
-      rstSysuser12.update('SYSUSER12_CORTE_SEMANA', '0');
+      rstSysuser12.update('SYSUSER12_CORTE_SEMANA', '');
       final dia = _toInt(rstSysuser12.getValue('SYSUSER12_CORTE_DIA'));
       final quincenaValida = dia == 0 || dia == 15;
       rstSysuser12.update(
@@ -131,12 +131,12 @@ class SmxSaldiFyClienteCreditoController extends SmxController {
   }
 
   void setCorteQuincena(int value) {
-    rstSysuser12.update('SYSUSER12_CORTE_SEMANA', '0');
+    rstSysuser12.update('SYSUSER12_CORTE_SEMANA', '');
     rstSysuser12.update('SYSUSER12_CORTE_DIA', value == 2 ? 0 : 15);
   }
 
   void setCorteDiaMensual(int value) {
-    rstSysuser12.update('SYSUSER12_CORTE_SEMANA', '0');
+    rstSysuser12.update('SYSUSER12_CORTE_SEMANA', '');
     rstSysuser12.update('SYSUSER12_CORTE_DIA', value.clamp(1, 28));
   }
 
@@ -187,7 +187,7 @@ class SmxSaldiFyClienteCreditoController extends SmxController {
     rstSysuser12.update('SYSUSER12_PLAN', 1);
     rstSysuser12.update('SYSUSER12_PORCENTAJE', 0.0);
     rstSysuser12.update('SYSUSER12_CORTE_TIPO', 1);
-    rstSysuser12.update('SYSUSER12_CORTE_SEMANA', '0');
+    rstSysuser12.update('SYSUSER12_CORTE_SEMANA', '');
     rstSysuser12.update('SYSUSER12_CORTE_DIA', 5);
   }
 

@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:universal_html/html.dart' as html;
+import 'package:venture_saldify/smxColors.dart';
 
 enum SmxLayoutSize {
   mobile,
@@ -116,4 +117,77 @@ class SmxLayout {
 
     return double.tryParse(rawValue.replaceAll('px', '').trim()) ?? 0;
   }
+}
+
+class SmxSaldifyBackground extends StatelessWidget {
+  final Widget child;
+  final bool showBubbles;
+
+  const SmxSaldifyBackground({
+    super.key,
+    required this.child,
+    this.showBubbles = true,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: const BoxDecoration(gradient: SmxGradients.saldifyBackground),
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          if (showBubbles)
+            const IgnorePointer(child: CustomPaint(painter: _SaldifyBubbles())),
+          child,
+        ],
+      ),
+    );
+  }
+}
+
+class _SaldifyBubbles extends CustomPainter {
+  const _SaldifyBubbles();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final shortest = size.shortestSide;
+
+    _drawBubble(
+      canvas,
+      center: Offset(size.width + shortest * .05, shortest * .22),
+      radius: shortest * .38,
+      alpha: .12,
+    );
+    _drawBubble(
+      canvas,
+      center: Offset(-shortest * .12, size.height * .40),
+      radius: shortest * .26,
+      alpha: .08,
+    );
+    _drawBubble(
+      canvas,
+      center: Offset(size.width * .86, size.height * .88),
+      radius: shortest * .32,
+      alpha: .10,
+    );
+    _drawBubble(
+      canvas,
+      center: Offset(size.width * .28, size.height * .78),
+      radius: shortest * .18,
+      alpha: .06,
+    );
+  }
+
+  void _drawBubble(
+    Canvas canvas, {
+    required Offset center,
+    required double radius,
+    required double alpha,
+  }) {
+    final paint = Paint()..color = SmxColors.whiteAlpha(alpha);
+    canvas.drawCircle(center, radius, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

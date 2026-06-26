@@ -45,6 +45,8 @@
   <style>
     :root {
       --saldify-background: linear-gradient(180deg, #155C37 0%, #1B5E20 26%, #0D47A1 100%);
+      --saldify-bubble: rgba(255, 255, 255, 0.10);
+      --saldify-bubble-soft: rgba(255, 255, 255, 0.07);
     }
 
     html,
@@ -82,6 +84,31 @@
       opacity: 1;
       transition: opacity 0.5s ease-out;
       z-index: 2147483647;
+      overflow: hidden;
+    }
+
+    #splash::before,
+    #splash::after {
+      content: '';
+      position: absolute;
+      border-radius: 999px;
+      pointer-events: none;
+    }
+
+    #splash::before {
+      width: min(52vw, 520px);
+      height: min(52vw, 520px);
+      right: max(-14vw, -150px);
+      top: min(10vh, 110px);
+      background: var(--saldify-bubble);
+    }
+
+    #splash::after {
+      width: min(34vw, 340px);
+      height: min(34vw, 340px);
+      left: max(-12vw, -120px);
+      top: 38vh;
+      background: var(--saldify-bubble-soft);
     }
 
     #splash.hidden {
@@ -97,6 +124,20 @@
       align-items: center;
       padding: 24px 28px;
       box-sizing: border-box;
+      position: relative;
+      z-index: 1;
+    }
+
+    .splash-bubble {
+      position: absolute;
+      right: 8vw;
+      bottom: 8vh;
+      width: min(40vw, 400px);
+      height: min(40vw, 400px);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+      pointer-events: none;
+      z-index: 0;
     }
 
     .logo-container {
@@ -205,6 +246,7 @@
   <div id="flutter-host"></div>
 
   <div id="splash">
+    <div class="splash-bubble"></div>
     <div class="splash-content">
       <div class="logo-container">
         <img src="icons/Icon-512.png" alt="Saldify Icon">

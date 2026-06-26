@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:venture_saldify/smxColors.dart';
-import 'package:venture_saldify/smxLayout.dart';
+import 'package:venture_saldify/smxLayout/smxLayout.dart';
 import 'package:venture_widgets/smxCallBaseStateful.dart';
 import 'package:venture_widgets/smxController/smxControllerSendData.dart';
-import '../smxSaldify/smxSaldify_screens/smxSaldiFy_screen_tmp.dart';
+import '../smxLayout/smxScreenTmp.dart';
 import '../smxSaldify/smxSaldify_screens/smxSaldiFy_perfil.dart';
 import 'smxSaldiFyCliente_controller.dart';
 import 'smxSaldiFyCliente_menu_lateral.dart';

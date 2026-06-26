@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:venture_saldify/smxColors.dart';
-import 'package:venture_saldify/smxLayout.dart';
+import 'package:venture_saldify/smxLayout/smxLayout.dart';
 import 'package:venture_saldify/smxSaldify/smxSaldify_screens/saldify_credito/smxSaldiFy_cliente_credito_controller.dart';
 import 'package:venture_saldify/smxSaldify/smxSaldify_screens/saldify_credito/smxSaldiFy_cliente_credito_mock.dart';
 import 'package:venture_saldify/smxSaldify/smxSaldify_screens/saldify_credito/smxSaldiFy_cliente_credito_tarjetas.dart';
@@ -52,10 +52,7 @@ class _ClienteCreditoViewState extends State<_ClienteCreditoView> {
     return Scaffold(
       backgroundColor: SmxColors.transparent,
       body: SizedBox.expand(
-        child: DecoratedBox(
-          decoration: const BoxDecoration(
-            gradient: SmxGradients.saldifyBackground,
-          ),
+        child: SmxSaldifyBackground(
           child: SafeArea(
             top: false,
             bottom: false,
@@ -190,7 +187,6 @@ class _FormPanel extends StatelessWidget {
               controller: controller,
               label: 'Credito',
               decimales: 2,
-              minValue: 0,
               currency: true,
               isValid: true,
             ),

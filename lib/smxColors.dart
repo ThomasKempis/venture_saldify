@@ -23,6 +23,8 @@ class SmxColors {
   static const warningForeground = Color(0xFF9C6800);
   static const dangerBackground = Color(0xFFFFE7E7);
   static const dangerForeground = Color(0xFFB42318);
+  static const alertBackground = Color(0xFFFFF3D6);
+  static const alertForeground = Color(0xFF9A5B00);
 
   static const white = Colors.white;
   static const white70 = Colors.white70;

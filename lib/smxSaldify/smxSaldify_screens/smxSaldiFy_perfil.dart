@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:venture_saldify/smxColors.dart';
-import 'package:venture_saldify/smxLayout.dart';
+import 'package:venture_saldify/smxLayout/smxLayout.dart';
 import 'package:venture_saldify/smxLogonMovil/logon/smxPerfil/smxPerfil.dart';
 
 import '../../smxApis/smxConstants.dart';
@@ -23,16 +23,13 @@ class SmxSaldiFyPerfil extends StatelessWidget {
     this.menuButton,
   });
 
-  static const _backgroundGradient = SmxGradients.saldifyBackground;
-
   @override
   Widget build(BuildContext context) {
     final topContentInset = SmxLayout.topContentInset(context);
     final bottomContentInset = SmxLayout.bottomContentInset(context);
 
     return SizedBox.expand(
-      child: DecoratedBox(
-        decoration: const BoxDecoration(gradient: _backgroundGradient),
+      child: SmxSaldifyBackground(
         child: SafeArea(
           top: false,
           bottom: false,

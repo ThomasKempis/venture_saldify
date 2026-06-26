@@ -3,13 +3,14 @@ import 'package:venture_core_connect/smxDataBase/smxRowSet.dart';
 
 import '../smxSaldify_screens/saldify_cliente/smxSaldiFy_cliente.dart';
 import '../smxSaldify_screens/saldify_archivados/smxSaldiFy_archivados.dart';
+import '../smxSaldify_screens/saldify_cobranza/smxSaldiFy_cobranza.dart';
 import '../smxSaldify_screens/saldify_compras/smxSaldiFy_compras.dart';
 import '../smxSaldify_screens/saldify_credito/smxSaldiFy_cliente_credito.dart';
 import '../smxSaldify_screens/saldify_historial/smxSaldiFy_historial.dart';
 import '../smxSaldify_screens/saldify_pagos/smxSaldiFy_pagos.dart';
 import 'smxSaldiFy_clientes/smxSaldiFy_clientes.dart';
 import 'smxSaldiFy_dashboard_menu.dart';
-import '../smxSaldify_screens/smxSaldiFy_screen_tmp.dart';
+import '../../smxLayout/smxScreenTmp.dart';
 
 class SmxSaldiFyDashboardController {
   final ValueNotifier<SmxRowSet?> clientesActivosNotifier =
@@ -185,6 +186,12 @@ class SmxSaldiFyDashboardController {
     return Navigator.of(context).push<bool>(
       MaterialPageRoute(builder: (_) => const SmxSaldiFyArchivados()),
     );
+  }
+
+  Future<void> openCobranza(BuildContext context) {
+    return Navigator.of(
+      context,
+    ).push<void>(MaterialPageRoute(builder: (_) => const SmxSaldiFyCobranza()));
   }
 
   Future<bool?> openClienteCredito(

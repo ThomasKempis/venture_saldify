@@ -2,7 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:venture_saldify/smxColors.dart';
-import 'package:venture_saldify/smxLayout.dart';
+import 'package:venture_saldify/smxLayout/smxLayout.dart';
 import 'package:venture_saldify/smxLogonMovil/logon/smxAuth/AuthRepository.dart';
 import 'package:venture_saldify/smxLogonMovil/logon/smxAuth/AuthService.dart';
 import 'package:venture_saldify/smxLogonMovil/logon/smxAuth/AuthViewModel.dart';
@@ -23,7 +23,7 @@ class _SmxLogonMovilState extends State<SmxLogonMovil> {
   void initState() {
     super.initState();
     controller = SmxLogonMovil_controller();
-    //controller.checkPermissionLocation();
+    controller.checkPermissionLocation();
     //controller.checkPermissionCamara();
   }
 
@@ -55,8 +55,6 @@ class _LogonFrontEndBody extends StatefulWidget {
 }
 
 class _LogonFrontEndBodyState extends State<_LogonFrontEndBody> {
-  static const _loginGradient = SmxGradients.saldifyBackground;
-
   String _version = '';
   bool _alreadyNavigated = false; // ⬅️ bandera
 
@@ -87,8 +85,7 @@ class _LogonFrontEndBodyState extends State<_LogonFrontEndBody> {
       return const Scaffold(
         backgroundColor: Colors.transparent,
         body: SizedBox.expand(
-          child: DecoratedBox(
-            decoration: BoxDecoration(gradient: _loginGradient),
+          child: SmxSaldifyBackground(
             child: Center(
               child: CircularProgressIndicator(color: Colors.white),
             ),
@@ -103,10 +100,7 @@ class _LogonFrontEndBodyState extends State<_LogonFrontEndBody> {
         : Scaffold(
             backgroundColor: Colors.transparent,
             body: SizedBox.expand(
-              child: DecoratedBox(
-                decoration: const BoxDecoration(gradient: _loginGradient),
-                child: _buildAuth(),
-              ),
+              child: SmxSaldifyBackground(child: _buildAuth()),
             ),
           );
   }
