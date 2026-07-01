@@ -1,0 +1,218 @@
+import 'package:venture_core_connect/smxDataBase/smxRowSet.dart';
+import 'package:venture_core_connect/smxJson/SmxJsonUtil.dart';
+import 'package:venture_saldify/smxApis/smxConstants.dart';
+import 'package:venture_widgets/smxClassDrivers.dart';
+import 'package:venture_widgets/smxController/smxController.dart';
+import 'package:venture_widgets/smxShowDialog/smxShowDialogs.dart';
+
+import '../../smxSaldifyCliente_dashboard/smxSaldiFyCliente_metricas/smxSaldiFyCliente_metricas_snapshot.dart';
+
+class SmxSaldiFyClienteComprasController extends SmxController {
+  final int idSysuser11;
+  final int relaSysuser10Anfitrion;
+  final SmxSaldiFyClienteMetricasSnapshot? metricasIniciales;
+
+  late SmxRowSet rstCompras;
+  late SmxRowSet rstCompra;
+  SmxRowSet? rstMetricas;
+  bool lastSaveOk = false;
+  double lastSavedImporte = 0.0;
+
+  SmxSaldiFyClienteComprasController({
+    required super.alias,
+    required super.data,
+    required this.idSysuser11,
+    required this.relaSysuser10Anfitrion,
+    this.metricasIniciales,
+  });
+
+  int get rowCount => rstCompras.getRowCount();
+
+  @override
+  Future<void> init() async {
+    if (isBeginDB()) return;
+
+    beginDB();
+
+    if (metricasIniciales == null) {
+      await _loadMetricas();
+    }
+    await _prepareComprasSesion();
+    await prepareCompraNueva();
+  }
+
+  @override
+  Future<void> save({double? disponible}) async {
+    lastSaveOk = false;
+    lastSavedImporte = 0.0;
+
+    final context = data.context;
+    if (context == null) return;
+
+    if (!validateWidgets(context)) {
+      return;
+    }
+
+    final double importe = rstCompra.getValue('SYSUSER40_IMPORTE');
+    if (importe <= 0) {
+      showValidDialog(
+        context,
+        mensaje: 'Debe ingresar un importe mayor a cero.',
+      );
+      return;
+    }
+
+    if (disponible != null && importe > disponible) {
+      showValidDialog(
+        context,
+        mensaje: 'La compra supera el credito disponible.',
+      );
+      return;
+    }
+
+    await showDialogWait(context, () async {
+      await callTroncalSave(rstCompra);
+    });
+
+    if (jsonSend.getError() != null) {
+      final currentContext = data.context;
+      if (currentContext != null && currentContext.mounted) {
+        showSystemErrorDialog(currentContext, message: jsonSend.error!);
+      }
+      return;
+    }
+
+    lastSaveOk = true;
+    lastSavedImporte = importe;
+    _addCompraSesion();
+    await prepareCompraNueva();
+  }
+
+  @override
+  Future<void> cancel() async {}
+
+  @override
+  Future<void> delete() async {}
+
+  @override
+  void filtro(Function(String, Cancela) refresh) {}
+
+  double get credito => _getMetrica('SYSUSER12_CREDITO');
+
+  double get disponible => _getMetrica('SYSUSER12_DISPONIBLE');
+
+  double get saldo => _getMetrica('SYSUSER12_BALANCE');
+
+  String getConceptoAt(int index) {
+    rstCompras.index(index);
+    return rstCompras.getValue('SYSUSER40_CONCEPTO')?.toString() ?? '';
+  }
+
+  String getFechaAt(int index) {
+    rstCompras.index(index);
+    return rstCompras.getValueFormatDate('SYSUSER40_FECHA');
+  }
+
+  String getImporteAt(int index) {
+    rstCompras.index(index);
+    return rstCompras.getValueFormatAmount('SYSUSER40_IMPORTE');
+  }
+
+  Future<void> _loadMetricas() async {
+    removeSql('QRY_SYSUSER11_SALDOS_INVITADO');
+
+    addSql(
+      'QRY_SYSUSER11_SALDOS_INVITADO',
+      'select * from QRY_SYSUSER11_SALDOS_INVITADO('
+          '${SmxConstants.controllerMain.rstSysUser10.getId()}, '
+          '$relaSysuser10Anfitrion)',
+    );
+
+    await getRowSetFuture('QRY_SYSUSER11_SALDOS_INVITADO');
+
+    rstMetricas = getRowset('QRY_SYSUSER11_SALDOS_INVITADO');
+    if (rstMetricas!.getRowCount() > 0) {
+      rstMetricas!.first();
+    }
+  }
+
+  Future<void> _prepareComprasSesion() async {
+    await _ensureCompraVacia();
+
+    rstCompras = SmxConstants.rstCompraVacia!.copy();
+    rstCompras.tabla = 'SYSUSER40_DET_COMPRAS';
+  }
+
+  Future<void> prepareCompraNueva() async {
+    await _ensureCompraVacia();
+
+    rstCompra = SmxConstants.rstCompraVacia!.copy();
+    rstCompra.tabla = 'SYSUSER40_DET_COMPRAS';
+    rstCompra.insert();
+
+    data.accion = AccionNN.I;
+    data.tablaTroncalRst = rstCompra;
+    data.tablaTroncal = 'SYSUSER40_DET_COMPRAS';
+
+    _setDefaults();
+    _clearInputs();
+  }
+
+  void _addCompraSesion() {
+    rstCompra.first();
+    final row = rstCompra.getRowsList().first.clone();
+    row.accion = AccionNN.N.toJson();
+    rstCompras.getRowsList().add(row);
+    rstCompras.last();
+  }
+
+  Future<void> _ensureCompraVacia() async {
+    if (SmxConstants.rstCompraVacia != null) return;
+
+    removeSql('SYSUSER40_EMPTY');
+    addSql(
+      'SYSUSER40_EMPTY',
+      'select * from SYSUSER40_DET_COMPRAS where 1 = 0',
+    );
+
+    await getRowSetFuture('SYSUSER40_EMPTY');
+
+    SmxConstants.rstCompraVacia = getRowset('SYSUSER40_EMPTY');
+    SmxConstants.rstCompraVacia!.tabla = 'SYSUSER40_DET_COMPRAS';
+  }
+
+  void _setDefaults() {
+    rstCompra.update('RELA_SYSUSER11', idSysuser11);
+    rstCompra.update(
+      'RELA_SYSUSER10_ALTA',
+      SmxConstants.controllerMain.rstSysUser10.getId(),
+    );
+    rstCompra.update('SYSUSER40_CONCEPTO', '');
+    rstCompra.update('SYSUSER40_IMPORTE', 0.0);
+    rstCompra.update('SYSUSER40_FECHA', DateTime.now());
+    rstCompra.update('SYSUSER40_STATUS', 0);
+  }
+
+  void _clearInputs() {
+    setText('SYSUSER40_CONCEPTO', '');
+    setNumericDbl('SYSUSER40_IMPORTE', 0.0);
+    setDate('SYSUSER40_FECHA', DateTime.now());
+  }
+
+  double _getMetrica(String field) {
+    final metricas = metricasIniciales;
+    if (metricas != null) {
+      return switch (field) {
+        'SYSUSER12_CREDITO' => metricas.credito,
+        'SYSUSER12_DISPONIBLE' => metricas.disponible,
+        'SYSUSER12_BALANCE' => metricas.saldo,
+        _ => 0.0,
+      };
+    }
+
+    final rowSet = rstMetricas;
+    if (rowSet == null || rowSet.getRowCount() == 0) return 0.0;
+
+    return rowSet.getValue(field);
+  }
+}
