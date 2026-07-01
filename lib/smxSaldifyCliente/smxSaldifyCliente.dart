@@ -38,8 +38,6 @@ class _SmxSaldiFyClienteState extends State<SmxSaldiFyCliente> {
           );
         }
 
-        final clientName = _getClientName(controller);
-
         return LayoutBuilder(
           builder: (context, constraints) {
             final layout = SmxLayout.sizeFromWidth(constraints.maxWidth);
@@ -60,9 +58,7 @@ class _SmxSaldiFyClienteState extends State<SmxSaldiFyCliente> {
                     );
 
                     return _buildPage(
-                      clientName: clientName,
-                      anfitrionNombreCompleto:
-                          controller.anfitrionNombreCompleto,
+                      controller: controller,
                       layout: layout,
                       menuButton: menuButton,
                     );
@@ -71,11 +67,7 @@ class _SmxSaldiFyClienteState extends State<SmxSaldiFyCliente> {
               );
             }
 
-            final page = _buildPage(
-              clientName: clientName,
-              anfitrionNombreCompleto: controller.anfitrionNombreCompleto,
-              layout: layout,
-            );
+            final page = _buildPage(controller: controller, layout: layout);
 
             return Scaffold(
               backgroundColor: SmxColors.transparent,
@@ -99,8 +91,7 @@ class _SmxSaldiFyClienteState extends State<SmxSaldiFyCliente> {
   }
 
   Widget _buildPage({
-    required String clientName,
-    required String anfitrionNombreCompleto,
+    required SmxSaldiFyClienteController controller,
     required SmxLayoutSize layout,
     Widget? menuButton,
   }) {
@@ -109,13 +100,11 @@ class _SmxSaldiFyClienteState extends State<SmxSaldiFyCliente> {
             key: ValueKey(
               'saldify-cliente-dashboard-$_dashboardRefreshRevision',
             ),
-            clientName: clientName,
-            anfitrionNombreCompleto: anfitrionNombreCompleto,
+            controller: controller,
             isMobile: layout.isMobile,
             isDesktop: layout.isDesktop,
             maxContentWidth: layout.saldifyMaxContentWidth,
             pagePadding: layout.saldifyPagePadding,
-            metricColumnsFor: layout.saldifyMetricColumnsFor,
             menuButton: menuButton,
             onRefresh: _refreshDashboard,
           )
@@ -144,16 +133,5 @@ class _SmxSaldiFyClienteState extends State<SmxSaldiFyCliente> {
     });
 
     await Future<void>.delayed(const Duration(milliseconds: 350));
-  }
-
-  String _getClientName(SmxSaldiFyClienteController controller) {
-    try {
-      final fullName = controller.controllerMain.getNombres().trim();
-      if (fullName.isEmpty) return 'Cliente';
-
-      return fullName.split(RegExp(r'\s+')).first;
-    } catch (_) {
-      return 'Cliente';
-    }
   }
 }

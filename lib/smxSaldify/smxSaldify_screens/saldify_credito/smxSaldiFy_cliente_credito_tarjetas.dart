@@ -48,6 +48,7 @@ class SmxSaldiFyCreditoPlanSelector extends StatelessWidget {
                   return SmxSaldiFyCreditoPlanCard(
                     selected: value == plan.id,
                     title: plan.title,
+                    plan: plan.plan,
                     description: plan.subtitle,
                     example: plan.footerTitle,
                     imageAsset: plan.imageAsset,
@@ -93,6 +94,7 @@ class SmxSaldiFyCreditoPlanSelector extends StatelessWidget {
 class SmxSaldiFyCreditoPlanCard extends StatelessWidget {
   final bool selected;
   final String title;
+  final String plan;
   final String description;
   final String example;
   final String imageAsset;
@@ -103,6 +105,7 @@ class SmxSaldiFyCreditoPlanCard extends StatelessWidget {
     super.key,
     required this.selected,
     required this.title,
+    required this.plan,
     required this.description,
     required this.example,
     required this.imageAsset,
@@ -180,6 +183,21 @@ class SmxSaldiFyCreditoPlanCard extends StatelessWidget {
                                         ? SmxColors.white
                                         : SmxColors.textDark,
                                     fontSize: 18,
+                                    height: 1.08,
+                                    fontWeight: FontWeight.w900,
+                                  ),
+                                ),
+                                SizedBox(height: 8),
+                                Text(
+                                  plan,
+                                  maxLines: 2,
+                                  textAlign: TextAlign.right,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    color: selected
+                                        ? SmxColors.white
+                                        : SmxColors.textDark,
+                                    fontSize: 14,
                                     height: 1.08,
                                     fontWeight: FontWeight.w900,
                                   ),

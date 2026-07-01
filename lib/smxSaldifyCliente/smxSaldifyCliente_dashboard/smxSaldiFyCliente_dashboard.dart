@@ -2,35 +2,67 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:venture_saldify/smxColors.dart';
 import 'package:venture_saldify/smxLayout/smxLayout.dart';
-import 'package:venture_saldify/smxLayout/smxScreenTmp.dart';
 
-import 'smxSaldiFyCliente_negocio/smxSaldiFyCliente_negocio.dart';
-import 'smxSaldiFyCliente_pedidos/smxSaldiFyCliente_pedidos.dart';
-import 'smxSaldiFyCliente_resumen/smxSaldiFyCliente_resumen.dart';
+import '../smxSaldiFyCliente_controller.dart';
+import 'smxSaldiFyCliente_acciones_rapidas/smxSaldiFyCliente_acciones_rapidas.dart';
+import 'smxSaldiFyCliente_anfitrion/smxSaldiFyCliente_anfitrion.dart';
+import 'smxSaldiFyCliente_dashboard_controller.dart';
+import 'smxSaldiFyCliente_historial/smxSaldiFyCliente_historial.dart';
+import 'smxSaldiFyCliente_metricas/smxSaldiFyCliente_metricas.dart';
 
-class SmxSaldiFyClienteDashboard extends StatelessWidget {
-  final String clientName;
-  final String anfitrionNombreCompleto;
+class SmxSaldiFyClienteDashboard extends StatefulWidget {
+  final SmxSaldiFyClienteController controller;
   final bool isMobile;
   final bool isDesktop;
   final double maxContentWidth;
   final EdgeInsets pagePadding;
-  final int Function(double width) metricColumnsFor;
   final Widget? menuButton;
   final Future<void> Function()? onRefresh;
 
   const SmxSaldiFyClienteDashboard({
     super.key,
-    required this.clientName,
-    required this.anfitrionNombreCompleto,
+    required this.controller,
     required this.isMobile,
     required this.isDesktop,
     required this.maxContentWidth,
     required this.pagePadding,
-    required this.metricColumnsFor,
     this.menuButton,
     this.onRefresh,
   });
+
+  @override
+  State<SmxSaldiFyClienteDashboard> createState() =>
+      _SmxSaldiFyClienteDashboardState();
+}
+
+class _SmxSaldiFyClienteDashboardState
+    extends State<SmxSaldiFyClienteDashboard> {
+  late SmxSaldiFyClienteDashboardController dashboardController;
+
+  @override
+  void initState() {
+    super.initState();
+    dashboardController = SmxSaldiFyClienteDashboardController(
+      clienteController: widget.controller,
+      onRefresh: widget.onRefresh,
+    );
+  }
+
+  @override
+  void didUpdateWidget(SmxSaldiFyClienteDashboard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (oldWidget.controller == widget.controller &&
+        oldWidget.onRefresh == widget.onRefresh) {
+      return;
+    }
+
+    final metricasSnapshot = dashboardController.metricasSnapshot;
+    dashboardController = SmxSaldiFyClienteDashboardController(
+      clienteController: widget.controller,
+      onRefresh: widget.onRefresh,
+    )..metricasSnapshot = metricasSnapshot;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -45,71 +77,76 @@ class SmxSaldiFyClienteDashboard extends StatelessWidget {
           child: Align(
             alignment: Alignment.topCenter,
             child: ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: maxContentWidth),
+              constraints: BoxConstraints(maxWidth: widget.maxContentWidth),
               child: RefreshIndicator(
-                onRefresh: onRefresh ?? () async {},
+                onRefresh: dashboardController.refresh,
                 color: SmxColors.brandAccent,
                 backgroundColor: SmxColors.white,
                 child: CustomScrollView(
                   physics: const AlwaysScrollableScrollPhysics(),
                   slivers: [
-                    SliverPadding(
-                      padding: EdgeInsets.fromLTRB(
-                        pagePadding.left,
-                        pagePadding.top + topContentInset,
-                        pagePadding.right,
-                        pagePadding.bottom + bottomContentInset,
-                      ),
-                      sliver: SliverList(
-                        delegate: SliverChildListDelegate([
-                          _ClienteHeader(
-                            menuButton: menuButton,
-                            onRefresh: onRefresh,
-                            showRefreshButton:
-                                kIsWeb &&
-                                !SmxLayout.isWebMobile(context) &&
-                                !SmxLayout.isWebStandalone,
-                          ),
-                          SizedBox(height: isMobile ? 26 : 34),
-                          Text(
-                            'Hola, $clientName',
-                            style: const TextStyle(
-                              color: SmxColors.white70,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w700,
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: EdgeInsets.fromLTRB(
+                          widget.pagePadding.left,
+                          widget.pagePadding.top + topContentInset,
+                          widget.pagePadding.right,
+                          widget.pagePadding.bottom + bottomContentInset,
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            _ClienteHeader(
+                              menuButton: widget.menuButton,
+                              onRefresh: dashboardController.refresh,
+                              showRefreshButton:
+                                  kIsWeb &&
+                                  !SmxLayout.isWebMobile(context) &&
+                                  !SmxLayout.isWebStandalone,
                             ),
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            'Anfitrion: $anfitrionNombreCompleto',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              color: SmxColors.white54,
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
+                            SizedBox(height: widget.isMobile ? 26 : 34),
+                            Text(
+                              'Hola, ${dashboardController.clientName}',
+                              style: const TextStyle(
+                                color: SmxColors.white70,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w700,
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 12),
-                          SmxSaldiFyClienteResumen(
-                            isMobile: isMobile,
-                            metricColumnsFor: metricColumnsFor,
-                            onMetricTap: (title) =>
-                                _openUnderConstruction(context, title),
-                          ),
-                          SizedBox(height: isMobile ? 16 : 20),
-                          SmxSaldiFyClienteNegocio(
-                            onContactTap: () =>
-                                _openUnderConstruction(context, 'Contacto'),
-                          ),
-                          SizedBox(height: isMobile ? 26 : 30),
-                          SmxSaldiFyClientePedidos(
-                            isMobile: isMobile,
-                            isDesktop: isDesktop,
-                            onPedidoTap: (title) =>
-                                _openUnderConstruction(context, title),
-                          ),
-                        ]),
+                            const SizedBox(height: 12),
+                            SmxSaldiFyClienteMetricas(
+                              isMobile: widget.isMobile,
+                              relaSysuser10Anfitrion:
+                                  dashboardController.relaSysuser10Anfitrion,
+                              onMetricasChanged:
+                                  dashboardController.setMetricasSnapshot,
+                            ),
+                            SizedBox(height: widget.isMobile ? 16 : 20),
+                            SmxSaldiFyClienteAnfitrion(
+                              nombreAnfitrion:
+                                  dashboardController.anfitrionNombreCompleto,
+                              telefonoAnfitrion:
+                                  dashboardController.anfitrionTelefono,
+                              estadoRelacion:
+                                  dashboardController.anfitrionRelacionEstado,
+                              onContactTap: () =>
+                                  dashboardController.launchWhatsApp(context),
+                            ),
+                            SizedBox(height: widget.isMobile ? 16 : 20),
+                            SmxSaldiFyClienteAccionesRapidas(
+                              isMobile: widget.isMobile,
+                              onActionTap: (title) => dashboardController
+                                  .openClienteAction(context, title),
+                            ),
+                            SizedBox(height: widget.isMobile ? 26 : 30),
+                            SmxSaldiFyClienteHistorial(
+                              isMobile: widget.isMobile,
+                              isDesktop: widget.isDesktop,
+                              relaSysuser10Anfitrion:
+                                  dashboardController.relaSysuser10Anfitrion,
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ],
@@ -201,10 +238,4 @@ class _ClienteHeader extends StatelessWidget {
       ],
     );
   }
-}
-
-void _openUnderConstruction(BuildContext context, String title) {
-  Navigator.of(context).push(
-    MaterialPageRoute<void>(builder: (_) => SmxSaldiFyScreenTmp(title: title)),
-  );
 }

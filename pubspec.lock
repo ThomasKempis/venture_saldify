@@ -285,18 +285,18 @@ packages:
     dependency: transitive
     description:
       name: dio
-      sha256: aff32c08f92787a557dd5c0145ac91536481831a01b4648136373cddb0e64f8c
+      sha256: ea2bad3c89a27635ce2d85cce4d6b199da49a5a48ec77b03e45b65a3b90922b0
       url: "https://pub.dev"
     source: hosted
-    version: "5.9.2"
+    version: "5.10.0"
   dio_web_adapter:
     dependency: transitive
     description:
       name: dio_web_adapter
-      sha256: "2f9e64323a7c3c7ef69567d5c800424a11f8337b8b228bad02524c9fb3c1f340"
+      sha256: dd58dc3861eb36edb13b217efc006a1c21e5bbc341de8c229b85634fa5e362e4
       url: "https://pub.dev"
     source: hosted
-    version: "2.1.2"
+    version: "2.2.0"
   equatable:
     dependency: transitive
     description:
@@ -622,7 +622,7 @@ packages:
     source: hosted
     version: "0.1.1"
   geolocator:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: geolocator
       sha256: "79939537046c9025be47ec645f35c8090ecadb6fe98eba146a0d25e8c1357516"
@@ -1230,18 +1230,18 @@ packages:
     dependency: transitive
     description:
       name: syncfusion_flutter_core
-      sha256: ce5b3236fac7be6594e834cb2b128d7c9a3acbbcb8624f6304b3d42b04ce17c7
+      sha256: f054f5636c618dbf1a155409d0b5f3e70f8e9beb7ac7a8fdc870653968875e7d
       url: "https://pub.dev"
     source: hosted
-    version: "33.2.13+1"
+    version: "33.2.15"
   syncfusion_flutter_datagrid:
     dependency: transitive
     description:
       name: syncfusion_flutter_datagrid
-      sha256: "26c415235b56f043b22b5b4b43537201f3f70a194ecd3b5eacfed29f0dddbbe5"
+      sha256: "117f5f0781b0ab92c53b9b21213e1caa67e8be7f351a757fa4028d5047c8f015"
       url: "https://pub.dev"
     source: hosted
-    version: "33.2.13+1"
+    version: "33.2.15"
   synchronized:
     dependency: transitive
     description:
@@ -1383,7 +1383,7 @@ packages:
     description:
       path: "packages/venture_core_connect"
       ref: main
-      resolved-ref: "4a12e2c025c3494ff4faa7cfe4a5d21b1fbf7aa0"
+      resolved-ref: "2d0983edf6ba514822e7db5736b35278ed4b3025"
       url: "https://github.com/ThomasKempis/venture.git"
     source: git
     version: "2.0.14"
@@ -1392,7 +1392,7 @@ packages:
     description:
       path: "packages/venture_widgets"
       ref: main
-      resolved-ref: "4a12e2c025c3494ff4faa7cfe4a5d21b1fbf7aa0"
+      resolved-ref: "2d0983edf6ba514822e7db5736b35278ed4b3025"
       url: "https://github.com/ThomasKempis/venture.git"
     source: git
     version: "2.0.16"

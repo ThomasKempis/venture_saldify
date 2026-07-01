@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:venture_core_connect/smxDataBase/smxRowSet.dart';
 import 'package:venture_saldify/smxColors.dart';
 import 'package:venture_saldify/smxLayout/smxLayout.dart';
 import 'package:venture_saldify/smxSaldify/smxSaldify_dashboard/smxSaldiFy_clientes/smxSaldiFy_clientes.dart';
@@ -85,10 +86,10 @@ class _PagosViewState extends State<_PagosView> {
                       ),
                       const SizedBox(height: 18),
                       _SummaryPanel(
-                        credito: _formatAmount(credito),
-                        disponible: _formatAmount(disponibleVisible),
-                        saldo: _formatAmount(saldoVisible),
-                        totalPagos: _formatAmount(_totalPagosSesion),
+                        credito: SmxRowSet.formatAmount(credito),
+                        disponible: SmxRowSet.formatAmount(disponibleVisible),
+                        saldo: SmxRowSet.formatAmount(saldoVisible),
+                        totalPagos: SmxRowSet.formatAmount(_totalPagosSesion),
                       ),
                       const SizedBox(height: 18),
                       _ListHeader(
@@ -142,21 +143,6 @@ class _PagosViewState extends State<_PagosView> {
         .replaceAll(' ', '')
         .trim();
     return double.tryParse(clean) ?? 0.0;
-  }
-
-  String _formatAmount(double value) {
-    final text = value.toStringAsFixed(2);
-    final parts = text.split('.');
-    final entero = parts.first.replaceAllMapped(
-      RegExp(r'\B(?=(\d{3})+(?!\d))'),
-      (match) => ',',
-    );
-
-    if (parts.last == '00') {
-      return entero;
-    }
-
-    return '$entero.${parts.last}';
   }
 }
 

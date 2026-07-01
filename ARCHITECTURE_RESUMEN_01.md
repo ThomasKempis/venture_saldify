@@ -41,7 +41,7 @@ Es el usuario que puede estar relacionado a un anfitrion. Puede existir de varia
 - Creado por logon propio.
 - Creado por el anfitrion como cliente pendiente.
 - Relacionado con un anfitrion mediante `SYSUSER11_DET_CONTACTOS`.
-- Aceptado o pendiente segun `SYSUSER11_STATUS`.
+- Pendiente, activo o archivado segun `SYSUSER11_STATUS`.
 
 ## 3. Tablas Principales
 
@@ -82,13 +82,14 @@ Estado actual de la logica de relacion:
 - `SYSUSER11_STATUS`:
   - `0`: pendiente.
   - `1`: aceptado/activo.
-  - `2`: rechazado, si se usa.
+  - `2`: archivado.
 - `SYSUSER11_FAPL`
 
 Regla importante:
 
 - El campo antiguo `RELA_SYSUSER10_INVITADO` ya no debe usarse. Fue eliminado conceptualmente y no debe quedar ninguna referencia nueva.
 - El indice logico/unico debe pensarse como anfitrion + cliente.
+- `SYSUSER11_STATUS = 2` no significa rechazado: representa una relacion archivada por el anfitrion.
 
 ### SYSUSER12_DEP_CLIENTES
 
@@ -275,6 +276,27 @@ while (rst.next()) {
 ```
 
 No es necesario posicionar manualmente con `index(pos)` para estos casos. Si el campo ya viene tipado desde base, por ejemplo como `double`, evitar conversiones innecesarias a string.
+
+### getValue() Ya Normaliza Segun Tipo
+
+`SmxRowSet.getValue(field)` no es una lectura cruda de mapa. Internamente revisa el tipo del campo y devuelve valores normalizados.
+
+Regla practica:
+
+- Si el campo viene tipado como numerico (`INT`, `LNG`, `DBL`), leer directo con `getValue()`.
+- No envolver cada lectura numerica en helpers con `try/catch`, `double.tryParse()` o conversion a string si el rowset ya trae metadata correcta.
+- Para `DBL`, valores `null` o vacios regresan como `0.0`.
+- Para `INT`/`LNG`, valores `null` o vacios regresan como `0`.
+- Para `STR`, valores nulos regresan como cadena vacia.
+
+Ejemplo recomendado:
+
+```dart
+final credito = rstMetricas.getValue('SYSUSER12_CREDITO');
+final saldo = rstMetricas.getValue('SYSUSER12_BALANCE');
+```
+
+Agregar conversion manual solo cuando el dato venga deliberadamente como texto o el origen no tenga tipo confiable.
 
 ## 6. SmxRowSetTrack
 

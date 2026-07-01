@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:venture_core_connect/smxDataBase/smxRowSet.dart';
 
 import '../smxColors.dart';
 
@@ -10,6 +11,7 @@ class SmxSaldiFyCreditoResumen extends StatelessWidget {
   final double compras;
   final double pagos;
   final double saldo;
+  final bool saldoEnDeuda;
 
   const SmxSaldiFyCreditoResumen({
     super.key,
@@ -18,6 +20,7 @@ class SmxSaldiFyCreditoResumen extends StatelessWidget {
     required this.compras,
     required this.pagos,
     required this.saldo,
+    this.saldoEnDeuda = false,
   });
 
   @override
@@ -40,7 +43,7 @@ class SmxSaldiFyCreditoResumen extends StatelessWidget {
         final saldoCard = _ResumenMetricData(
           label: 'Saldo',
           value: saldo,
-          note: 'Pendiente',
+          note: saldoEnDeuda ? 'Deudor' : 'Pendiente',
           color: _saldoColor,
         );
         final disponibleCard = _ResumenMetricData(
@@ -55,6 +58,7 @@ class SmxSaldiFyCreditoResumen extends StatelessWidget {
             credito: credito,
             disponible: disponible,
             saldo: saldo,
+            saldoEnDeuda: saldoEnDeuda,
             cards: [comprasCard, pagosCard, saldoCard, disponibleCard],
           );
         }
@@ -68,6 +72,7 @@ class SmxSaldiFyCreditoResumen extends StatelessWidget {
                 credito: credito,
                 disponible: disponible,
                 saldo: saldo,
+                saldoEnDeuda: saldoEnDeuda,
               ),
             ),
             const SizedBox(width: 12),
@@ -85,6 +90,8 @@ class SmxSaldiFyCreditoResumen extends StatelessWidget {
   }
 
   Color get _saldoColor {
+    if (saldoEnDeuda && saldo > 0) return SmxColors.dangerForeground;
+
     if (credito <= 0 || saldo <= 0) return SmxColors.brandAccent;
 
     final usage = saldo / credito;
@@ -98,11 +105,13 @@ class _CreditoRadialCard extends StatelessWidget {
   final double credito;
   final double disponible;
   final double saldo;
+  final bool saldoEnDeuda;
 
   const _CreditoRadialCard({
     required this.credito,
     required this.disponible,
     required this.saldo,
+    required this.saldoEnDeuda,
   });
 
   @override
@@ -136,6 +145,9 @@ class _CreditoRadialCard extends StatelessWidget {
             credito: credito,
             disponiblePercent: disponiblePercent,
             usadoPercent: usadoPercent,
+            usadoColor: saldoEnDeuda
+                ? SmxColors.dangerForeground
+                : const Color(0xFFFFC857),
             size: 176,
             creditFontSize: 32,
             percentFontSize: 13,
@@ -150,12 +162,14 @@ class _CreditoCompactCard extends StatelessWidget {
   final double credito;
   final double disponible;
   final double saldo;
+  final bool saldoEnDeuda;
   final List<_ResumenMetricData> cards;
 
   const _CreditoCompactCard({
     required this.credito,
     required this.disponible,
     required this.saldo,
+    required this.saldoEnDeuda,
     required this.cards,
   });
 
@@ -189,6 +203,9 @@ class _CreditoCompactCard extends StatelessWidget {
             credito: credito,
             disponiblePercent: disponiblePercent,
             usadoPercent: usadoPercent,
+            usadoColor: saldoEnDeuda
+                ? SmxColors.dangerForeground
+                : const Color(0xFFFFC857),
             size: 132,
             creditFontSize: 22,
             percentFontSize: 10,
@@ -226,6 +243,7 @@ class _CreditoRadialVisual extends StatelessWidget {
   final double credito;
   final double disponiblePercent;
   final double usadoPercent;
+  final Color usadoColor;
   final double size;
   final double creditFontSize;
   final double percentFontSize;
@@ -234,6 +252,7 @@ class _CreditoRadialVisual extends StatelessWidget {
     required this.credito,
     required this.disponiblePercent,
     required this.usadoPercent,
+    required this.usadoColor,
     required this.size,
     required this.creditFontSize,
     required this.percentFontSize,
@@ -246,6 +265,7 @@ class _CreditoRadialVisual extends StatelessWidget {
         painter: _CreditoRadialPainter(
           disponiblePercent: disponiblePercent,
           usadoPercent: usadoPercent,
+          usadoColor: usadoColor,
         ),
         child: SizedBox(
           width: size,
@@ -270,7 +290,7 @@ class _CreditoRadialVisual extends StatelessWidget {
                   FittedBox(
                     fit: BoxFit.scaleDown,
                     child: Text(
-                      _formatMoney(credito),
+                      SmxRowSet.formatAmount(credito),
                       style: TextStyle(
                         color: SmxColors.white,
                         fontSize: creditFontSize,
@@ -386,7 +406,7 @@ class _ResumenMetricCard extends StatelessWidget {
             fit: BoxFit.scaleDown,
             alignment: Alignment.centerLeft,
             child: Text(
-              _formatMoney(data.value),
+              SmxRowSet.formatAmount(data.value),
               style: TextStyle(
                 color: SmxColors.white,
                 fontSize: compact ? 20 : 26,
@@ -415,10 +435,12 @@ class _ResumenMetricCard extends StatelessWidget {
 class _CreditoRadialPainter extends CustomPainter {
   final double disponiblePercent;
   final double usadoPercent;
+  final Color usadoColor;
 
   const _CreditoRadialPainter({
     required this.disponiblePercent,
     required this.usadoPercent,
+    required this.usadoColor,
   });
 
   @override
@@ -444,7 +466,7 @@ class _CreditoRadialPainter extends CustomPainter {
       ..strokeCap = StrokeCap.round;
 
     final usadoPaint = Paint()
-      ..color = const Color(0xFFFFC857)
+      ..color = usadoColor
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth * .72
       ..strokeCap = StrokeCap.round;
@@ -480,7 +502,8 @@ class _CreditoRadialPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _CreditoRadialPainter oldDelegate) {
     return oldDelegate.disponiblePercent != disponiblePercent ||
-        oldDelegate.usadoPercent != usadoPercent;
+        oldDelegate.usadoPercent != usadoPercent ||
+        oldDelegate.usadoColor != usadoColor;
   }
 }
 
@@ -496,17 +519,4 @@ class _ResumenMetricData {
     required this.note,
     required this.color,
   });
-}
-
-String _formatMoney(double amount) {
-  final sign = amount < 0 ? '-' : '';
-  final fixed = amount.abs().toStringAsFixed(0);
-  final parts = <String>[];
-
-  for (var end = fixed.length; end > 0; end -= 3) {
-    final start = end - 3 > 0 ? end - 3 : 0;
-    parts.insert(0, fixed.substring(start, end));
-  }
-
-  return '$sign\$${parts.join(',')}';
 }

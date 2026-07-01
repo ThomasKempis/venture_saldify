@@ -71,8 +71,8 @@ class SmxSaldiFyClienteNavigationPanel extends StatelessWidget {
                 ),
                 const Divider(color: SmxColors.white24, height: 32),
                 _NavigationItem(
-                  icon: Icons.shopping_bag_rounded,
-                  label: 'Pedidos',
+                  icon: Icons.receipt_long_rounded,
+                  label: 'Movimientos',
                   expanded: expanded,
                   enabled: false,
                 ),
@@ -206,8 +206,8 @@ class SmxSaldiFyClienteDrawer extends StatelessWidget {
                 ),
                 const Divider(color: SmxColors.white24, height: 28),
                 const _DisabledDrawerItem(
-                  icon: Icons.shopping_bag_rounded,
-                  label: 'Pedidos',
+                  icon: Icons.receipt_long_rounded,
+                  label: 'Movimientos',
                 ),
                 const _DisabledDrawerItem(
                   icon: Icons.account_balance_wallet_rounded,

@@ -92,6 +92,15 @@ class SmxSaldiFyDashboardMain extends StatelessWidget {
               await onRefresh();
             }
           },
+          onClientNovedadTap: (client) async {
+            final changed = await controller.openClienteHistorial(
+              context,
+              client,
+            );
+            if (changed == true) {
+              await onRefresh();
+            }
+          },
         ),
         ValueListenableBuilder<SmxRowSet?>(
           valueListenable: controller.clientesActivosNotifier,

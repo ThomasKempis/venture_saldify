@@ -25,8 +25,7 @@ class SmxSaldiFyClienteCreditoController extends SmxController {
     return value >= 1 && value <= 3 ? value : 1;
   }
 
-  double get porcentaje =>
-      _toDouble(rstSysuser12.getValue('SYSUSER12_PORCENTAJE'));
+  double get porcentaje => rstSysuser12.getValue('SYSUSER12_PORCENTAJE');
 
   int get corteTipo => _toInt(rstSysuser12.getValue('SYSUSER12_CORTE_TIPO'));
 
@@ -221,7 +220,7 @@ class SmxSaldiFyClienteCreditoController extends SmxController {
   }
 
   bool _validateCorte(BuildContext context) {
-    final credito = _toDouble(rstSysuser12.getValue('SYSUSER12_CREDITO'));
+    final double credito = rstSysuser12.getValue('SYSUSER12_CREDITO');
     if (credito <= 0) {
       showValidDialog(
         context,
@@ -279,13 +278,6 @@ class SmxSaldiFyClienteCreditoController extends SmxController {
     if (value is int) return value;
     if (value is double) return value.toInt();
     return int.tryParse(value?.toString() ?? '') ?? 0;
-  }
-
-  static double _toDouble(dynamic value) {
-    if (value is double) return value;
-    if (value is int) return value.toDouble();
-    return double.tryParse((value?.toString() ?? '').replaceAll(',', '')) ??
-        0.0;
   }
 
   static const _diasSemana = [

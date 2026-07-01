@@ -70,6 +70,14 @@ class SmxSaldiFyClientesController extends SmxController {
     return rstClientes.getValue('SYSUSER12_BALANCE')?.toString() ?? '';
   }
 
+  int getClientNoveCompras() {
+    return _getIntValue('NOVE_COMPRAS');
+  }
+
+  int getClientNovePagos() {
+    return _getIntValue('NOVE_PAGOS');
+  }
+
   int getClientRelationId() {
     return rstClientes.getId();
   }
@@ -79,6 +87,17 @@ class SmxSaldiFyClientesController extends SmxController {
     if (value is int) return value;
     if (value is double) return value.toInt();
     return int.tryParse(value?.toString() ?? '') ?? -1;
+  }
+
+  int _getIntValue(String field) {
+    try {
+      final value = rstClientes.getValue(field);
+      if (value is int) return value;
+      if (value is double) return value.toInt();
+      return int.tryParse(value?.toString() ?? '') ?? 0;
+    } catch (_) {
+      return 0;
+    }
   }
 
   Future<bool> archiveClienteAt(int index) async {

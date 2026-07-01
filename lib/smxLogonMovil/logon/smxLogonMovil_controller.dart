@@ -14,6 +14,7 @@ import 'package:universal_html/html.dart' as html;
 import 'package:venture_core_connect/smxDataBase/smxRowSet.dart';
 import 'package:venture_widgets/smxShowDialog/smxShowDialogs.dart';
 
+import '../../smxApis/smxLocationReporter.dart';
 import '../../smxSaldify/smxSaldify.dart';
 import '../../smxSaldifyCliente/smxSaldifyCliente.dart';
 
@@ -107,10 +108,7 @@ class SmxLogonMovil_controller extends SmxTmpCtl {
         rstSysUser10.update('SYSUSER10_CORREO', getCorreo());
         rstSysUser10.update('SYSUSER10_CORREO_01', getCorreo());
         rstSysUser10.update('SYSUSER10_FECHA', DateTime.now());
-        rstSysUser10.update(
-          'SYSUSER10_GEOLOC_ULT',
-          SmxConstants_core.geoLocalizacion,
-        );
+        rstSysUser10.update('SYSUSER10_GEOLOC_ULT', SmxConstants_core.geoLocalizacion,);
         rstSysUser10.update('SYSUSER10_UUID', const Uuid().v4());
 
         await callTroncalSave(rstSysUser10);
@@ -134,6 +132,8 @@ class SmxLogonMovil_controller extends SmxTmpCtl {
       rstSysUser10.update('RELA_SYSJSON02', idImage);
       await callTroncalSave(rstSysUser10);
     }
+
+    await SmxLocationReporter.report(accion: 'LOGIN');
 
     Navigator.pushReplacement(
       context,

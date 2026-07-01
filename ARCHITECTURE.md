@@ -36,6 +36,19 @@ for (int i = 0; i < rstClientes.getRowCount(); i++) {
 
 Este patron es importante porque se parece al flujo real de la plataforma: el servidor devuelve un rowset, el cliente lo transforma en memoria, los widgets leen por campo y despues el core puede serializar de vuelta para enviar transacciones.
 
+### Lectura tipada con `getValue()`
+
+`SmxRowSet.getValue('CAMPO')` ya interpreta el tipo del campo definido en el rowset. Para campos numericos, como `INT`, `LNG` o `DBL`, el core devuelve valores numericos y normaliza `null` o cadena vacia a `0` o `0.0` segun corresponda.
+
+Por eso, si el stored procedure o la tabla ya entrega el campo con el tipo correcto, evitar helpers redundantes como parsear de nuevo con `double.tryParse(...)`, envolver cada lectura en `try/catch`, o convertir a string antes de sumar. Es preferible leer directo:
+
+```dart
+final credito = rstMetricas.getValue('SYSUSER12_CREDITO');
+final disponible = rstMetricas.getValue('SYSUSER12_DISPONIBLE');
+```
+
+Solo agregar conversiones manuales cuando el dato realmente venga como texto o cuando el origen no tenga metadata/tipo confiable.
+
 ## SmxController
 
 Los controllers de modulos deben extender directamente de `SmxController` cuando formen parte del flujo real de la plataforma.

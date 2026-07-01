@@ -43,7 +43,7 @@ class SmxSaldiFyPagosController extends SmxController {
       return;
     }
 
-    final importe = _toDouble(rstPago.getValue('SYSUSER50_IMPORTE'));
+    final double importe = rstPago.getValue('SYSUSER50_IMPORTE');
     if (importe <= 0) {
       showValidDialog(
         context,
@@ -91,12 +91,12 @@ class SmxSaldiFyPagosController extends SmxController {
 
   String getFechaAt(int index) {
     rstPagos.index(index);
-    return _formatDate(rstPagos.getValue('SYSUSER50_FECHA'));
+    return rstPagos.getValueFormatDate('SYSUSER50_FECHA');
   }
 
   String getImporteAt(int index) {
     rstPagos.index(index);
-    return _formatMoney(rstPagos.getValue('SYSUSER50_IMPORTE'));
+    return rstPagos.getValueFormatAmount('SYSUSER50_IMPORTE');
   }
 
   Future<void> _preparePagosSesion() async {
@@ -150,44 +150,12 @@ class SmxSaldiFyPagosController extends SmxController {
     rstPago.update('SYSUSER50_REFERENCIA', '');
     rstPago.update('SYSUSER50_IMPORTE', 0.0);
     rstPago.update('SYSUSER50_FECHA', DateTime.now());
+    rstPago.update('SYSUSER50_STATUS', 0);
   }
 
   void _clearInputs() {
     setText('SYSUSER50_REFERENCIA', '');
     setNumericDbl('SYSUSER50_IMPORTE', 0.0);
     setDate('SYSUSER50_FECHA', DateTime.now());
-  }
-
-  String _formatDate(dynamic value) {
-    DateTime? date;
-    if (value is DateTime) {
-      date = value;
-    } else if (value != null) {
-      date = DateTime.tryParse(value.toString());
-    }
-
-    if (date == null) return '';
-
-    return '${date.day.toString().padLeft(2, '0')}/'
-        '${date.month.toString().padLeft(2, '0')}/'
-        '${date.year}';
-  }
-
-  String _formatMoney(dynamic value) {
-    final amount = _toDouble(value);
-    final text = amount.toStringAsFixed(2);
-    final parts = text.split('.');
-    final entero = parts.first.replaceAllMapped(
-      RegExp(r'\B(?=(\d{3})+(?!\d))'),
-      (match) => ',',
-    );
-    return '\$$entero.${parts.last}';
-  }
-
-  double _toDouble(dynamic value) {
-    if (value is double) return value;
-    if (value is int) return value.toDouble();
-    return double.tryParse((value?.toString() ?? '').replaceAll(',', '')) ??
-        0.0;
   }
 }

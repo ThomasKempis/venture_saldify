@@ -13,6 +13,7 @@ class SmxSaldiFyClientes extends StatefulWidget {
   final bool isMobile;
   final bool isDesktop;
   final ValueChanged<SmxSaldiFyClientTapData> onClientTap;
+  final ValueChanged<SmxSaldiFyClientTapData>? onClientNovedadTap;
   final ValueChanged<SmxRowSet> onLoaded;
   final ValueChanged<SmxRowSet>? onArchived;
   final ValueListenable<SmxRowSet?>? clientesNotifier;
@@ -23,6 +24,7 @@ class SmxSaldiFyClientes extends StatefulWidget {
     required this.isDesktop,
     required this.onClientTap,
     required this.onLoaded,
+    this.onClientNovedadTap,
     this.onArchived,
     this.clientesNotifier,
   });
@@ -60,6 +62,7 @@ class _SmxSaldiFyClientesState extends State<SmxSaldiFyClientes> {
             isMobile: widget.isMobile,
             isDesktop: widget.isDesktop,
             onClientTap: widget.onClientTap,
+            onClientNovedadTap: widget.onClientNovedadTap,
             controller: controller,
             clientes: rstClientes,
             showAllClients: _showAllClients,
@@ -145,6 +148,7 @@ class _SmxSaldiFyClientesView extends StatelessWidget {
   final bool isMobile;
   final bool isDesktop;
   final ValueChanged<SmxSaldiFyClientTapData> onClientTap;
+  final ValueChanged<SmxSaldiFyClientTapData>? onClientNovedadTap;
   final SmxSaldiFyClientesController controller;
   final SmxRowSet clientes;
   final bool showAllClients;
@@ -156,6 +160,7 @@ class _SmxSaldiFyClientesView extends StatelessWidget {
     required this.isMobile,
     required this.isDesktop,
     required this.onClientTap,
+    required this.onClientNovedadTap,
     required this.controller,
     required this.clientes,
     required this.showAllClients,
@@ -184,6 +189,7 @@ class _SmxSaldiFyClientesView extends StatelessWidget {
           controller: controller,
           showAll: showAllClients,
           onClientTap: onClientTap,
+          onClientNovedadTap: onClientNovedadTap,
           onClientArchive: onClientArchive,
           onClientArchived: onClientArchived,
         ),
@@ -244,6 +250,7 @@ class _ClientCards extends StatelessWidget {
   final SmxSaldiFyClientesController controller;
   final bool showAll;
   final ValueChanged<SmxSaldiFyClientTapData> onClientTap;
+  final ValueChanged<SmxSaldiFyClientTapData>? onClientNovedadTap;
   final Future<bool> Function(int index, String name) onClientArchive;
   final VoidCallback onClientArchived;
 
@@ -254,6 +261,7 @@ class _ClientCards extends StatelessWidget {
     required this.controller,
     required this.showAll,
     required this.onClientTap,
+    required this.onClientNovedadTap,
     required this.onClientArchive,
     required this.onClientArchived,
   });
@@ -288,6 +296,22 @@ class _ClientCards extends StatelessWidget {
       final purchases = _getClientValue(index, controller.getClientPurchases);
       final payments = _getClientValue(index, controller.getClientPayments);
       final balance = _getClientValue(index, controller.getClientBalance);
+      final noveCompras = _getClientIntValue(
+        index,
+        controller.getClientNoveCompras,
+      );
+      final novePagos = _getClientIntValue(
+        index,
+        controller.getClientNovePagos,
+      );
+      final clientTapData = SmxSaldiFyClientTapData(
+        idSysuser11: idSysuser11,
+        relaSysuser10Cliente: relaSysuser10Cliente,
+        name: name,
+        credit: credit,
+        availableCredit: availableCredit,
+        balance: balance,
+      );
 
       cards.add(
         _SlidableClientCard(
@@ -301,16 +325,12 @@ class _ClientCards extends StatelessWidget {
           purchases: purchases,
           payments: payments,
           balance: balance,
-          onTap: () => onClientTap(
-            SmxSaldiFyClientTapData(
-              idSysuser11: idSysuser11,
-              relaSysuser10Cliente: relaSysuser10Cliente,
-              name: name,
-              credit: credit,
-              availableCredit: availableCredit,
-              balance: balance,
-            ),
-          ),
+          noveCompras: noveCompras,
+          novePagos: novePagos,
+          onTap: () => onClientTap(clientTapData),
+          onNovedadTap: onClientNovedadTap == null
+              ? null
+              : () => onClientNovedadTap!(clientTapData),
           confirmArchive: () => onClientArchive(index, name),
           onArchived: onClientArchived,
         ),
@@ -374,7 +394,10 @@ class _SlidableClientCard extends StatelessWidget {
   final String purchases;
   final String payments;
   final String balance;
+  final int noveCompras;
+  final int novePagos;
   final VoidCallback onTap;
+  final VoidCallback? onNovedadTap;
   final Future<bool> Function() confirmArchive;
   final VoidCallback onArchived;
 
@@ -389,7 +412,10 @@ class _SlidableClientCard extends StatelessWidget {
     required this.purchases,
     required this.payments,
     required this.balance,
+    required this.noveCompras,
+    required this.novePagos,
     required this.onTap,
+    this.onNovedadTap,
     required this.confirmArchive,
     required this.onArchived,
   });
@@ -432,7 +458,10 @@ class _SlidableClientCard extends StatelessWidget {
           purchases: purchases,
           payments: payments,
           balance: balance,
+          noveCompras: noveCompras,
+          novePagos: novePagos,
           onTap: onTap,
+          onNovedadTap: onNovedadTap,
         ),
       ),
     );
@@ -481,7 +510,10 @@ class _ClientCard extends StatelessWidget {
   final String purchases;
   final String payments;
   final String balance;
+  final int noveCompras;
+  final int novePagos;
   final VoidCallback onTap;
+  final VoidCallback? onNovedadTap;
 
   const _ClientCard({
     required this.name,
@@ -493,11 +525,16 @@ class _ClientCard extends StatelessWidget {
     required this.purchases,
     required this.payments,
     required this.balance,
+    required this.noveCompras,
+    required this.novePagos,
     required this.onTap,
+    this.onNovedadTap,
   });
 
   @override
   Widget build(BuildContext context) {
+    final hasNovedades = noveCompras > 0 || novePagos > 0;
+
     return Material(
       color: SmxColors.whiteAlpha(.94),
       borderRadius: BorderRadius.circular(20),
@@ -525,6 +562,8 @@ class _ClientCard extends StatelessWidget {
                   Expanded(
                     child: Text(
                       name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
                         color: SmxColors.textDark,
                         fontSize: 18,
@@ -532,6 +571,7 @@ class _ClientCard extends StatelessWidget {
                       ),
                     ),
                   ),
+                  const SizedBox(width: 8),
                   _StatusBadge(label: status, statusType: statusType),
                 ],
               ),
@@ -543,13 +583,16 @@ class _ClientCard extends StatelessWidget {
                   ),
                   const SizedBox(width: 10),
                   Expanded(
-                    child: _ClientData(label: 'Credito', value: credit),
+                    child: _ClientData(
+                      label: 'Credito',
+                      value: SmxRowSet.formatAmount(credit),
+                    ),
                   ),
                   const SizedBox(width: 10),
                   Expanded(
                     child: _ClientData(
                       label: 'Disponible',
-                      value: availableCredit,
+                      value: SmxRowSet.formatAmount(availableCredit),
                       emphasis: true,
                     ),
                   ),
@@ -559,18 +602,37 @@ class _ClientCard extends StatelessWidget {
               Row(
                 children: [
                   Expanded(
-                    child: _ClientData(label: 'Compras', value: purchases),
+                    child: _ClientData(
+                      label: 'Compras',
+                      value: SmxRowSet.formatAmount(purchases),
+                    ),
                   ),
                   const SizedBox(width: 10),
                   Expanded(
-                    child: _ClientData(label: 'Pagos', value: payments),
+                    child: _ClientData(
+                      label: 'Pagos',
+                      value: SmxRowSet.formatAmount(payments),
+                    ),
                   ),
                   const SizedBox(width: 10),
                   Expanded(
-                    child: _ClientData(label: 'Saldo', value: balance),
+                    child: _ClientData(
+                      label: 'Saldo',
+                      value: SmxRowSet.formatAmount(balance),
+                    ),
                   ),
                 ],
               ),
+              if (hasNovedades) ...[
+                const SizedBox(height: 16),
+                Divider(height: 1, color: SmxColors.blackAlpha(.12)),
+                const SizedBox(height: 12),
+                _NovedadesLine(
+                  compras: noveCompras,
+                  pagos: novePagos,
+                  onTap: onNovedadTap,
+                ),
+              ],
             ],
           ),
         ),
@@ -614,6 +676,98 @@ class _StatusBadge extends StatelessWidget {
           color: colors.fg,
           fontSize: 11,
           fontWeight: FontWeight.w900,
+        ),
+      ),
+    );
+  }
+}
+
+class _NovedadesLine extends StatelessWidget {
+  final int compras;
+  final int pagos;
+  final VoidCallback? onTap;
+
+  const _NovedadesLine({
+    required this.compras,
+    required this.pagos,
+    this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final total = compras + pagos;
+    final detalle = [
+      if (compras > 0) '$compras ${compras == 1 ? 'compra' : 'compras'}',
+      if (pagos > 0) '$pagos ${pagos == 1 ? 'pago' : 'pagos'}',
+    ].join('  •  ');
+
+    return Material(
+      color: SmxColors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+          child: Align(
+            alignment: Alignment.centerRight,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 360),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 46,
+                    height: 46,
+                    decoration: BoxDecoration(
+                      color: SmxColors.whiteAlpha(.78),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.notifications_none_rounded,
+                      color: SmxColors.dangerForeground,
+                      size: 26,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Flexible(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          '$total ${total == 1 ? 'gestion pendiente' : 'gestiones pendientes'}',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: SmxColors.dangerForeground,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          detalle,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: SmxColors.textMuted,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  const Icon(
+                    Icons.chevron_right_rounded,
+                    color: SmxColors.textDark,
+                    size: 32,
+                  ),
+                ],
+              ),
+            ),
+          ),
         ),
       ),
     );
