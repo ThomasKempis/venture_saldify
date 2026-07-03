@@ -45,7 +45,11 @@ Por eso, si el stored procedure o la tabla ya entrega el campo con el tipo corre
 ```dart
 final credito = rstMetricas.getValue('SYSUSER12_CREDITO');
 final disponible = rstMetricas.getValue('SYSUSER12_DISPONIBLE');
+final plan = rstPlan.getValue('SYSUSER12_PLAN');
+final diasAlVto = rstPlan.getValue('DIAS_AL_VTO');
 ```
+
+No crear helpers locales tipo `_getInt(field)`, `_getDouble(field)` o `_toDouble(value)` para campos numericos que ya vienen tipados en el `SmxRowSet`. Esos helpers duplican el trabajo de `getValue()` y suelen esconder problemas de metadata del rowset o del stored procedure.
 
 Solo agregar conversiones manuales cuando el dato realmente venga como texto o cuando el origen no tenga metadata/tipo confiable.
 
@@ -92,6 +96,50 @@ Reglas importantes:
 - Usar `beginDB()` para marcar el inicio del ciclo del controller.
 - Evitar modelos Dart innecesarios si el dato real vendra como `SmxRowSet`.
 - Exponer metodos de lectura especificos cuando ayuden a la UI, por ejemplo `getClientName()` o `getActionIcon()`.
+
+### Espera En Operaciones De Base
+
+Cuando una accion dispare una operacion de base de datos o un stored procedure, el indicador de espera debe vivir en el controller usando `showDialogWait(...)`.
+
+Patron recomendado:
+
+```dart
+await showDialogWait(context, () async {
+  await getRowSetFuture(alias);
+});
+```
+
+La UI no debe crear flags locales como `_isLoading`, `loadingRows` o spinners por fila/boton para duplicar ese estado si el controller ya usa `showDialogWait(...)`.
+
+Regla practica:
+
+- Carga inicial de widgets: usar `loadingBuilder` o skeletons.
+- Acciones de base de datos: usar `showDialogWait(...)` en el controller.
+- Evitar mezclar `showDialogWait(...)` con loaders locales para la misma accion.
+- Solo usar un flag local de UI cuando no haya operacion de base, o cuando se trate de una interaccion puramente visual/local.
+
+### Buffer De RowSets Por Alias
+
+`getRowSetFuture(alias)` usa el rowset ya cargado si el alias existe en el buffer interno del controller. Si `_rst` ya contiene ese alias, no vuelve al servidor.
+
+Esto permite usar aliases fijos para datos casi estables dentro del ciclo de vida del controller:
+
+```dart
+addSql(
+  'QRY_SYSUSER12',
+  'select * from QRY_SYSUSER12($idSysuser11)',
+);
+
+await getRowSetFuture('QRY_SYSUSER12');
+rstPlan = getRowset('QRY_SYSUSER12');
+```
+
+Regla practica:
+
+- No usar `removeSql(alias)` cuando se desea aprovechar el buffer y el dato casi no cambia.
+- Usar alias hardcodeado/estable para datos de referencia o configuracion del widget.
+- Usar `removeSql(alias)` solo cuando se necesita forzar recarga desde base.
+- Recordar que el buffer vive dentro del controller; si el controller se destruye y se crea otra vez, se vuelve a cargar.
 
 ## SmxCallBaseStateful
 

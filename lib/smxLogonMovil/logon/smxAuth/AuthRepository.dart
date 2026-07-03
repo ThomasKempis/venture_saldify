@@ -1,5 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
+import 'package:venture_saldify/smxSaldify/smxSaldify_logon/smxSaldify_accessSession.dart';
 
 class AuthRepository {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -20,12 +20,6 @@ class AuthRepository {
   }
 
   Future<void> signOut() async {
-    await _auth.signOut();
-
-    if (kIsWeb) {
-      try {
-        Uri.parse('https://accounts.google.com/Logout');
-      } catch (e) {}
-    }
+    await SmxSaldifyAccessSession.clearGoogleLogin();
   }
 }

@@ -224,6 +224,24 @@ Ejemplo conceptual:
 
 Por eso `data.accion` no se debe omitir.
 
+### Espera En Operaciones De Base
+
+Para acciones que llaman base de datos o stored procedures, usar `showDialogWait(...)` desde el controller.
+
+```dart
+await showDialogWait(context, () async {
+  await getRowSetFuture(alias);
+});
+```
+
+No duplicar ese estado con flags locales de UI como `_isLoading`, `loadingRows` o spinners en filas/botones para la misma accion.
+
+Regla practica:
+
+- `loadingBuilder`/skeletons: carga inicial de widgets.
+- `showDialogWait(...)`: acciones de base de datos desde controller.
+- Flags locales: solo interacciones visuales/locales sin llamada a base.
+
 ### Rowset Troncal y Detalle
 
 Cuando se crea un cliente nuevo desde anfitrion:
@@ -285,6 +303,7 @@ Regla practica:
 
 - Si el campo viene tipado como numerico (`INT`, `LNG`, `DBL`), leer directo con `getValue()`.
 - No envolver cada lectura numerica en helpers con `try/catch`, `double.tryParse()` o conversion a string si el rowset ya trae metadata correcta.
+- No crear helpers locales tipo `_getInt(field)`, `_getDouble(field)` o `_toDouble(value)` cuando el campo ya viene tipado. `getValue()` ya devuelve `0`, `0.0` o el valor numerico correspondiente segun la metadata.
 - Para `DBL`, valores `null` o vacios regresan como `0.0`.
 - Para `INT`/`LNG`, valores `null` o vacios regresan como `0`.
 - Para `STR`, valores nulos regresan como cadena vacia.
@@ -294,9 +313,48 @@ Ejemplo recomendado:
 ```dart
 final credito = rstMetricas.getValue('SYSUSER12_CREDITO');
 final saldo = rstMetricas.getValue('SYSUSER12_BALANCE');
+final plan = rstPlan.getValue('SYSUSER12_PLAN');
+final diasAlVto = rstPlan.getValue('DIAS_AL_VTO');
 ```
 
 Agregar conversion manual solo cuando el dato venga deliberadamente como texto o el origen no tenga tipo confiable.
+
+### Buffer De RowSets Por Alias
+
+`getRowSetFuture(alias)` no vuelve al servidor si el alias ya existe cargado en el buffer del controller.
+
+Regla practica:
+
+- Usar alias fijo para datos casi estables durante la vida del controller.
+- No llamar `removeSql(alias)` si se quiere reutilizar lo ya cargado.
+- Llamar `removeSql(alias)` solo cuando se necesita forzar una lectura nueva desde base.
+- El buffer vive en el controller; si el controller se recrea, el dato se vuelve a cargar.
+
+### Formatos Estandar Desde SmxRowSet
+
+Para mostrar importes o fechas en pantalla, usar los helpers del `SmxRowSet` en lugar de crear formateadores locales repetidos.
+
+Importes:
+
+```dart
+final credito = rstMetricas.getValueFormatAmount('SYSUSER12_CREDITO');
+final saldo = SmxRowSet.formatAmount(valor);
+```
+
+Fechas:
+
+```dart
+final fecha = rstHistorial.getValueFormatDate('SYSUSER90_FECHA');
+final fechaManual = SmxRowSet.formatDate(valor);
+```
+
+`getValueFormatAmount(field)` lee el campo con `getValue(field)` y aplica el formato monetario estandar. `getValueFormatDate(field)` lee el campo con `getValue(field)` y aplica el formato estandar `dd/mm/yyyy`.
+
+Regla practica:
+
+- No crear helpers locales tipo `_formatAmount`, `_formatMoney`, `_formatDate` o conversiones manuales si el formato estandar del rowset alcanza.
+- Mantener helpers locales solo cuando la pantalla necesite un formato visual distinto, por ejemplo una fecha compacta tipo `30 Jun`.
+- Si un formato especial se repite en varias pantallas, promoverlo al `SmxRowSet` o a una API comun antes de duplicarlo.
 
 ## 6. SmxRowSetTrack
 

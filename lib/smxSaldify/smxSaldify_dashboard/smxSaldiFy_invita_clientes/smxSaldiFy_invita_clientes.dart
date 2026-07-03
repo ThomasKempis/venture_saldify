@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:venture_core_connect/smxDataBase/smxRowSet.dart';
 import 'package:venture_saldify/smxColors.dart';
+import 'package:venture_saldify/smxSaldify/smxSaldify_screens/smxSaldify_backgrounds/saldify_circles_background.dart';
+import 'package:venture_widgets/smxCallBaseStateful.dart';
+import 'package:venture_widgets/smxController/smxControllerSendData.dart';
 
 import 'smxSaldiFy_invita_clientes_controller.dart';
-import 'smxSaldiFy_invita_modal.dart';
+import 'smxSaldiFy_invita_clientes_models.dart';
 
-class SmxSaldiFyInvitaClientes extends StatefulWidget {
+class SmxSaldiFyInvitaClientes extends StatelessWidget {
   final String uuidAnfitrion;
   final String anfitrionNombre;
   final SmxRowSet? clientes;
@@ -18,24 +21,40 @@ class SmxSaldiFyInvitaClientes extends StatefulWidget {
   });
 
   @override
-  State<SmxSaldiFyInvitaClientes> createState() =>
-      _SmxSaldiFyInvitaClientesState();
+  Widget build(BuildContext context) {
+    return SmxCallBaseStateful<SmxSaldiFyInvitaClientesController>(
+      controllerBuilder: (context) => SmxSaldiFyInvitaClientesController(
+        alias: 'SMXSALDIFY_INVITA_CLIENTES',
+        data: SmxControllerSendData(context: context),
+      ),
+      loadingBuilder: (_) => const SizedBox.shrink(),
+      builder: (context, controller) => _SmxSaldiFyInvitaClientesView(
+        controller: controller,
+        uuidAnfitrion: uuidAnfitrion,
+        anfitrionNombre: anfitrionNombre,
+        clientes: clientes,
+      ),
+    );
+  }
 }
 
-class _SmxSaldiFyInvitaClientesState extends State<SmxSaldiFyInvitaClientes> {
-  final SmxSaldiFyInvitaClientesController _controller =
-      SmxSaldiFyInvitaClientesController();
+class _SmxSaldiFyInvitaClientesView extends StatelessWidget {
+  final SmxSaldiFyInvitaClientesController controller;
+  final String uuidAnfitrion;
+  final String anfitrionNombre;
+  final SmxRowSet? clientes;
 
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
+  const _SmxSaldiFyInvitaClientesView({
+    required this.controller,
+    required this.uuidAnfitrion,
+    required this.anfitrionNombre,
+    required this.clientes,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         color: SmxColors.whiteAlpha(.95),
         borderRadius: BorderRadius.circular(20),
@@ -47,75 +66,93 @@ class _SmxSaldiFyInvitaClientesState extends State<SmxSaldiFyInvitaClientes> {
           ),
         ],
       ),
-      child: Row(
+      child: Stack(
         children: [
-          Container(
-            width: 92,
-            height: 92,
-            decoration: BoxDecoration(
-              color: SmxColors.surfaceQr,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: SmxColors.white, width: 8),
-            ),
-            child: const Icon(
-              Icons.qr_code_2_rounded,
-              color: SmxColors.iconDark,
-              size: 70,
+          const Positioned.fill(
+            child: CustomPaint(
+              painter: SaldifyCirclesBackgroundPainter(
+                accentColor: SmxColors.brandSecondary,
+              ),
             ),
           ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
               children: [
-                const Text(
-                  'Invita clientes',
-                  style: TextStyle(
-                    color: SmxColors.textDark,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w900,
+                Container(
+                  width: 92,
+                  height: 92,
+                  decoration: BoxDecoration(
+                    color: SmxColors.surfaceQr,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: SmxColors.white, width: 8),
+                  ),
+                  child: const Icon(
+                    Icons.qr_code_2_rounded,
+                    color: SmxColors.iconDark,
+                    size: 70,
                   ),
                 ),
-                const SizedBox(height: 6),
-                const Text(
-                  'Comparte tu QR o link. Todo cliente que se registre entra a tu negocio y queda pendiente de aprobacion.',
-                  style: TextStyle(
-                    color: SmxColors.textMuted,
-                    fontSize: 12,
-                    height: 1.35,
-                    fontWeight: FontWeight.w500,
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Invita clientes',
+                        style: TextStyle(
+                          color: SmxColors.textDark,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      const Text(
+                        'Comparte tu QR o link para invitar a tus clientes a tu plataforma. Evitaras cargar compras y pagos.',
+                        style: TextStyle(
+                          color: SmxColors.textMuted,
+                          fontSize: 12,
+                          height: 1.35,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      AnimatedBuilder(
+                        animation: controller,
+                        builder: (context, _) {
+                          final action = controller.selectedAction;
+
+                          return Row(
+                            children: [
+                              _InvitePill(
+                                label: 'Copiar link',
+                                filled:
+                                    action == SmxSaldiFyInvitaAction.copiarLink,
+                                onTap: () => controller.openCopyLinkModal(
+                                  context: context,
+                                  uuidAnfitrion: uuidAnfitrion,
+                                  anfitrionNombre: anfitrionNombre,
+                                  clientes: clientes,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              _InvitePill(
+                                label: 'WhatsApp',
+                                filled:
+                                    action == SmxSaldiFyInvitaAction.whatsApp,
+                                onTap: () => controller.openWhatsAppModal(
+                                  context: context,
+                                  uuidAnfitrion: uuidAnfitrion,
+                                  anfitrionNombre: anfitrionNombre,
+                                  clientes: clientes,
+                                ),
+                              ),
+                            ],
+                          );
+                        },
+                      ),
+                    ],
                   ),
-                ),
-                const SizedBox(height: 12),
-                ValueListenableBuilder<SmxSaldiFyInvitaAction>(
-                  valueListenable: _controller.actionNotifier,
-                  builder: (context, action, _) {
-                    return Row(
-                      children: [
-                        _InvitePill(
-                          label: 'Copiar link',
-                          filled: action == SmxSaldiFyInvitaAction.copiarLink,
-                          onTap: () => _controller.openCopyLinkModal(
-                            context: context,
-                            uuidAnfitrion: widget.uuidAnfitrion,
-                            anfitrionNombre: widget.anfitrionNombre,
-                            clientes: widget.clientes,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        _InvitePill(
-                          label: 'WhatsApp',
-                          filled: action == SmxSaldiFyInvitaAction.whatsApp,
-                          onTap: () => _controller.openWhatsAppModal(
-                            context: context,
-                            uuidAnfitrion: widget.uuidAnfitrion,
-                            anfitrionNombre: widget.anfitrionNombre,
-                            clientes: widget.clientes,
-                          ),
-                        ),
-                      ],
-                    );
-                  },
                 ),
               ],
             ),

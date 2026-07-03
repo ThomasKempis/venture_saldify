@@ -2,16 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show Clipboard, ClipboardData;
 import 'package:url_launcher/url_launcher.dart';
 import 'package:venture_core_connect/smxDataBase/smxRowSet.dart';
-import 'package:venture_saldify/smxApis/smxConstants.dart';
 import 'package:venture_saldify/smxColors.dart';
 
-enum SmxSaldiFyInvitaAction { copiarLink, whatsApp }
+import 'smxSaldiFy_invita_clientes_models.dart';
+
+typedef SmxSaldiFyCreateInvite =
+    Future<SmxSaldiFyInvitacionGenerada?> Function({
+      required String uuidAnfitrion,
+      String correoInvitado,
+      String uuidInvitado,
+      String telefono,
+    });
 
 Future<void> showSmxSaldiFyInvitaModal({
   required BuildContext context,
   required String uuidAnfitrion,
   required String anfitrionNombre,
   required SmxSaldiFyInvitaAction action,
+  required SmxSaldiFyCreateInvite onCreateInvite,
   SmxRowSet? clientes,
 }) async {
   await showDialog<void>(
@@ -21,6 +29,7 @@ Future<void> showSmxSaldiFyInvitaModal({
         uuidAnfitrion: uuidAnfitrion,
         action: action,
         clientes: clientes,
+        onCreateInvite: onCreateInvite,
         onInvite: (invite) =>
             _runInviteAction(context, invite, action, anfitrionNombre),
       );
@@ -30,22 +39,29 @@ Future<void> showSmxSaldiFyInvitaModal({
 
 Future<void> _runInviteAction(
   BuildContext context,
-  _InviteActionData invite,
+  SmxSaldiFyInvitacionGenerada invite,
   SmxSaldiFyInvitaAction action,
   String anfitrionNombre,
 ) async {
   if (action == SmxSaldiFyInvitaAction.copiarLink) {
-    await Clipboard.setData(ClipboardData(text: invite.link));
+    await Clipboard.setData(
+      ClipboardData(
+        text: _buildClipboardInviteMessage(
+          invite: invite,
+          anfitrionNombre: anfitrionNombre,
+        ),
+      ),
+    );
 
     if (!context.mounted) return;
 
-    _showPageMessage(context, 'Link de invitacion copiado.');
+    _showPageMessage(context, 'Invitacion copiada.');
     return;
   }
 
   final whatsAppUrl = _buildWhatsAppUrl(
     telefono: invite.telefono,
-    link: invite.link,
+    invite: invite,
     anfitrionNombre: anfitrionNombre,
   );
 
@@ -60,7 +76,7 @@ Future<void> _runInviteAction(
 
 Uri? _buildWhatsAppUrl({
   required String telefono,
-  required String link,
+  required SmxSaldiFyInvitacionGenerada invite,
   required String anfitrionNombre,
 }) {
   final phone = _normalizeWhatsAppPhone(telefono);
@@ -68,12 +84,15 @@ Uri? _buildWhatsAppUrl({
 
   return Uri.https('api.whatsapp.com', '/send', {
     'phone': phone,
-    'text': _buildWhatsAppMessage(link: link, anfitrionNombre: anfitrionNombre),
+    'text': _buildWhatsAppMessage(
+      invite: invite,
+      anfitrionNombre: anfitrionNombre,
+    ),
   });
 }
 
 String _buildWhatsAppMessage({
-  required String link,
+  required SmxSaldiFyInvitacionGenerada invite,
   required String anfitrionNombre,
 }) {
   final anfitrion = anfitrionNombre.trim().isEmpty
@@ -84,7 +103,35 @@ String _buildWhatsAppMessage({
     'SALDIFY',
     'Anfitrion: $anfitrion',
     'Te comparto tu invitacion para entrar a mi red de clientes.',
-    link,
+    '',
+    'Ingresa aqui:',
+    invite.link,
+    '',
+    'Codigo de invitacion:',
+    invite.codigoFormato,
+    '',
+    'Guarda este codigo para acceder directamente desde la app.',
+  ].join('\n');
+}
+
+String _buildClipboardInviteMessage({
+  required SmxSaldiFyInvitacionGenerada invite,
+  required String anfitrionNombre,
+}) {
+  final anfitrion = anfitrionNombre.trim().isEmpty
+      ? 'Tu anfitrion'
+      : anfitrionNombre.trim();
+
+  return [
+    'SALDIFY',
+    'Anfitrion: $anfitrion',
+    'Link de invitacion:',
+    invite.link,
+    '',
+    'Codigo de invitacion:',
+    invite.codigoFormato,
+    '',
+    'Guarda este codigo para acceder directamente desde la app.',
   ].join('\n');
 }
 
@@ -120,23 +167,18 @@ void _showPageMessage(BuildContext context, String message) {
     ..showSnackBar(SnackBar(content: Text(message)));
 }
 
-class _InviteActionData {
-  final String link;
-  final String telefono;
-
-  const _InviteActionData({required this.link, this.telefono = ''});
-}
-
 class _InviteLinkDialog extends StatefulWidget {
   final String uuidAnfitrion;
   final SmxSaldiFyInvitaAction action;
   final SmxRowSet? clientes;
-  final Future<void> Function(_InviteActionData invite) onInvite;
+  final SmxSaldiFyCreateInvite onCreateInvite;
+  final Future<void> Function(SmxSaldiFyInvitacionGenerada invite) onInvite;
 
   const _InviteLinkDialog({
     required this.uuidAnfitrion,
     required this.action,
     this.clientes,
+    required this.onCreateInvite,
     required this.onInvite,
   });
 
@@ -272,10 +314,15 @@ class _InviteLinkDialogState extends State<_InviteLinkDialog> {
       return;
     }
 
-    final link = _buildInviteLink(uuidInvitado: cliente.uuidInvitado);
-    await widget.onInvite(
-      _InviteActionData(link: link, telefono: cliente.telefono),
+    final invite = await widget.onCreateInvite(
+      uuidAnfitrion: widget.uuidAnfitrion,
+      uuidInvitado: cliente.uuidInvitado,
+      telefono: cliente.telefono,
     );
+
+    if (invite == null) return;
+
+    await widget.onInvite(invite);
     if (mounted) Navigator.of(context).pop();
   }
 
@@ -293,25 +340,16 @@ class _InviteLinkDialogState extends State<_InviteLinkDialog> {
       return;
     }
 
-    final link = _buildInviteLink(correoInvitado: correo);
-    await widget.onInvite(_InviteActionData(link: link, telefono: telefono));
+    final invite = await widget.onCreateInvite(
+      uuidAnfitrion: widget.uuidAnfitrion,
+      correoInvitado: correo,
+      telefono: telefono,
+    );
+
+    if (invite == null) return;
+
+    await widget.onInvite(invite);
     if (mounted) Navigator.of(context).pop();
-  }
-
-  String _buildInviteLink({String? uuidInvitado, String? correoInvitado}) {
-    final queryParameters = {
-      SmxConstants.uuidAnfitrionKey: widget.uuidAnfitrion,
-    };
-
-    if (uuidInvitado != null) {
-      queryParameters[SmxConstants.uuidInvitadoKey] = uuidInvitado;
-    }
-
-    if (correoInvitado != null) {
-      queryParameters[SmxConstants.correoInvitadoKey] = correoInvitado;
-    }
-
-    return Uri.base.replace(queryParameters: queryParameters).toString();
   }
 
   bool _isValidEmail(String value) {
@@ -381,10 +419,14 @@ class _ClienteExistenteTab extends StatelessWidget {
             separatorBuilder: (context, index) => const SizedBox(height: 10),
             itemBuilder: (context, index) {
               clientes.index(index);
-              final name = clientes.getValue('SYSUSER10_INVITADO')?.toString() ?? '';
-              final status = clientes.getValue('SYSUSER12_STATUS')?.toString() ?? '';
-              final uuidInvitado = clientes.getValue('SYSUSER10_UUID')?.toString() ?? '';
-              final telefono = clientes.getValue('SYSUSER10_TELEFONO')?.toString() ?? '';
+              final name =
+                  clientes.getValue('SYSUSER10_INVITADO')?.toString() ?? '';
+              final status =
+                  clientes.getValue('SYSUSER12_STATUS')?.toString() ?? '';
+              final uuidInvitado =
+                  clientes.getValue('SYSUSER10_UUID')?.toString() ?? '';
+              final telefono =
+                  clientes.getValue('SYSUSER10_TELEFONO')?.toString() ?? '';
 
               return Material(
                 color: SmxColors.whiteAlpha(.92),

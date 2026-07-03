@@ -122,15 +122,17 @@ class _SmxSaldiFyClienteDashboardState
                                   dashboardController.setMetricasSnapshot,
                             ),
                             SizedBox(height: widget.isMobile ? 16 : 20),
+                            Text(
+                              'Tu anfitrion',
+                              style: const TextStyle(
+                                color: SmxColors.white70,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            SizedBox(height: widget.isMobile ? 16 : 20),
                             SmxSaldiFyClienteAnfitrion(
-                              nombreAnfitrion:
-                                  dashboardController.anfitrionNombreCompleto,
-                              telefonoAnfitrion:
-                                  dashboardController.anfitrionTelefono,
-                              estadoRelacion:
-                                  dashboardController.anfitrionRelacionEstado,
-                              onContactTap: () =>
-                                  dashboardController.launchWhatsApp(context),
+                              dashboardController: dashboardController,
                             ),
                             SizedBox(height: widget.isMobile ? 16 : 20),
                             SmxSaldiFyClienteAccionesRapidas(

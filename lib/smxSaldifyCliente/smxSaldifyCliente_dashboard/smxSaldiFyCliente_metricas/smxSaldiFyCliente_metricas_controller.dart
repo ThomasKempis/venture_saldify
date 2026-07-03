@@ -34,7 +34,7 @@ class SmxSaldiFyClienteMetricasController extends SmxController {
     _refreshingMetricas = true;
     try {
       _prepareMetricasSql();
-      await _loadMetricas();
+      await SmxRowSetTrack.run(controller: this, call: () => _loadMetricas());
     } catch (_) {
       return;
     } finally {

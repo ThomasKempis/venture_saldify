@@ -52,14 +52,14 @@ class SmxSaldiFyClienteController extends SmxController {
     if (rstClienteCredito.getRowCount() == 0 &&
         SmxConstants.hasCorreoInvitado &&
         controllerMain.getCorreo() == SmxConstants.correoInvitadoParam) {
-      addSql(
+      addSTrans(
         'ADD_SYSUSER10_SYSUSER11',
         "select * from ADD_SYSUSER10_SYSUSER11("
             "'${SmxConstants.uuidAnfitrionParam}', "
             "'${SmxConstants.correoInvitadoParam}')",
       );
 
-      await getRowSetFuture('ADD_SYSUSER10_SYSUSER11');
+      await getCallWS();
 
       rstClienteCredito = getRowset('ADD_SYSUSER10_SYSUSER11');
     }
@@ -97,6 +97,17 @@ class SmxSaldiFyClienteController extends SmxController {
       SmxSaldiFyClienteStatus.invalido => 'Su invitacion no es valida.',
       SmxSaldiFyClienteStatus.usuarioNoCorresponde =>
         'Esta invitacion pertenece a otro usuario.',
+    };
+  }
+
+  String get tituloValidacion {
+    return switch (status) {
+      SmxSaldiFyClienteStatus.pendiente => 'Invitacion pendiente',
+      SmxSaldiFyClienteStatus.archivado => 'Vinculo archivado',
+      SmxSaldiFyClienteStatus.invalido => 'Link de invitacion no valido',
+      SmxSaldiFyClienteStatus.usuarioNoCorresponde =>
+        'Invitacion de otro usuario',
+      SmxSaldiFyClienteStatus.aceptado => '',
     };
   }
 
@@ -152,6 +163,10 @@ class SmxSaldiFyClienteController extends SmxController {
     return _getInvitacionValue('SYSUSER10_TELEFONO').trim();
   }
 
+  String get anfitrionCorreo {
+    return _getInvitacionValue('SYSUSER10_CORREO').trim();
+  }
+
   String get anfitrionRelacionEstado {
     return switch (status) {
       SmxSaldiFyClienteStatus.pendiente => 'Pendiente',
@@ -167,7 +182,9 @@ class SmxSaldiFyClienteController extends SmxController {
   }
 
   int get idSysuser11 {
-    return _getInvitacionInt('ID_SYSUSER11');
+    if (rstClienteCredito.getRowCount() == 0) return -1;
+
+    return rstClienteCredito.getId();
   }
 
   String _getInvitacionValue(String field) {

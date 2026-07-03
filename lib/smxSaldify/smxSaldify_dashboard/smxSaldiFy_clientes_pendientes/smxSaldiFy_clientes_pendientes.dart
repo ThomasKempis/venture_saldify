@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:venture_core_connect/smxDataBase/smxRowSet.dart';
 import 'package:venture_saldify/smxColors.dart';
+import 'package:venture_saldify/smxSaldify/smxSaldify_screens/smxSaldify_backgrounds/saldify_circles_background.dart';
 import 'package:venture_widgets/smxController/smxControllerSendData.dart';
 
 import '../smxSaldiFy_clientes/smxSaldiFy_clientes.dart';
@@ -416,7 +417,6 @@ class _ClientCard extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(20),
         child: Ink(
-          padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(20),
             boxShadow: [
@@ -427,42 +427,56 @@ class _ClientCard extends StatelessWidget {
               ),
             ],
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: Stack(
             children: [
-              Text(
-                name,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  color: SmxColors.textDark,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w900,
+              const Positioned.fill(
+                child: CustomPaint(
+                  painter: SaldifyCirclesBackgroundPainter(
+                    accentColor: SmxColors.brandAccent,
+                  ),
                 ),
               ),
-              const SizedBox(height: 14),
-              _ClientLine(label: 'Correo', value: email),
-              const SizedBox(height: 8),
-              _ClientLine(label: 'Telefono', value: phone),
-              const SizedBox(height: 14),
-              Align(
-                alignment: Alignment.centerRight,
-                child: FilledButton.icon(
-                  onPressed: onActivate,
-                  icon: const Icon(Icons.check_circle_outline_rounded),
-                  label: const Text('Activar cliente'),
-                  style: FilledButton.styleFrom(
-                    backgroundColor: SmxColors.brandAccent,
-                    foregroundColor: SmxColors.textDark,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 10,
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: SmxColors.textDark,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w900,
+                      ),
                     ),
-                    textStyle: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w900,
+                    const SizedBox(height: 14),
+                    _ClientLine(label: 'Correo', value: email),
+                    const SizedBox(height: 8),
+                    _ClientLine(label: 'Telefono', value: phone),
+                    const SizedBox(height: 14),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: FilledButton.icon(
+                        onPressed: onActivate,
+                        icon: const Icon(Icons.check_circle_outline_rounded),
+                        label: const Text('Activar cliente'),
+                        style: FilledButton.styleFrom(
+                          backgroundColor: SmxColors.brandAccent,
+                          foregroundColor: SmxColors.textDark,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 10,
+                          ),
+                          textStyle: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
+                  ],
                 ),
               ),
             ],

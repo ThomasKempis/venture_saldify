@@ -52,7 +52,7 @@ class SmxSaldiFyCobranzaController extends SmxController {
           location: _stringValue('SYSUSER10_GEOLOC_ULT'),
           cutDate: _stringValue('SYSUSER12_CORTE'),
           balance: balance,
-          balanceText: _moneyText(balance),
+          balanceText: rstClientes.getValueFormatAmount('SYSUSER12_BALANCE'),
           dias: _intValue('SYSUSER12_DIAS'),
           status: status,
           statusType: _stringValue('SYSUSER12_STATUS_TIPO'),
@@ -77,15 +77,6 @@ class SmxSaldiFyCobranzaController extends SmxController {
 
   double _doubleValue(String field) {
     return rstClientes.getValue(field);
-  }
-
-  String _moneyText(double value) {
-    final rounded = value.roundToDouble();
-    if ((value - rounded).abs() < .01) {
-      return rounded.toInt().toString();
-    }
-
-    return value.toStringAsFixed(2);
   }
 
   @override

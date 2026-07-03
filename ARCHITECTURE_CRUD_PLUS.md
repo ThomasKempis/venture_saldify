@@ -433,6 +433,38 @@ setPositionCbos(
 );
 ```
 
+## SQL de consulta vs SQL transaccional
+
+`addSql()` + `getRowSetFuture()` debe usarse para consultas puras: vistas, queries, combos, metricas o rowsets auxiliares que no modifican datos.
+
+En el servidor, las llamadas `CRUD_SQL` pueden calcular `maxRows` ejecutando un `SELECT COUNT(*)` sobre el SQL original antes de ejecutar la consulta real. Eso es correcto para listados y consultas, pero no debe usarse para stored procedures o SQL con efectos de escritura.
+
+Si se llama un stored procedure que inserta, actualiza, elimina o reserva datos, aunque devuelva un rowset de respuesta, debe enviarse como transaccion:
+
+```dart
+addSTrans(
+  'ADD_ALGO',
+  "select * from ADD_ALGO('VALOR')",
+);
+
+await getCallWS();
+```
+
+Luego se lee el rowset devuelto de la misma forma:
+
+```dart
+final rst = getRowset('ADD_ALGO');
+rst.first();
+final status = rst.getValue('TMPUSER99_STATUS');
+```
+
+Regla practica:
+
+- `addSql()` / `getRowSetFuture()` para leer datos sin efectos.
+- `addSTrans()` / `getCallWS()` para procedimientos con efectos que tambien devuelven datos.
+
+Esto evita que un procedure se ejecute dos veces por el conteo automatico de `CRUD_SQL`. Por ejemplo, un procedure que reserva un codigo puede insertar en la primera ejecucion del count y devolver `DUPLICADO` en la ejecucion real.
+
 ## Validacion
 
 La validacion suele ocurrir en el toolbar ABM:

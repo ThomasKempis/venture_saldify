@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:venture_core_connect/smxDataBase/smxRowSet.dart';
 import 'package:venture_saldify/smxColors.dart';
+import 'package:venture_saldify/smxSaldify/smxSaldify_screens/smxSaldify_backgrounds/saldify_circles_background.dart';
 import 'package:venture_widgets/smxCallBaseStateful.dart';
 import 'package:venture_widgets/smxController/smxControllerSendData.dart';
 
@@ -534,6 +535,11 @@ class _ClientCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hasNovedades = noveCompras > 0 || novePagos > 0;
+    final accentColor = switch (statusType) {
+      _ClientStatusType.ok => SmxColors.successForeground,
+      _ClientStatusType.warning => SmxColors.warningForeground,
+      _ClientStatusType.danger => SmxColors.dangerForeground,
+    };
 
     return Material(
       color: SmxColors.whiteAlpha(.94),
@@ -543,7 +549,6 @@ class _ClientCard extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(20),
         child: Ink(
-          padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(20),
             boxShadow: [
@@ -554,85 +559,99 @@ class _ClientCard extends StatelessWidget {
               ),
             ],
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: Stack(
             children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      name,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: SmxColors.textDark,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
+              Positioned.fill(
+                child: CustomPaint(
+                  painter: SaldifyCirclesBackgroundPainter(
+                    accentColor: accentColor,
                   ),
-                  const SizedBox(width: 8),
-                  _StatusBadge(label: status, statusType: statusType),
-                ],
-              ),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: _ClientData(label: 'Corte', value: cutDate),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: _ClientData(
-                      label: 'Credito',
-                      value: SmxRowSet.formatAmount(credit),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: _ClientData(
-                      label: 'Disponible',
-                      value: SmxRowSet.formatAmount(availableCredit),
-                      emphasis: true,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  Expanded(
-                    child: _ClientData(
-                      label: 'Compras',
-                      value: SmxRowSet.formatAmount(purchases),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: _ClientData(
-                      label: 'Pagos',
-                      value: SmxRowSet.formatAmount(payments),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: _ClientData(
-                      label: 'Saldo',
-                      value: SmxRowSet.formatAmount(balance),
-                    ),
-                  ),
-                ],
-              ),
-              if (hasNovedades) ...[
-                const SizedBox(height: 16),
-                Divider(height: 1, color: SmxColors.blackAlpha(.12)),
-                const SizedBox(height: 12),
-                _NovedadesLine(
-                  compras: noveCompras,
-                  pagos: novePagos,
-                  onTap: onNovedadTap,
                 ),
-              ],
+              ),
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            name,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              color: SmxColors.textDark,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        _StatusBadge(label: status, statusType: statusType),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _ClientData(label: 'Corte', value: cutDate),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: _ClientData(
+                            label: 'Credito',
+                            value: SmxRowSet.formatAmount(credit),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: _ClientData(
+                            label: 'Disponible',
+                            value: SmxRowSet.formatAmount(availableCredit),
+                            emphasis: true,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _ClientData(
+                            label: 'Compras',
+                            value: SmxRowSet.formatAmount(purchases),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: _ClientData(
+                            label: 'Pagos',
+                            value: SmxRowSet.formatAmount(payments),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: _ClientData(
+                            label: 'Saldo',
+                            value: SmxRowSet.formatAmount(balance),
+                          ),
+                        ),
+                      ],
+                    ),
+                    if (hasNovedades) ...[
+                      const SizedBox(height: 16),
+                      Divider(height: 1, color: SmxColors.blackAlpha(.12)),
+                      const SizedBox(height: 12),
+                      _NovedadesLine(
+                        compras: noveCompras,
+                        pagos: novePagos,
+                        onTap: onNovedadTap,
+                      ),
+                    ],
+                  ],
+                ),
+              ),
             ],
           ),
         ),

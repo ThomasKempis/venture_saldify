@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:venture_core_connect/smxDataBase/smxRowSet.dart';
 import 'package:venture_saldify/smxColors.dart';
 import 'package:venture_saldify/smxLayout/smxLayout.dart';
+import 'package:venture_saldify/smxSaldify/smxSaldify_screens/smxSaldify_backgrounds/operacion_bg_panel.dart';
 import 'package:venture_widgets/smxCallBaseStateful.dart';
 import 'package:venture_widgets/smxController/smxControllerSendData.dart';
 import 'package:venture_widgets/smxDatePicker/smxDatePicker.dart';
@@ -362,52 +363,49 @@ class _FormPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: SmxColors.whiteAlpha(.96),
-      borderRadius: BorderRadius.circular(18),
-      clipBehavior: Clip.antiAlias,
-      child: Padding(
-        padding: const EdgeInsets.all(18),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            SmxTextField(
-              field: 'SYSUSER50_REFERENCIA',
-              controller: controller,
-              label: 'Referencia',
-              isValid: true,
-            ),
-            const SizedBox(height: 18),
-            _ResponsiveFields(
-              children: [
-                SmxNumberField(
-                  field: 'SYSUSER50_IMPORTE',
-                  controller: controller,
-                  label: 'Importe',
-                  decimales: 2,
-                  currency: true,
-                  isValid: true,
-                ),
-                SmxDatePicker(
-                  field: 'SYSUSER50_FECHA',
-                  controller: controller,
-                  label: 'Fecha',
-                  withEmpty: false,
-                ),
-              ],
-            ),
-            const SizedBox(height: 22),
-            _SaveButton(
-              label: 'Guardar pago',
-              onPressed: () async {
-                await controller.save(saldo: saldo);
-                if (context.mounted && controller.lastSaveOk) {
-                  onSaved();
-                }
-              },
-            ),
-          ],
-        ),
+    return OperacionBgPanel(
+      title: 'Registrar pago',
+      subtitle: 'Captura el deposito para que tu anfitrion lo confirme.',
+      icon: Icons.payments_rounded,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SmxTextField(
+            field: 'SYSUSER50_REFERENCIA',
+            controller: controller,
+            label: 'Referencia',
+            isValid: true,
+          ),
+          const SizedBox(height: 18),
+          _ResponsiveFields(
+            children: [
+              SmxNumberField(
+                field: 'SYSUSER50_IMPORTE',
+                controller: controller,
+                label: 'Importe',
+                decimales: 2,
+                currency: true,
+                isValid: true,
+              ),
+              SmxDatePicker(
+                field: 'SYSUSER50_FECHA',
+                controller: controller,
+                label: 'Fecha',
+                withEmpty: false,
+              ),
+            ],
+          ),
+          const SizedBox(height: 22),
+          _SaveButton(
+            label: 'Guardar pago',
+            onPressed: () async {
+              await controller.save(saldo: saldo);
+              if (context.mounted && controller.lastSaveOk) {
+                onSaved();
+              }
+            },
+          ),
+        ],
       ),
     );
   }

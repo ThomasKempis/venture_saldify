@@ -4,7 +4,7 @@ import 'package:venture_saldify/smxColors.dart';
 import 'package:venture_saldify/smxLayout/smxLayout.dart';
 import '../smxLogonMovil/logon/smxLogonMovil_controller.dart';
 import 'smxSaldify_dashboard/smxSaldiFy_dashboard.dart';
-import 'smxSaldiFy_menu_lateral.dart';
+import 'smxSaldify_menu_lateral.dart';
 import 'smxSaldify_screens/smxSaldiFy_perfil.dart';
 
 class SmxSaldiFy extends StatefulWidget {

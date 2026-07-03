@@ -2,72 +2,45 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:universal_html/html.dart' as html;
 import 'package:venture_saldify/smxApis/smxConstants.dart';
-import 'package:venture_saldify/smxLogonMovil/logon/smxLogonMovil.dart';
+import 'package:venture_saldify/smxSaldify/smxSaldify_logon/smxSaldify_logon.dart';
 import 'package:venture_saldify/smxThemeData.dart';
-
-const String devUuidAnfitrion = 'ce9db2f5-dfb5-4b0e-9d35-941c0387f6de';
-const String devCorreoInvitado = 'santiago.azael.mohr@gmail.com';
-const String devUuidInvitado = 'bdfed92f-4e29-4565-9851-1a11068901c4';
-const SmxInvitacionMode devModalidad = SmxInvitacionMode.admin;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  _applyDevInvitacionCliente();
+  _applyDevCodigoInvitacion();
 
   final queryParameters = Uri.base.queryParameters;
+  final saldifyLogonAssets = SmxSaldifyLogon.warmUpAssets();
 
-  await SmxConstants.smxAppStartUp(
-    produccion: true,
-    queryParameters: queryParameters,
-  );
+  await Future.wait([
+    SmxConstants.smxAppStartUp(
+      produccion: true,
+      queryParameters: queryParameters,
+    ),
+    saldifyLogonAssets,
+  ]);
 
   runApp(MyAppSmx());
 }
 
-void _applyDevInvitacionCliente() {
-  if (!kDebugMode || devModalidad == SmxInvitacionMode.admin) return;
+void _applyDevCodigoInvitacion() {
+  if (!kDebugMode) return;
 
-  if (Uri.base.queryParameters.containsKey(SmxConstants.uuidInvitadoKey) ||
-      Uri.base.queryParameters.containsKey(SmxConstants.correoInvitadoKey) ||
-      Uri.base.queryParameters.containsKey(SmxConstants.uuidAnfitrionKey)) {
+  const String codigo = 'SF479689914378';
+
+  if (Uri.base.queryParameters.containsKey(SmxConstants.codigoInvitacionKey)) {
     return;
   }
 
-  final invitacionParameters = _getDevInvitacionParameters();
-  if (invitacionParameters.isEmpty) return;
-
   final newUri = Uri.base.replace(
-    queryParameters: {...Uri.base.queryParameters, ...invitacionParameters},
+    queryParameters: {
+      ...Uri.base.queryParameters,
+      SmxConstants.codigoInvitacionKey: codigo,
+    },
   );
 
   html.window.history.replaceState(null, 'Saldify Dev', newUri.toString());
-}
-
-Map<String, String> _getDevInvitacionParameters() {
-  final uuidAnfitrion = devUuidAnfitrion.trim();
-  final uuidInvitado = devUuidInvitado.trim();
-  final correoInvitado = devCorreoInvitado.trim();
-
-  if (uuidAnfitrion.isEmpty) return {};
-
-  if (devModalidad == SmxInvitacionMode.uuid_invitado &&
-      uuidInvitado.isNotEmpty) {
-    return {
-      SmxConstants.uuidAnfitrionKey: uuidAnfitrion,
-      SmxConstants.uuidInvitadoKey: uuidInvitado,
-    };
-  }
-
-  if (devModalidad == SmxInvitacionMode.correo_invitado &&
-      correoInvitado.isNotEmpty) {
-    return {
-      SmxConstants.uuidAnfitrionKey: uuidAnfitrion,
-      SmxConstants.correoInvitadoKey: correoInvitado,
-    };
-  }
-
-  return {};
 }
 
 class MyAppSmx extends StatelessWidget {
@@ -82,7 +55,7 @@ class MyAppSmx extends StatelessWidget {
       locale: const Locale('es', 'MX'),
       debugShowCheckedModeBanner: false,
       theme: SmxThemeData(),
-      home: SmxLogonMovil(),
+      home: SmxSaldifyLogon(codigoInicial: SmxConstants.codigoInvitacionParam),
     );
   }
 }

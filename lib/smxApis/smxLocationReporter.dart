@@ -32,8 +32,7 @@ class SmxLocationReporter {
       final cleanAccion = accion.trim().toUpperCase();
       if (cleanAccion.isEmpty) return;
 
-      controller.removeSql(procedureName);
-      controller.addSql(
+      controller.addSTrans(
         procedureName,
         "select * from $procedureName("
         '$idSysuser10, '
@@ -41,7 +40,7 @@ class SmxLocationReporter {
         "'${_sqlString(cleanAccion)}')",
       );
 
-      await controller.getRowSetFuture(procedureName);
+      await controller.getCallWS();
 
       if (controller.jsonSend.getError() == null) {
         controller.rstSysUser10.update('SYSUSER10_GEOLOC_ULT', geoloc);

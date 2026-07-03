@@ -23,6 +23,8 @@ class SmxSaldiFyClienteDashboardController {
 
   String get anfitrionTelefono => clienteController.anfitrionTelefono;
 
+  String get anfitrionCorreo => clienteController.anfitrionCorreo;
+
   String get anfitrionRelacionEstado =>
       clienteController.anfitrionRelacionEstado;
 

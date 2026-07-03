@@ -15,6 +15,7 @@ import 'package:venture_core_connect/smxDataBase/smxRowSet.dart';
 import 'package:venture_widgets/smxShowDialog/smxShowDialogs.dart';
 
 import '../../smxApis/smxLocationReporter.dart';
+import '../../smxSaldify/smxSaldify_logon/smxSaldify_accessSession.dart';
 import '../../smxSaldify/smxSaldify.dart';
 import '../../smxSaldifyCliente/smxSaldifyCliente.dart';
 
@@ -79,10 +80,6 @@ class SmxLogonMovil_controller extends SmxTmpCtl {
   }
 
   void navigateToAppMovil(BuildContext context) async {
-    SmxConstants_core.instancia = 'SALDIFY';
-
-    resetJsonSend();
-
     addSql(
       'SYSUSER10',
       "Select * from SYSUSER10_CAB_MOVIL where SYSUSER10_CORREO = '${getCorreo()}'",
@@ -108,7 +105,10 @@ class SmxLogonMovil_controller extends SmxTmpCtl {
         rstSysUser10.update('SYSUSER10_CORREO', getCorreo());
         rstSysUser10.update('SYSUSER10_CORREO_01', getCorreo());
         rstSysUser10.update('SYSUSER10_FECHA', DateTime.now());
-        rstSysUser10.update('SYSUSER10_GEOLOC_ULT', SmxConstants_core.geoLocalizacion,);
+        rstSysUser10.update(
+          'SYSUSER10_GEOLOC_ULT',
+          SmxConstants_core.geoLocalizacion,
+        );
         rstSysUser10.update('SYSUSER10_UUID', const Uuid().v4());
 
         await callTroncalSave(rstSysUser10);
@@ -135,13 +135,18 @@ class SmxLogonMovil_controller extends SmxTmpCtl {
 
     await SmxLocationReporter.report(accion: 'LOGIN');
 
+    SmxSaldifyAccessSession.markActive(
+      SmxConstants.isClienteInvitado
+          ? SmxSaldifyAccessMode.invitado
+          : SmxSaldifyAccessMode.anfitrion,
+      getCorreo(),
+    );
+
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
         builder: (_) =>
-            SmxConstants.isClienteInvitado || SmxConstants.hasParametrosInvitacionInvalidos
-            ? SmxSaldiFyCliente()
-            : SmxSaldiFy(),
+            SmxConstants.isClienteInvitado ? SmxSaldiFyCliente() : SmxSaldiFy(),
       ),
     );
   }

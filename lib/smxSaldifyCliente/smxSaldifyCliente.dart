@@ -3,11 +3,11 @@ import 'package:venture_saldify/smxColors.dart';
 import 'package:venture_saldify/smxLayout/smxLayout.dart';
 import 'package:venture_widgets/smxCallBaseStateful.dart';
 import 'package:venture_widgets/smxController/smxControllerSendData.dart';
-import '../smxLayout/smxScreenTmp.dart';
 import '../smxSaldify/smxSaldify_screens/smxSaldiFy_perfil.dart';
 import 'smxSaldiFyCliente_controller.dart';
 import 'smxSaldiFyCliente_menu_lateral.dart';
 import 'smxSaldifyCliente_dashboard/smxSaldiFyCliente_dashboard.dart';
+import 'smxSaldifyCliente_screens/saldify_invitacion/smx_saldify_cliente_invitacion_estado.dart';
 
 class SmxSaldiFyCliente extends StatefulWidget {
   const SmxSaldiFyCliente({super.key});
@@ -31,10 +31,9 @@ class _SmxSaldiFyClienteState extends State<SmxSaldiFyCliente> {
         final mensajeValidacion = controller.mensajeValidacion;
 
         if (mensajeValidacion != null) {
-          return SmxSaldiFyScreenTmp(
-            title: 'Validacion de invitacion',
+          return SmxSaldiFyClienteInvitacionEstado(
+            title: controller.tituloValidacion,
             mensaje: mensajeValidacion,
-            btoBack: false,
           );
         }
 

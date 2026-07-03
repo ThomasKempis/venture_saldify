@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:venture_core_connect/smxDataBase/smxRowSet.dart';
 import 'package:venture_saldify/smxColors.dart';
+import 'package:venture_saldify/smxSaldify/smxSaldify_screens/smxSaldify_backgrounds/cliente_movimiento_bg.dart';
 import 'package:venture_widgets/smxCallBaseStateful.dart';
 import 'package:venture_widgets/smxController/smxControllerSendData.dart';
 
@@ -243,7 +244,7 @@ class _MovimientoCard extends StatelessWidget {
     );
 
     return Container(
-      padding: const EdgeInsets.all(12),
+      clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         color: data.cardBackground,
         borderRadius: BorderRadius.circular(14),
@@ -256,92 +257,102 @@ class _MovimientoCard extends StatelessWidget {
           ),
         ],
       ),
-      child: Row(
+      child: Stack(
         children: [
-          Container(
-            width: 9,
-            height: 52,
-            decoration: BoxDecoration(
-              color: data.barColor,
-              borderRadius: BorderRadius.circular(999),
-            ),
+          Positioned.fill(
+            child: ClienteMovimientoBg(accentColor: data.barColor),
           ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: Row(
               children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        concepto.isEmpty ? data.typeLabel : concepto,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          color: SmxColors.textDark,
-                          fontSize: 15,
-                          fontWeight: FontWeight.w900,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    _MovimientoStatusBadge(data: data),
-                  ],
+                Container(
+                  width: 9,
+                  height: 52,
+                  decoration: BoxDecoration(
+                    color: data.barColor,
+                    borderRadius: BorderRadius.circular(999),
+                  ),
                 ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Icon(
-                      Icons.event_outlined,
-                      color: SmxColors.textMuted,
-                      size: 14,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      fecha,
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              concepto.isEmpty ? data.typeLabel : concepto,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                color: SmxColors.textDark,
+                                fontSize: 15,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          _MovimientoStatusBadge(data: data),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.event_outlined,
+                            color: SmxColors.textMuted,
+                            size: 14,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            fecha,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              color: SmxColors.textMuted,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              data.typeLabel,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: data.typeColor,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 12),
+                ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 88),
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerRight,
+                    child: Text(
+                      importe,
                       maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
-                        color: SmxColors.textMuted,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w800,
+                        color: SmxColors.textDark,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w900,
                       ),
                     ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        data.typeLabel,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: data.typeColor,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w900,
-                        ),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               ],
-            ),
-          ),
-          const SizedBox(width: 12),
-          ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 88),
-            child: FittedBox(
-              fit: BoxFit.scaleDown,
-              alignment: Alignment.centerRight,
-              child: Text(
-                importe,
-                maxLines: 1,
-                style: const TextStyle(
-                  color: SmxColors.textDark,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
             ),
           ),
         ],

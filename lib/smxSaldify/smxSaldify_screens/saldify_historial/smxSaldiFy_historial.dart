@@ -17,8 +17,6 @@ class SmxSaldiFyHistorial extends StatefulWidget {
 }
 
 class _SmxSaldiFyHistorialState extends State<SmxSaldiFyHistorial> {
-  final Set<int> _loadingRows = {};
-
   @override
   Widget build(BuildContext context) {
     return SmxCallBaseStateful<SmxSaldiFyHistorialController>(
@@ -36,22 +34,13 @@ class _SmxSaldiFyHistorialState extends State<SmxSaldiFyHistorial> {
         child: _HistorialView(
           controller: controller,
           client: widget.client,
-          loadingRows: _loadingRows,
           onStatusChange: (index, status) async {
-            setState(() {
-              _loadingRows.add(index);
-            });
-
             final updated = await controller.updateMovimientoStatusAt(
               index,
               status,
             );
 
             if (!mounted) return;
-            setState(() {
-              _loadingRows.remove(index);
-            });
-
             if (updated) {
               setState(() {});
             }
@@ -65,13 +54,11 @@ class _SmxSaldiFyHistorialState extends State<SmxSaldiFyHistorial> {
 class _HistorialView extends StatelessWidget {
   final SmxSaldiFyHistorialController controller;
   final SmxSaldiFyClientTapData client;
-  final Set<int> loadingRows;
   final Future<void> Function(int index, int status) onStatusChange;
 
   const _HistorialView({
     required this.controller,
     required this.client,
-    required this.loadingRows,
     required this.onStatusChange,
   });
 
@@ -116,7 +103,6 @@ class _HistorialView extends StatelessWidget {
                       else
                         _HistorialPanel(
                           controller: controller,
-                          loadingRows: loadingRows,
                           onStatusChange: onStatusChange,
                         ),
                     ],
@@ -220,12 +206,10 @@ class _EmptyState extends StatelessWidget {
 
 class _HistorialPanel extends StatelessWidget {
   final SmxSaldiFyHistorialController controller;
-  final Set<int> loadingRows;
   final Future<void> Function(int index, int status) onStatusChange;
 
   const _HistorialPanel({
     required this.controller,
-    required this.loadingRows,
     required this.onStatusChange,
   });
 
@@ -264,7 +248,6 @@ class _HistorialPanel extends StatelessWidget {
                         index,
                       ),
                       canConfirmPago: controller.canConfirmPagoAt(index),
-                      isLoading: loadingRows.contains(index),
                       onStatusChange: (status) => onStatusChange(index, status),
                       index: index,
                     ),
@@ -334,7 +317,6 @@ class _HistorialRow extends StatelessWidget {
   final bool canSetCompraPendiente;
   final bool canSetCompraEntregada;
   final bool canConfirmPago;
-  final bool isLoading;
   final ValueChanged<int> onStatusChange;
   final int index;
 
@@ -348,7 +330,6 @@ class _HistorialRow extends StatelessWidget {
     required this.canSetCompraPendiente,
     required this.canSetCompraEntregada,
     required this.canConfirmPago,
-    required this.isLoading,
     required this.onStatusChange,
     required this.index,
   });
@@ -432,7 +413,6 @@ class _HistorialRow extends StatelessWidget {
                 alignment: Alignment.centerRight,
                 child: _MovimientoActions(
                   isPago: isPago,
-                  isLoading: isLoading,
                   canSetCompraPendiente: canSetCompraPendiente,
                   canSetCompraEntregada: canSetCompraEntregada,
                   canConfirmPago: canConfirmPago,
@@ -524,7 +504,6 @@ class _InfoPill extends StatelessWidget {
 
 class _MovimientoActions extends StatelessWidget {
   final bool isPago;
-  final bool isLoading;
   final bool canSetCompraPendiente;
   final bool canSetCompraEntregada;
   final bool canConfirmPago;
@@ -532,7 +511,6 @@ class _MovimientoActions extends StatelessWidget {
 
   const _MovimientoActions({
     required this.isPago,
-    required this.isLoading,
     required this.canSetCompraPendiente,
     required this.canSetCompraEntregada,
     required this.canConfirmPago,
@@ -541,14 +519,6 @@ class _MovimientoActions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (isLoading) {
-      return const SizedBox(
-        width: 22,
-        height: 22,
-        child: CircularProgressIndicator(strokeWidth: 2),
-      );
-    }
-
     if (isPago && canConfirmPago) {
       return _ActionPill(
         label: 'Confirmar deposito',

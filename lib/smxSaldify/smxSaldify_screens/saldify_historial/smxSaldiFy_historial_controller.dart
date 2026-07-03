@@ -134,14 +134,13 @@ class SmxSaldiFyHistorialController extends SmxController {
     }
 
     final aliasUpdate = 'ADD_SYSUSER40_SYSUSER50';
-    removeSql(aliasUpdate);
-    addSql(
+    addSTrans(
       aliasUpdate,
       "select * from ADD_SYSUSER40_SYSUSER50('$accion', $id, $status)",
     );
 
     await showDialogWait(context, () async {
-      await getRowSetFuture(aliasUpdate);
+      await getCallWS();
     });
 
     if (jsonSend.getError() != null) {

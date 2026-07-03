@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:venture_saldify/smxColors.dart';
@@ -481,11 +483,24 @@ class _LocationTile extends StatelessWidget {
                 ),
               ),
               Expanded(
-                child: SmxViewMap(
-                  geolocacion: cliente.location,
-                  controller: controller,
-                  onLine: false,
-                  isInvitar: false,
+                child: Stack(
+                  children: [
+                    Positioned.fill(
+                      child: SmxViewMap(
+                        geolocacion: cliente.location,
+                        controller: controller,
+                        onLine: false,
+                        isInvitar: false,
+                      ),
+                    ),
+                    Positioned(
+                      right: 14,
+                      bottom: 14,
+                      child: _GoogleMapsButton(
+                        onTap: () => _launchGoogleMaps(cliente.location),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
@@ -494,6 +509,131 @@ class _LocationTile extends StatelessWidget {
       },
     );
   }
+
+  Future<void> _launchGoogleMaps(String location) async {
+    final query = location.replaceAll(' ', '');
+    if (query.isEmpty) return;
+
+    final uri = Uri.https('www.google.com', '/maps/search/', {
+      'api': '1',
+      'query': query,
+    });
+
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
+  }
+}
+
+class _GoogleMapsButton extends StatelessWidget {
+  final VoidCallback onTap;
+
+  const _GoogleMapsButton({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: 'Abrir en Google Maps',
+      child: Material(
+        color: SmxColors.white,
+        elevation: 8,
+        shadowColor: SmxColors.blackAlpha(.18),
+        shape: const CircleBorder(),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          customBorder: const CircleBorder(),
+          child: const SizedBox(
+            width: 48,
+            height: 48,
+            child: Center(child: _GoogleMapsGlyph()),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _GoogleMapsGlyph extends StatelessWidget {
+  const _GoogleMapsGlyph();
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomPaint(
+      size: const Size(30, 30),
+      painter: _GoogleMapsGlyphPainter(),
+    );
+  }
+}
+
+class _GoogleMapsGlyphPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final stroke = size.width * .18;
+    final rect = Rect.fromLTWH(
+      stroke,
+      stroke,
+      size.width - stroke * 2,
+      size.height - stroke * 2,
+    );
+
+    Paint segment(Color color) => Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = stroke
+      ..strokeCap = StrokeCap.butt;
+
+    double deg(double value) => value * math.pi / 180;
+
+    canvas.drawArc(
+      rect,
+      deg(205),
+      deg(74),
+      false,
+      segment(const Color(0xFFEA4335)),
+    );
+    canvas.drawArc(
+      rect,
+      deg(279),
+      deg(87),
+      false,
+      segment(const Color(0xFF4285F4)),
+    );
+    canvas.drawArc(
+      rect,
+      deg(26),
+      deg(105),
+      false,
+      segment(const Color(0xFF34A853)),
+    );
+    canvas.drawArc(
+      rect,
+      deg(131),
+      deg(74),
+      false,
+      segment(const Color(0xFFFBBC05)),
+    );
+
+    final barPaint = Paint()
+      ..color = const Color(0xFF4285F4)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = stroke
+      ..strokeCap = StrokeCap.square;
+
+    canvas.drawLine(
+      Offset(size.width * .52, size.height * .50),
+      Offset(size.width * .86, size.height * .50),
+      barPaint,
+    );
+    canvas.drawLine(
+      Offset(size.width * .86, size.height * .50),
+      Offset(size.width * .86, size.height * .66),
+      barPaint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
 class _DiasTile extends StatelessWidget {

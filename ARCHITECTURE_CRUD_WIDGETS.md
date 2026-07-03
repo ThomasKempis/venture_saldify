@@ -476,6 +476,49 @@ Cada ficha futura deberia incluir:
 - como se usa en alta/edicion;
 - ejemplos reales.
 
+## Acciones SQL desde controllers de widgets
+
+Cuando un widget o pantalla necesita cargar datos auxiliares sin modificar la base, el controller puede usar el flujo normal de consulta:
+
+```dart
+addSql('ALIAS', 'select * from QRY_ALGO');
+await getRowSetFuture('ALIAS');
+```
+
+Pero si el SQL es un `select` sobre un stored procedure que realiza una accion, no debe llamarse con `addSql()`.
+
+Ejemplo sensible:
+
+```dart
+select * from ADD_ALGO(...)
+```
+
+Aunque empiece con `select *`, si el procedure `ADD_...` inserta, actualiza, elimina, reserva codigos o cambia estado, debe enviarse como transaccion:
+
+```dart
+addSTrans(
+  'ADD_ALGO',
+  "select * from ADD_ALGO(...)",
+);
+
+await getCallWS();
+```
+
+Luego el controller puede leer el rowset devuelto normalmente:
+
+```dart
+final rst = getRowset('ADD_ALGO');
+rst.first();
+final status = rst.getValue('TMPUSER99_STATUS');
+```
+
+Regla para widgets/controllers:
+
+- `addSql()` + `getRowSetFuture()` para queries, vistas y combos de solo lectura.
+- `addSTrans()` + `getCallWS()` para `select * from ADD_...` cuando el procedure tiene efectos de escritura.
+
+Esto evita doble ejecucion en el servidor por el conteo automatico de filas de `CRUD_SQL`.
+
 ## Nota para futuros colaboradores
 
 No tratar `venture_widgets` como una libreria visual generica.
