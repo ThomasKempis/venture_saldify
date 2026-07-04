@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:venture_core_connect/smxDataBase/smxRowSet.dart';
-import 'package:venture_saldify/smxSaldify/smxSaldify_logon/smxSaldify_codeInvitado.dart';
 import 'package:venture_saldify/smxApis/smxConstants.dart';
 import 'package:venture_widgets/smxClassDrivers.dart';
 import 'package:venture_widgets/smxController/smxController.dart';
 import 'package:venture_widgets/smxShowDialog/smxShowDialogs.dart';
 
+import '../../../smxSaldifyLogon/smxSaldifyCodeInvitado.dart';
 import 'smxSaldiFy_invita_clientes_models.dart';
 import 'smxSaldiFy_invita_modal.dart';
 

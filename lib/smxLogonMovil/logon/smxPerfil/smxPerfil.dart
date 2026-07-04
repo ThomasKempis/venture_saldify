@@ -242,7 +242,7 @@ class _SmxPerfil extends State<SmxPerfil> {
               // Círculo grande (avatar)
               InkWell(
                 onTap: () {
-                  _openUnderConstruction(context, 'Configuracion de perfil');
+                  //_openUnderConstruction(context, 'Configuracion de perfil');
                 },
                 borderRadius: BorderRadius.circular(40),
                 child: FutureBuilder<Uint8List>(
@@ -278,7 +278,7 @@ class _SmxPerfil extends State<SmxPerfil> {
               // Círculo pequeño (mano)
               InkWell(
                 onTap: () {
-                  _openUnderConstruction(context, 'Accion especial');
+                  //_openUnderConstruction(context, 'Accion especial');
                 },
                 borderRadius: BorderRadius.circular(12),
                 child: Container(

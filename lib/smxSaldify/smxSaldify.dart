@@ -3,6 +3,8 @@ import 'package:venture_saldify/smxApis/smxConstants.dart';
 import 'package:venture_saldify/smxColors.dart';
 import 'package:venture_saldify/smxLayout/smxLayout.dart';
 import '../smxLogonMovil/logon/smxLogonMovil_controller.dart';
+import '../smxSaldifyAssistant/smxSaldifyAssistant.dart';
+import '../smxSaldifyAssistant/smxSaldifyAssistant_context.dart';
 import 'smxSaldify_dashboard/smxSaldiFy_dashboard.dart';
 import 'smxSaldify_menu_lateral.dart';
 import 'smxSaldify_screens/smxSaldiFy_perfil.dart';
@@ -79,7 +81,10 @@ class _SmxSaldiFy extends State<SmxSaldiFy> {
     required SmxLayoutSize layout,
     Widget? menuButton,
   }) {
-    return _selectedIndex == 0
+    final screen = _selectedIndex == 0
+        ? SmxSaldifyAssistantScreen.dashboardAnfitrion
+        : SmxSaldifyAssistantScreen.perfilAnfitrion;
+    final page = _selectedIndex == 0
         ? SmxSaldiFyDashboard(
             key: ValueKey('saldify-dashboard-$_dashboardRefreshRevision'),
             adminName: adminName,
@@ -98,6 +103,14 @@ class _SmxSaldiFy extends State<SmxSaldiFy> {
             pagePadding: layout.saldifyPagePadding,
             menuButton: menuButton,
           );
+
+    return SmxSaldifyAssistantHost(
+      key: ValueKey(screen),
+      role: SmxSaldifyAssistantRole.anfitrion,
+      screen: screen,
+      isMobile: layout.isMobile,
+      child: page,
+    );
   }
 
   void _selectPage(int index) {

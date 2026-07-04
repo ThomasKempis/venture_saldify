@@ -2,13 +2,13 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:universal_html/html.dart' as html;
 import 'package:venture_saldify/smxApis/smxConstants.dart';
-import 'package:venture_saldify/smxSaldify/smxSaldify_logon/smxSaldify_logon.dart';
+import 'package:venture_saldify/smxSaldifyLogon/smxSaldifyLogon.dart';
 import 'package:venture_saldify/smxThemeData.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  _applyDevCodigoInvitacion();
+  //_applyDevCodigoInvitacion();
 
   final queryParameters = Uri.base.queryParameters;
   final saldifyLogonAssets = SmxSaldifyLogon.warmUpAssets();

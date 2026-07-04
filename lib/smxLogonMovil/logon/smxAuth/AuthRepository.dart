@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:venture_saldify/smxSaldify/smxSaldify_logon/smxSaldify_accessSession.dart';
+
+import '../../../smxSaldifyLogon/smxSaldifyAccessSession.dart';
 
 class AuthRepository {
   final FirebaseAuth _auth = FirebaseAuth.instance;

@@ -6,6 +6,10 @@ import 'package:venture_widgets/smxConstants_widgets.dart';
 import '../firebase_options.dart';
 import '../smxLogonMovil/logon/smxLogonMovil_controller.dart';
 
+enum SmxServiciosSaldify {
+  CHATBOT_IA_SALDIFY
+}
+
 abstract class SmxConstants {
   static late SmxLogonMovil_controller controllerMain;
   static SmxRowSet? rstCompraVacia;

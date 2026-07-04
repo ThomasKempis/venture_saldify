@@ -3,10 +3,12 @@ import 'package:flutter/services.dart';
 import 'package:venture_saldify/smxColors.dart';
 import 'package:venture_saldify/smxLayout/smxLayout.dart';
 import 'package:venture_saldify/smxLogonMovil/logon/smxLogonMovil.dart';
+import 'package:venture_saldify/smxSaldifyAssistant/smxSaldifyAssistant.dart';
+import 'package:venture_saldify/smxSaldifyAssistant/smxSaldifyAssistant_context.dart';
 import 'package:venture_widgets/smxCallBaseStateful.dart';
 import 'package:venture_widgets/smxController/smxControllerSendData.dart';
 
-import 'smxSaldify_logon_controller.dart';
+import 'smxSaldifyLogon_controller.dart';
 
 class SmxSaldifyLogon extends StatelessWidget {
   static const logoAsset = SmxSaldifyLogonController.logoAsset;
@@ -101,7 +103,11 @@ class _SmxSaldifyLogonBodyState extends State<_SmxSaldifyLogonBody> {
   void _openLogonMovil() {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (_) => const SmxLogonMovil()),
+      PageRouteBuilder(
+        opaque: false,
+        pageBuilder: (_, __, ___) => const SmxLogonMovil(),
+        transitionsBuilder: (_, __, ___, child) => child,
+      ),
     );
   }
 
@@ -145,85 +151,104 @@ class _SmxSaldifyLogonBodyState extends State<_SmxSaldifyLogonBody> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: SmxColors.transparent,
-      body: SmxSaldifyBackground(
-        child: SafeArea(
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final compact = constraints.maxWidth < 520;
-              final welcomeAsset = widget.controller.getWelcomeAsset(
-                constraints.maxWidth,
-              );
-              final maxWidth = compact ? constraints.maxWidth : 760.0;
-              final horizontalPadding = compact ? 22.0 : 36.0;
-              final topPadding = compact ? 0.0 : 36.0;
-              final bottomPadding = compact ? 24.0 : 36.0;
+    return LayoutBuilder(
+      builder: (context, rootConstraints) {
+        final layout = SmxLayout.sizeFromWidth(rootConstraints.maxWidth);
 
-              return AnimatedSwitcher(
-                duration: const Duration(milliseconds: 240),
-                switchInCurve: Curves.easeOutCubic,
-                switchOutCurve: Curves.easeOutCubic,
-                child: widget.controller.contentReady
-                    ? SingleChildScrollView(
-                        key: const ValueKey('saldify-logon-content'),
-                        padding: EdgeInsets.fromLTRB(
-                          horizontalPadding,
-                          topPadding,
-                          horizontalPadding,
-                          bottomPadding,
-                        ),
-                        child: ConstrainedBox(
-                          constraints: BoxConstraints(
-                            minHeight:
-                                constraints.maxHeight -
-                                MediaQuery.of(context).padding.vertical -
-                                topPadding -
+        return SmxSaldifyAssistantHost(
+          role: SmxSaldifyAssistantRole.publico,
+          screen: SmxSaldifyAssistantScreen.logon,
+          isMobile: layout.isMobile,
+          child: Scaffold(
+            backgroundColor: SmxColors.transparent,
+            body: SmxSaldifyBackground(
+              child: SafeArea(
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final compact = constraints.maxWidth < 520;
+                    final welcomeAsset = widget.controller.getWelcomeAsset(
+                      constraints.maxWidth,
+                    );
+                    final maxWidth = compact ? constraints.maxWidth : 760.0;
+                    final horizontalPadding = compact ? 22.0 : 36.0;
+                    final topPadding = compact ? 0.0 : 36.0;
+                    final bottomPadding = compact ? 24.0 : 36.0;
+
+                    return AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 240),
+                      switchInCurve: Curves.easeOutCubic,
+                      switchOutCurve: Curves.easeOutCubic,
+                      child: widget.controller.contentReady
+                          ? SingleChildScrollView(
+                              key: const ValueKey('saldify-logon-content'),
+                              padding: EdgeInsets.fromLTRB(
+                                horizontalPadding,
+                                topPadding,
+                                horizontalPadding,
                                 bottomPadding,
-                          ),
-                          child: Center(
-                            child: ConstrainedBox(
-                              constraints: BoxConstraints(maxWidth: maxWidth),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.stretch,
-                                children: [
-                                  _SaldifyBrand(compact: compact),
-                                  _WelcomeGraphic(
-                                    compact: compact,
-                                    asset: welcomeAsset,
+                              ),
+                              child: ConstrainedBox(
+                                constraints: BoxConstraints(
+                                  minHeight:
+                                      constraints.maxHeight -
+                                      MediaQuery.of(context).padding.vertical -
+                                      topPadding -
+                                      bottomPadding,
+                                ),
+                                child: Center(
+                                  child: ConstrainedBox(
+                                    constraints: BoxConstraints(
+                                      maxWidth: maxWidth,
+                                    ),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.stretch,
+                                      children: [
+                                        _SaldifyBrand(compact: compact),
+                                        _WelcomeGraphic(
+                                          compact: compact,
+                                          asset: welcomeAsset,
+                                        ),
+                                        _WelcomeCard(
+                                          compact: compact,
+                                          hasCodigoInicialValido: widget
+                                              .controller
+                                              .hasCodigoInicialValido,
+                                          codigoController: widget
+                                              .controller
+                                              .codigoController,
+                                          codigoError:
+                                              widget.controller.codigoError,
+                                          onAnfitrionTap: _onAnfitrionTap,
+                                          onInvitadoTap: _onInvitadoTap,
+                                          onCodigoChanged: widget
+                                              .controller
+                                              .clearCodigoError,
+                                          onInvitadoCodigoTap: () =>
+                                              widget.controller.validarCodigo(
+                                                _onCodigoInvitadoValido,
+                                              ),
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                                  _WelcomeCard(
-                                    compact: compact,
-                                    hasCodigoInicialValido: widget
-                                        .controller
-                                        .hasCodigoInicialValido,
-                                    codigoController:
-                                        widget.controller.codigoController,
-                                    codigoError: widget.controller.codigoError,
-                                    onAnfitrionTap: _onAnfitrionTap,
-                                    onInvitadoTap: _onInvitadoTap,
-                                    onCodigoChanged:
-                                        widget.controller.clearCodigoError,
-                                    onInvitadoCodigoTap: () => widget.controller
-                                        .validarCodigo(_onCodigoInvitadoValido),
-                                  ),
-                                ],
+                                ),
+                              ),
+                            )
+                          : const Center(
+                              key: ValueKey('saldify-logon-loading'),
+                              child: CircularProgressIndicator(
+                                color: SmxColors.white,
                               ),
                             ),
-                          ),
-                        ),
-                      )
-                    : const Center(
-                        key: ValueKey('saldify-logon-loading'),
-                        child: CircularProgressIndicator(
-                          color: SmxColors.white,
-                        ),
-                      ),
-              );
-            },
+                    );
+                  },
+                ),
+              ),
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
@@ -404,7 +429,32 @@ class _WelcomeCard extends StatelessWidget {
             borderColor: hasCodigoInicialValido
                 ? const Color(0xFFDDE4EB)
                 : const Color(0xFFC7E9D9),
-            onTap: hasCodigoInicialValido ? null : onAnfitrionTap,
+            onTap: hasCodigoInicialValido
+                ? null
+                : (onAnfitrionTap ??
+                      () => Navigator.push(
+                        context,
+                        PageRouteBuilder(
+                          opaque: false,
+                          pageBuilder: (_, __, ___) => const SmxLogonMovil(),
+                          transitionsBuilder: (_, __, ___, child) => child,
+                        ),
+                      )),
+          ),
+          SizedBox(height: compact ? 12 : 14),
+          _AccessOptionCard(
+            compact: compact,
+            icon: Icons.person_pin_circle_rounded,
+            title: 'Invitado (Cliente)',
+            subtitle: 'Ingresa con el último código validado',
+            accentColor: const Color(0xFF1454B8),
+            backgroundColor: hasCodigoInicialValido
+                ? const Color(0xFFF0F4F7)
+                : (compact ? SmxColors.white : const Color(0xFFF5FBFF)),
+            borderColor: hasCodigoInicialValido
+                ? const Color(0xFFDDE4EB)
+                : const Color(0xFFCFE0F6),
+            onTap: hasCodigoInicialValido ? null : onInvitadoTap,
           ),
           SizedBox(height: compact ? 12 : 14),
           _InvitadoOptionCard(
@@ -412,7 +462,6 @@ class _WelcomeCard extends StatelessWidget {
             hasCodigoInicialValido: hasCodigoInicialValido,
             codigoController: codigoController,
             codigoError: codigoError,
-            onInvitadoTap: onInvitadoTap ?? onInvitadoCodigoTap,
             onCodigoChanged: onCodigoChanged,
             onInvitadoCodigoTap: onInvitadoCodigoTap,
           ),
@@ -708,7 +757,6 @@ class _InvitadoOptionCard extends StatelessWidget {
   final bool hasCodigoInicialValido;
   final TextEditingController codigoController;
   final String? codigoError;
-  final VoidCallback? onInvitadoTap;
   final VoidCallback onCodigoChanged;
   final VoidCallback onInvitadoCodigoTap;
 
@@ -717,7 +765,6 @@ class _InvitadoOptionCard extends StatelessWidget {
     required this.hasCodigoInicialValido,
     required this.codigoController,
     required this.codigoError,
-    required this.onInvitadoTap,
     required this.onCodigoChanged,
     required this.onInvitadoCodigoTap,
   });
@@ -730,149 +777,99 @@ class _InvitadoOptionCard extends StatelessWidget {
     final cardBorderColor = hasCodigoInicialValido
         ? const Color(0xFFDDE4EB)
         : const Color(0xFFCFE0F6);
+    final radius = compact ? 16.0 : 20.0;
 
-    return Container(
-      padding: EdgeInsets.all(compact ? 12 : 16),
-      decoration: BoxDecoration(
-        color: cardBgColor,
-        borderRadius: BorderRadius.circular(compact ? 16 : 20),
-        border: Border.all(color: cardBorderColor, width: compact ? 1.4 : 1.4),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Material(
-            color: SmxColors.transparent,
-            child: InkWell(
-              borderRadius: BorderRadius.circular(compact ? 13 : 16),
-              onTap: hasCodigoInicialValido ? null : onInvitadoTap,
-              child: Opacity(
-                opacity: hasCodigoInicialValido ? 0.5 : 1,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 2),
-                  child: Row(
-                    children: [
-                      _OptionIcon(
-                        compact: compact,
-                        icon: Icons.person_pin_circle_rounded,
-                        color: const Color(0xFF1454B8),
-                      ),
-                      SizedBox(width: compact ? 12 : 14),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Invitado (Cliente)',
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                color: SmxColors.textDark,
-                                fontSize: compact ? 16 : 18,
-                                fontWeight: FontWeight.w900,
-                                height: 1.05,
-                              ),
-                            ),
-                            SizedBox(height: compact ? 5 : 6),
-                            Text(
-                              'Ingresa con el último código validado',
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                color: SmxColors.textMuted,
-                                fontSize: compact ? 13 : 14,
-                                fontWeight: FontWeight.w700,
-                                height: 1.18,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const Icon(
-                        Icons.chevron_right_rounded,
-                        color: Color(0xFF1454B8),
-                        size: 28,
-                      ),
-                    ],
+    return Material(
+      color: cardBgColor,
+      borderRadius: BorderRadius.circular(radius),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(radius),
+          border: Border.all(
+            color: cardBorderColor,
+            width: compact ? 1.4 : 1.4,
+          ),
+        ),
+        child: Padding(
+          padding: EdgeInsets.all(compact ? 12 : 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              TextField(
+                controller: codigoController,
+                enabled: !hasCodigoInicialValido,
+                onChanged: (_) => onCodigoChanged(),
+                textCapitalization: TextCapitalization.characters,
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9-]')),
+                  UpperCaseTextFormatter(),
+                ],
+                decoration: InputDecoration(
+                  hintText: 'Código de invitación',
+                  errorText: codigoError,
+                  filled: true,
+                  fillColor: hasCodigoInicialValido
+                      ? const Color(0xFFE8EEF2)
+                      : SmxColors.white,
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: compact ? 12 : 15,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(compact ? 13 : 16),
+                    borderSide: const BorderSide(color: Color(0xFFD1DAE4)),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(compact ? 13 : 16),
+                    borderSide: const BorderSide(color: Color(0xFFD1DAE4)),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(compact ? 13 : 16),
+                    borderSide: const BorderSide(
+                      color: Color(0xFF1454B8),
+                      width: 1.6,
+                    ),
+                  ),
+                  prefixIcon: const Icon(
+                    Icons.confirmation_number_outlined,
+                    color: Color(0xFF1454B8),
+                  ),
+                ),
+                style: TextStyle(
+                  color: hasCodigoInicialValido
+                      ? SmxColors.textMuted
+                      : SmxColors.textDark,
+                  fontSize: compact ? 15 : 17,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 1,
+                ),
+              ),
+              SizedBox(height: compact ? 10 : 12),
+              SizedBox(
+                height: compact ? 46 : 52,
+                child: ElevatedButton.icon(
+                  onPressed: onInvitadoCodigoTap,
+                  icon: compact
+                      ? const SizedBox.shrink()
+                      : const Icon(Icons.check_circle_outline_rounded),
+                  label: const Text('Validar código'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF0647B7),
+                    foregroundColor: SmxColors.white,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(compact ? 13 : 16),
+                    ),
+                    textStyle: TextStyle(
+                      fontSize: compact ? 15 : 16,
+                      fontWeight: FontWeight.w900,
+                    ),
                   ),
                 ),
               ),
-            ),
-          ),
-          SizedBox(height: compact ? 12 : 14),
-          TextField(
-            controller: codigoController,
-            enabled: !hasCodigoInicialValido,
-            onChanged: (_) => onCodigoChanged(),
-            textCapitalization: TextCapitalization.characters,
-            inputFormatters: [
-              FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9-]')),
-              UpperCaseTextFormatter(),
             ],
-            decoration: InputDecoration(
-              hintText: 'Código de invitación',
-              errorText: codigoError,
-              filled: true,
-              fillColor: hasCodigoInicialValido
-                  ? const Color(0xFFE8EEF2)
-                  : SmxColors.white,
-              contentPadding: EdgeInsets.symmetric(
-                horizontal: 14,
-                vertical: compact ? 12 : 15,
-              ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(compact ? 13 : 16),
-                borderSide: const BorderSide(color: Color(0xFFD1DAE4)),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(compact ? 13 : 16),
-                borderSide: const BorderSide(color: Color(0xFFD1DAE4)),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(compact ? 13 : 16),
-                borderSide: const BorderSide(
-                  color: Color(0xFF1454B8),
-                  width: 1.6,
-                ),
-              ),
-              prefixIcon: const Icon(
-                Icons.confirmation_number_outlined,
-                color: Color(0xFF1454B8),
-              ),
-            ),
-            style: TextStyle(
-              color: hasCodigoInicialValido
-                  ? SmxColors.textMuted
-                  : SmxColors.textDark,
-              fontSize: compact ? 15 : 17,
-              fontWeight: FontWeight.w900,
-              letterSpacing: 1,
-            ),
           ),
-          SizedBox(height: compact ? 10 : 12),
-          SizedBox(
-            height: compact ? 46 : 52,
-            child: ElevatedButton.icon(
-              onPressed: onInvitadoCodigoTap,
-              icon: compact
-                  ? const SizedBox.shrink()
-                  : const Icon(Icons.check_circle_outline_rounded),
-              label: const Text('Validar código'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF0647B7),
-                foregroundColor: SmxColors.white,
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(compact ? 13 : 16),
-                ),
-                textStyle: TextStyle(
-                  fontSize: compact ? 15 : 16,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }

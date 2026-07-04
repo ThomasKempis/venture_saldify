@@ -15,9 +15,9 @@ import 'package:venture_core_connect/smxDataBase/smxRowSet.dart';
 import 'package:venture_widgets/smxShowDialog/smxShowDialogs.dart';
 
 import '../../smxApis/smxLocationReporter.dart';
-import '../../smxSaldify/smxSaldify_logon/smxSaldify_accessSession.dart';
 import '../../smxSaldify/smxSaldify.dart';
 import '../../smxSaldifyCliente/smxSaldifyCliente.dart';
+import '../../smxSaldifyLogon/smxSaldifyAccessSession.dart';
 
 class SmxLogonMovil_controller extends SmxTmpCtl {
   static const edad_maxima = 14;

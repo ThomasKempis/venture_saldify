@@ -6,9 +6,9 @@ import 'package:venture_widgets/smxController/smxController.dart';
 import 'package:venture_widgets/smxShowDialog/smxShowDialogs.dart';
 import 'package:universal_html/html.dart' as html;
 
-import 'smxSaldify_codeInvitado.dart';
+import 'smxSaldifyCodeInvitado.dart';
 import '../../smxApis/smxConstants.dart';
-import 'smxSaldify_accessSession.dart';
+import 'smxSaldifyAccessSession.dart';
 
 class SmxSaldifyLogonController extends SmxController {
   static const logoAsset = 'assets/images/logo_logon_trimmed.png';
@@ -118,12 +118,9 @@ class SmxSaldifyLogonController extends SmxController {
 
   bool cargarInvitadoGuardado(BuildContext context) {
     final codigo = _codigoGuardado;
-    final uuidAnfitrion =
-        html.window.localStorage[_uuidAnfitrionStorageKey]?.trim() ?? '';
-    final correoInvitado =
-        html.window.localStorage[_correoInvitadoStorageKey]?.trim() ?? '';
-    final uuidInvitado =
-        html.window.localStorage[_uuidInvitadoStorageKey]?.trim() ?? '';
+    final uuidAnfitrion = html.window.localStorage[_uuidAnfitrionStorageKey]?.trim() ?? '';
+    final correoInvitado = html.window.localStorage[_correoInvitadoStorageKey]?.trim() ?? '';
+    final uuidInvitado = html.window.localStorage[_uuidInvitadoStorageKey]?.trim() ?? '';
 
     if (codigo.isEmpty ||
         uuidAnfitrion.isEmpty ||
