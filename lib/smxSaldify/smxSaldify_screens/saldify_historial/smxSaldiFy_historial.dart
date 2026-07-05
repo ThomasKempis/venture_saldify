@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:venture_saldify/smxColors.dart';
 import 'package:venture_saldify/smxLayout/smxLayout.dart';
 import 'package:venture_saldify/smxSaldify/smxSaldify_dashboard/smxSaldiFy_clientes/smxSaldiFy_clientes.dart';
+import 'package:venture_saldify/smxSaldifyBackgrounds/historial_linear_bg.dart';
 import 'package:venture_widgets/smxCallBaseStateful.dart';
 import 'package:venture_widgets/smxController/smxControllerSendData.dart';
 
@@ -221,7 +222,7 @@ class _HistorialPanel extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       child: Stack(
         children: [
-          Positioned.fill(child: CustomPaint(painter: _HistorialBgPainter())),
+          const Positioned.fill(child: HistorialLinearBg()),
           Padding(
             padding: const EdgeInsets.all(10),
             child: ClipRRect(
@@ -271,9 +272,9 @@ class _SaldoResumen extends StatelessWidget {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-      decoration: const BoxDecoration(
-        color: Color(0xFFFFFFFF),
-        border: Border(bottom: BorderSide(color: Color(0x14000000))),
+      decoration: BoxDecoration(
+        color: SmxColors.whiteAlpha(.88),
+        border: Border(bottom: BorderSide(color: SmxColors.blackAlpha(.08))),
       ),
       child: Row(
         children: [
@@ -341,8 +342,8 @@ class _HistorialRow extends StatelessWidget {
         canSetCompraPendiente || canSetCompraEntregada || canConfirmPago;
     final accent = isPago ? const Color(0xFF168553) : const Color(0xFFE05A47);
     final bg = index.isEven
-        ? const Color(0xFFF6FBFA).withValues(alpha: .94)
-        : const Color(0xFFEAF6F3).withValues(alpha: .94);
+        ? const Color(0xFFEAF6F3).withValues(alpha: .70)
+        : SmxColors.whiteAlpha(.78);
 
     return Container(
       width: double.infinity,
@@ -629,48 +630,4 @@ class _TipoBadge extends StatelessWidget {
       ),
     );
   }
-}
-
-class _HistorialBgPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final receiptPaint = Paint()
-      ..color = const Color(0xFF14577A).withValues(alpha: .045)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 3
-      ..strokeCap = StrokeCap.round;
-    final accentPaint = Paint()
-      ..color = const Color(0xFF58D69B).withValues(alpha: .08);
-    final coralPaint = Paint()
-      ..color = const Color(0xFFE84D3D).withValues(alpha: .055);
-
-    canvas.drawCircle(
-      Offset(size.width * .94, size.height * .10),
-      size.shortestSide * .18,
-      accentPaint,
-    );
-    canvas.drawCircle(
-      Offset(size.width * .08, size.height * .88),
-      size.shortestSide * .16,
-      coralPaint,
-    );
-
-    final receipt = RRect.fromRectAndRadius(
-      Rect.fromLTWH(size.width * .62, 18, size.width * .28, 96),
-      const Radius.circular(12),
-    );
-    canvas.drawRRect(receipt, receiptPaint);
-
-    for (var i = 0; i < 4; i++) {
-      final y = 40.0 + (i * 16);
-      canvas.drawLine(
-        Offset(size.width * .66, y),
-        Offset(size.width * .84, y),
-        receiptPaint,
-      );
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

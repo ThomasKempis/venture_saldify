@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:venture_saldify/smxColors.dart';
 import 'package:venture_saldify/smxLayout/smxLayout.dart';
+import 'package:venture_saldify/smxSaldifyBackgrounds/saldify_circles_background.dart';
 import 'package:venture_widgets/smxCallBaseStateful.dart';
 import 'package:venture_widgets/smxController/smxControllerSendData.dart';
 
@@ -374,12 +375,18 @@ class _ClientCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final accentColor = switch (statusType) {
+      _ClientStatusType.ok => SmxColors.successForeground,
+      _ClientStatusType.warning => SmxColors.warningForeground,
+      _ClientStatusType.alert => SmxColors.alertForeground,
+      _ClientStatusType.danger => SmxColors.dangerForeground,
+    };
+
     return Material(
       color: SmxColors.whiteAlpha(.94),
       borderRadius: BorderRadius.circular(20),
       clipBehavior: Clip.antiAlias,
       child: Ink(
-        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
@@ -390,59 +397,75 @@ class _ClientCard extends StatelessWidget {
             ),
           ],
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Stack(
           children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    name,
-                    style: const TextStyle(
-                      color: SmxColors.textDark,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
+            Positioned.fill(
+              child: CustomPaint(
+                painter: SaldifyCirclesBackgroundPainter(
+                  accentColor: accentColor,
                 ),
-                _StatusBadge(label: status, statusType: statusType),
-              ],
+              ),
             ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: _ClientData(label: 'Corte', value: cutDate),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: _ClientData(label: 'Credito', value: credit),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: _ClientData(
-                    label: 'Disponible',
-                    value: availableCredit,
-                    emphasis: true,
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: SmxColors.textDark,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                      ),
+                      _StatusBadge(label: status, statusType: statusType),
+                    ],
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            Row(
-              children: [
-                Expanded(
-                  child: _ClientData(label: 'Compras', value: purchases),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: _ClientData(label: 'Pagos', value: payments),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: _ClientData(label: 'Saldo', value: balance),
-                ),
-              ],
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _ClientData(label: 'Corte', value: cutDate),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: _ClientData(label: 'Credito', value: credit),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: _ClientData(
+                          label: 'Disponible',
+                          value: availableCredit,
+                          emphasis: true,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _ClientData(label: 'Compras', value: purchases),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: _ClientData(label: 'Pagos', value: payments),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: _ClientData(label: 'Saldo', value: balance),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ],
         ),

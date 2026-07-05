@@ -3,7 +3,7 @@ import 'package:venture_core_connect/smxDataBase/smxRowSet.dart';
 import 'package:venture_saldify/smxColors.dart';
 import 'package:venture_saldify/smxLayout/smxLayout.dart';
 import 'package:venture_saldify/smxSaldify/smxSaldify_dashboard/smxSaldiFy_clientes/smxSaldiFy_clientes.dart';
-import 'package:venture_saldify/smxSaldify/smxSaldify_screens/smxSaldify_backgrounds/operacion_bg_panel.dart';
+import 'package:venture_saldify/smxSaldifyBackgrounds/operacion_bg_panel.dart';
 import 'package:venture_widgets/smxCallBaseStateful.dart';
 import 'package:venture_widgets/smxController/smxControllerSendData.dart';
 import 'package:venture_widgets/smxDatePicker/smxDatePicker.dart';

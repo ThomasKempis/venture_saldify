@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:venture_core_connect/smxDataBase/smxRowSet.dart';
 import 'package:venture_saldify/smxColors.dart';
-import 'package:venture_saldify/smxSaldify/smxSaldify_screens/smxSaldify_backgrounds/saldify_circles_background.dart';
+import 'package:venture_saldify/smxSaldifyBackgrounds/saldify_circles_background.dart';
 import 'package:venture_widgets/smxCallBaseStateful.dart';
 import 'package:venture_widgets/smxController/smxControllerSendData.dart';
 

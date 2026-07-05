@@ -2,11 +2,12 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:venture_saldify/smxApis/SmxViewMap.dart';
 import 'package:venture_saldify/smxColors.dart';
 import 'package:venture_saldify/smxLayout/smxLayout.dart';
+import 'package:venture_saldify/smxSaldifyBackgrounds/saldify_circles_background.dart';
 import 'package:venture_widgets/smxCallBaseStateful.dart';
 import 'package:venture_widgets/smxController/smxControllerSendData.dart';
-import 'package:venture_widgets/smxViewMap/smxViewMap.dart';
 
 import 'smxSaldiFy_cobranza_controller.dart';
 
@@ -329,12 +330,19 @@ class _CobranzaCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final statusType = _StatusType.fromValue(cliente.statusType);
+    final accentColor = switch (statusType) {
+      _StatusType.danger => SmxColors.dangerForeground,
+      _StatusType.alert => SmxColors.alertForeground,
+      _StatusType.warning => SmxColors.warningForeground,
+      _StatusType.ok => SmxColors.successForeground,
+    };
+
     return Material(
       color: SmxColors.whiteAlpha(.95),
       borderRadius: BorderRadius.circular(18),
       clipBehavior: Clip.antiAlias,
       child: Ink(
-        padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(18),
           boxShadow: [
@@ -345,16 +353,30 @@ class _CobranzaCard extends StatelessWidget {
             ),
           ],
         ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Stack(
           children: [
-            _LocationColumn(
-              cliente: cliente,
-              controller: controller,
-              size: compact ? 70 : 78,
+            Positioned.fill(
+              child: CustomPaint(
+                painter: SaldifyCirclesBackgroundPainter(
+                  accentColor: accentColor,
+                ),
+              ),
             ),
-            const SizedBox(width: 12),
-            Expanded(child: _CobranzaInfo(cliente: cliente)),
+            Padding(
+              padding: const EdgeInsets.all(14),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _LocationColumn(
+                    cliente: cliente,
+                    controller: controller,
+                    size: compact ? 70 : 78,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(child: _CobranzaInfo(cliente: cliente)),
+                ],
+              ),
+            ),
           ],
         ),
       ),

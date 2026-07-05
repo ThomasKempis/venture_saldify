@@ -5,6 +5,7 @@ import 'package:venture_saldify/smxLayout/smxLayout.dart';
 import 'package:venture_saldify/smxLogonMovil/logon/smxLogonMovil.dart';
 import 'package:venture_saldify/smxSaldifyAssistant/smxSaldifyAssistant.dart';
 import 'package:venture_saldify/smxSaldifyAssistant/smxSaldifyAssistant_context.dart';
+import 'package:venture_saldify/smxSaldifyBackgrounds/logon_access_bg.dart';
 import 'package:venture_widgets/smxCallBaseStateful.dart';
 import 'package:venture_widgets/smxController/smxControllerSendData.dart';
 
@@ -372,9 +373,8 @@ class _WelcomeCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final card = Container(
-      padding: EdgeInsets.all(compact ? 16 : 24),
       decoration: BoxDecoration(
-        color: SmxColors.white.withValues(alpha: .95),
+        color: SmxColors.whiteAlpha(.95),
         borderRadius: BorderRadius.circular(compact ? 24 : 32),
         boxShadow: [
           BoxShadow(
@@ -384,86 +384,97 @@ class _WelcomeCard extends StatelessWidget {
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+      clipBehavior: Clip.antiAlias,
+      child: Stack(
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Text(
-                  'Bienvenido',
-                  textAlign: TextAlign.left,
+          const Positioned.fill(child: LogonAccessBg()),
+          Padding(
+            padding: EdgeInsets.all(compact ? 16 : 24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        'Bienvenido',
+                        textAlign: TextAlign.left,
+                        style: TextStyle(
+                          color: SmxColors.textDark,
+                          fontSize: compact ? 27 : 36,
+                          fontWeight: FontWeight.w900,
+                          height: 1,
+                        ),
+                      ),
+                    ),
+                    _InfoButton(onTap: () => _showAccessInfo(context)),
+                  ],
+                ),
+                SizedBox(height: compact ? 8 : 10),
+                Text(
+                  'Elige cómo quieres ingresar a SaldiFY.',
+                  textAlign: compact ? TextAlign.left : TextAlign.center,
                   style: TextStyle(
-                    color: SmxColors.textDark,
-                    fontSize: compact ? 27 : 36,
-                    fontWeight: FontWeight.w900,
-                    height: 1,
+                    color: SmxColors.textMuted,
+                    fontSize: compact ? 14 : 17,
+                    fontWeight: FontWeight.w700,
+                    height: 1.25,
                   ),
                 ),
-              ),
-              _InfoButton(onTap: () => _showAccessInfo(context)),
-            ],
-          ),
-          SizedBox(height: compact ? 8 : 10),
-          Text(
-            'Elige cómo quieres ingresar a SaldiFY.',
-            textAlign: compact ? TextAlign.left : TextAlign.center,
-            style: TextStyle(
-              color: SmxColors.textMuted,
-              fontSize: compact ? 14 : 17,
-              fontWeight: FontWeight.w700,
-              height: 1.25,
+                SizedBox(height: compact ? 16 : 22),
+                _AccessOptionCard(
+                  compact: compact,
+                  icon: Icons.storefront_rounded,
+                  title: 'Anfitrión (Empresa)',
+                  subtitle: 'Gestiona créditos y clientes',
+                  accentColor: SmxColors.successForeground,
+                  backgroundColor: hasCodigoInicialValido
+                      ? const Color(0xFFF0F4F7)
+                      : (compact ? SmxColors.white : const Color(0xFFEAF8F0)),
+                  borderColor: hasCodigoInicialValido
+                      ? const Color(0xFFDDE4EB)
+                      : const Color(0xFFC7E9D9),
+                  onTap: hasCodigoInicialValido
+                      ? null
+                      : (onAnfitrionTap ??
+                            () => Navigator.push(
+                              context,
+                              PageRouteBuilder(
+                                opaque: false,
+                                pageBuilder: (_, __, ___) =>
+                                    const SmxLogonMovil(),
+                                transitionsBuilder: (_, __, ___, child) =>
+                                    child,
+                              ),
+                            )),
+                ),
+                SizedBox(height: compact ? 12 : 14),
+                _AccessOptionCard(
+                  compact: compact,
+                  icon: Icons.person_pin_circle_rounded,
+                  title: 'Invitado (Cliente)',
+                  subtitle: 'Ingresa con el último código validado',
+                  accentColor: const Color(0xFF1454B8),
+                  backgroundColor: hasCodigoInicialValido
+                      ? const Color(0xFFF0F4F7)
+                      : (compact ? SmxColors.white : const Color(0xFFF5FBFF)),
+                  borderColor: hasCodigoInicialValido
+                      ? const Color(0xFFDDE4EB)
+                      : const Color(0xFFCFE0F6),
+                  onTap: hasCodigoInicialValido ? null : onInvitadoTap,
+                ),
+                SizedBox(height: compact ? 12 : 14),
+                _InvitadoOptionCard(
+                  compact: compact,
+                  hasCodigoInicialValido: hasCodigoInicialValido,
+                  codigoController: codigoController,
+                  codigoError: codigoError,
+                  onCodigoChanged: onCodigoChanged,
+                  onInvitadoCodigoTap: onInvitadoCodigoTap,
+                ),
+              ],
             ),
-          ),
-          SizedBox(height: compact ? 16 : 22),
-          _AccessOptionCard(
-            compact: compact,
-            icon: Icons.storefront_rounded,
-            title: 'Anfitrión (Empresa)',
-            subtitle: 'Gestiona créditos y clientes',
-            accentColor: SmxColors.successForeground,
-            backgroundColor: hasCodigoInicialValido
-                ? const Color(0xFFF0F4F7)
-                : (compact ? SmxColors.white : const Color(0xFFEAF8F0)),
-            borderColor: hasCodigoInicialValido
-                ? const Color(0xFFDDE4EB)
-                : const Color(0xFFC7E9D9),
-            onTap: hasCodigoInicialValido
-                ? null
-                : (onAnfitrionTap ??
-                      () => Navigator.push(
-                        context,
-                        PageRouteBuilder(
-                          opaque: false,
-                          pageBuilder: (_, __, ___) => const SmxLogonMovil(),
-                          transitionsBuilder: (_, __, ___, child) => child,
-                        ),
-                      )),
-          ),
-          SizedBox(height: compact ? 12 : 14),
-          _AccessOptionCard(
-            compact: compact,
-            icon: Icons.person_pin_circle_rounded,
-            title: 'Invitado (Cliente)',
-            subtitle: 'Ingresa con el último código validado',
-            accentColor: const Color(0xFF1454B8),
-            backgroundColor: hasCodigoInicialValido
-                ? const Color(0xFFF0F4F7)
-                : (compact ? SmxColors.white : const Color(0xFFF5FBFF)),
-            borderColor: hasCodigoInicialValido
-                ? const Color(0xFFDDE4EB)
-                : const Color(0xFFCFE0F6),
-            onTap: hasCodigoInicialValido ? null : onInvitadoTap,
-          ),
-          SizedBox(height: compact ? 12 : 14),
-          _InvitadoOptionCard(
-            compact: compact,
-            hasCodigoInicialValido: hasCodigoInicialValido,
-            codigoController: codigoController,
-            codigoError: codigoError,
-            onCodigoChanged: onCodigoChanged,
-            onInvitadoCodigoTap: onInvitadoCodigoTap,
           ),
         ],
       ),

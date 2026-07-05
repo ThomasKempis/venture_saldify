@@ -4,6 +4,7 @@ import 'package:venture_saldify/smxLayout/smxLayout.dart';
 import 'package:venture_saldify/smxSaldify/smxSaldify_screens/saldify_credito/smxSaldiFy_cliente_credito_controller.dart';
 import 'package:venture_saldify/smxSaldify/smxSaldify_screens/saldify_credito/smxSaldiFy_cliente_credito_mock.dart';
 import 'package:venture_saldify/smxSaldify/smxSaldify_screens/saldify_credito/smxSaldiFy_cliente_credito_tarjetas.dart';
+import 'package:venture_saldify/smxSaldifyBackgrounds/credito_config_bg.dart';
 import 'package:venture_widgets/smxCallBaseStateful.dart';
 import 'package:venture_widgets/smxController/smxControllerSendData.dart';
 import 'package:venture_widgets/smxNumberField/smxNumberField.dart';
@@ -173,73 +174,78 @@ class _FormPanel extends StatelessWidget {
       color: SmxColors.whiteAlpha(.96),
       borderRadius: BorderRadius.circular(18),
       clipBehavior: Clip.antiAlias,
-      child: Padding(
-        padding: const EdgeInsets.all(18),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            _SelectedPlanHeader(plan: plan),
-            const SizedBox(height: 16),
-            Container(height: 1, color: SmxColors.blackAlpha(.06)),
-            const SizedBox(height: 18),
-            SmxNumberField(
-              field: 'SYSUSER12_CREDITO',
-              controller: controller,
-              label: 'Credito',
-              decimales: 2,
-              currency: true,
-              isValid: true,
+      child: Stack(
+        children: [
+          const Positioned.fill(child: CreditoConfigBg()),
+          Padding(
+            padding: const EdgeInsets.all(18),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _SelectedPlanHeader(plan: plan),
+                const SizedBox(height: 16),
+                Container(height: 1, color: SmxColors.blackAlpha(.06)),
+                const SizedBox(height: 18),
+                SmxNumberField(
+                  field: 'SYSUSER12_CREDITO',
+                  controller: controller,
+                  label: 'Credito',
+                  decimales: 2,
+                  currency: true,
+                  isValid: true,
+                ),
+                const SizedBox(height: 18),
+                _CutTypeSelector(
+                  value: corteTipo,
+                  onChanged: (value) {
+                    controller.setCorteTipo(value);
+                    onChanged();
+                  },
+                ),
+                const SizedBox(height: 20),
+                _CutConfigDivider(corteTipo: corteTipo),
+                const SizedBox(height: 16),
+                if (corteTipo == 1)
+                  _MonthDaySelector(
+                    value: controller.corteDiaMensual,
+                    onChanged: (value) {
+                      controller.setCorteDiaMensual(value);
+                      onChanged();
+                    },
+                  ),
+                if (corteTipo == 2)
+                  _FortnightSelector(
+                    value: controller.corteQuincena,
+                    onChanged: (value) {
+                      controller.setCorteQuincena(value);
+                      onChanged();
+                    },
+                  ),
+                if (corteTipo == 3)
+                  _WeekSelector(
+                    value: controller.corteSemana,
+                    values: controller.diasSemana,
+                    onChanged: (value) {
+                      controller.setCorteSemana(value);
+                      onChanged();
+                    },
+                  ),
+                const SizedBox(height: 22),
+                _SaveButton(
+                  label: controller.isAlta
+                      ? 'Dar de alta credito'
+                      : 'Guardar cambios',
+                  onPressed: () async {
+                    await controller.save();
+                    if (context.mounted && controller.lastSaveOk) {
+                      Navigator.of(context).pop(true);
+                    }
+                  },
+                ),
+              ],
             ),
-            const SizedBox(height: 18),
-            _CutTypeSelector(
-              value: corteTipo,
-              onChanged: (value) {
-                controller.setCorteTipo(value);
-                onChanged();
-              },
-            ),
-            const SizedBox(height: 20),
-            _CutConfigDivider(corteTipo: corteTipo),
-            const SizedBox(height: 16),
-            if (corteTipo == 1)
-              _MonthDaySelector(
-                value: controller.corteDiaMensual,
-                onChanged: (value) {
-                  controller.setCorteDiaMensual(value);
-                  onChanged();
-                },
-              ),
-            if (corteTipo == 2)
-              _FortnightSelector(
-                value: controller.corteQuincena,
-                onChanged: (value) {
-                  controller.setCorteQuincena(value);
-                  onChanged();
-                },
-              ),
-            if (corteTipo == 3)
-              _WeekSelector(
-                value: controller.corteSemana,
-                values: controller.diasSemana,
-                onChanged: (value) {
-                  controller.setCorteSemana(value);
-                  onChanged();
-                },
-              ),
-            const SizedBox(height: 22),
-            _SaveButton(
-              label: controller.isAlta
-                  ? 'Dar de alta credito'
-                  : 'Guardar cambios',
-              onPressed: () async {
-                await controller.save();
-                if (context.mounted && controller.lastSaveOk) {
-                  Navigator.of(context).pop(true);
-                }
-              },
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
