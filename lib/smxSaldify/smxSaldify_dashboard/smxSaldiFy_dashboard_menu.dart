@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:venture_saldify/smxColors.dart';
+import 'package:venture_saldify/smxApis/smxConfig.dart';
+import 'package:venture_saldify/smxLayout/smxColors.dart';
 import 'package:venture_saldify/smxSaldifyBackgrounds/cliente_actions_bg.dart';
 
 import 'smxSaldiFy_clientes/smxSaldiFy_clientes.dart';
@@ -60,18 +61,10 @@ class _ClienteActionsSheet extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Image.asset(
-                          'assets/images/logo_cab.png',
+                        SmxConfig.logoCab(
                           width: 72,
                           height: 44,
                           fit: BoxFit.contain,
-                          errorBuilder: (context, error, stackTrace) =>
-                              Image.asset(
-                                'assets/images/logo_logon.png',
-                                width: 48,
-                                height: 44,
-                                fit: BoxFit.contain,
-                              ),
                         ),
                         const SizedBox(width: 10),
                         Flexible(

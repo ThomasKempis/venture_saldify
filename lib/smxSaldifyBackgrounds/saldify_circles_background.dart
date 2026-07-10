@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:venture_saldify/smxColors.dart';
+import 'package:venture_saldify/smxLayout/smxColors.dart';
 
 class SaldifyCirclesBackgroundPainter extends CustomPainter {
   final Color accentColor;

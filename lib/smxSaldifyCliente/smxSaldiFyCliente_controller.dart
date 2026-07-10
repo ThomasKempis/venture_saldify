@@ -36,18 +36,20 @@ class SmxSaldiFyClienteController extends SmxController {
       return;
     }
 
-    removeSql('QRY_SYSUSER10_SYSUSER11');
+    String aliasSql = 'QRY_SYSUSER10_SYSUSER11';
+
+    removeSql(aliasSql);
 
     addSql(
-      'QRY_SYSUSER10_SYSUSER11',
+      aliasSql,
       "select * from QRY_SYSUSER10_SYSUSER11 "
           "where UUID_ANFITRION = '${SmxConstants.uuidAnfitrionParam}' "
           "and ${_getInvitadoSqlCondition()}",
     );
 
-    await getRowSetFuture('QRY_SYSUSER10_SYSUSER11');
+    await getRowSetFuture(aliasSql);
 
-    rstClienteCredito = getRowset('QRY_SYSUSER10_SYSUSER11');
+    rstClienteCredito = getRowset(aliasSql);
 
     if (rstClienteCredito.getRowCount() == 0 &&
         SmxConstants.hasCorreoInvitado &&
@@ -91,12 +93,12 @@ class SmxSaldiFyClienteController extends SmxController {
     return switch (status) {
       SmxSaldiFyClienteStatus.aceptado => null,
       SmxSaldiFyClienteStatus.pendiente =>
-        'Su invitacion esta pendiente de aprobacion por el anfitrion.',
+        'Su invitación esta pendiente de aprobacion por el anfitrion.',
       SmxSaldiFyClienteStatus.archivado =>
         'Su relacion fue archivada por el anfitrion.',
       SmxSaldiFyClienteStatus.invalido => 'Su invitacion no es valida.',
       SmxSaldiFyClienteStatus.usuarioNoCorresponde =>
-        'Esta invitacion pertenece a otro usuario.',
+        'Esta invitación pertenece a otro usuario.',
     };
   }
 
@@ -105,8 +107,7 @@ class SmxSaldiFyClienteController extends SmxController {
       SmxSaldiFyClienteStatus.pendiente => 'Invitacion pendiente',
       SmxSaldiFyClienteStatus.archivado => 'Vinculo archivado',
       SmxSaldiFyClienteStatus.invalido => 'Link de invitacion no valido',
-      SmxSaldiFyClienteStatus.usuarioNoCorresponde =>
-        'Invitacion de otro usuario',
+      SmxSaldiFyClienteStatus.usuarioNoCorresponde => 'Invitación de otro usuario',
       SmxSaldiFyClienteStatus.aceptado => '',
     };
   }

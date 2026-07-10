@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:venture_saldify/smxColors.dart';
+import 'package:venture_saldify/smxLayout/smxColors.dart';
 import 'package:venture_saldify/smxLayout/smxLayout.dart';
 import 'package:venture_saldify/smxSaldify/smxSaldify_dashboard/smxSaldiFy_clientes/smxSaldiFy_clientes.dart';
 import 'package:venture_saldify/smxSaldifyBackgrounds/historial_linear_bg.dart';

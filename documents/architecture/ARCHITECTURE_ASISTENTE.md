@@ -233,6 +233,7 @@ Deposito confirmado significa que el pago ya fue validado.
 ## Que puede responder el asistente
 - Explicar que significa cada estado.
 - Explicar por que aparece una gestion pendiente.
+- Explicar que el panel de acciones pendientes puede avisar una gestion pendiente cuando al menos un cliente tiene compra solicitada o pago registrado por revisar.
 - Explicar que debe revisar el anfitrion.
 - Orientar al usuario sobre la pantalla.
 
@@ -293,6 +294,7 @@ Regla funcional:
 
 - Una compra tiene gestion pendiente mientras su estado sea diferente de `2`.
 - Un pago tiene gestion pendiente mientras su estado sea diferente de `1`.
+- El panel de acciones pendientes solo debe indicar que existe una gestion pendiente; el detalle se revisa en la campana de notificaciones de la tarjeta del cliente.
 
 ## Llamada HTTP Desde Java
 

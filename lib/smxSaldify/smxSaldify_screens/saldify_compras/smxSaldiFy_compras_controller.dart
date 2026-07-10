@@ -91,9 +91,10 @@ class SmxSaldiFyComprasController extends SmxController {
   @override
   void filtro(Function(String, Cancela) refresh) {}
 
-  String getConceptoAt(int index) {
+  String getProductoAt(int index) {
     rstCompras.index(index);
-    return rstCompras.getValue('SYSUSER40_CONCEPTO')?.toString() ?? '';
+    return (rstCompras.getValue('SYSUSER40_CONCEPTO')?.toString() ?? '')
+        .toUpperCase();
   }
 
   String getFechaAt(int index) {

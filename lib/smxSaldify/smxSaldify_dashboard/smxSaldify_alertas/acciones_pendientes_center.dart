@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:venture_saldify/smxColors.dart';
+import 'package:venture_saldify/smxLayout/smxColors.dart';
 
 import 'acciones_pendientes_modal.dart';
 
@@ -187,14 +187,14 @@ class _AccionesPendientesCenterState extends State<AccionesPendientesCenter>
               Curves.easeOutCubic.transform(value / .018));
     }
 
-    if (value < .075) {
+    if (value < .151) {
       return expandedOffset;
     }
 
-    if (value < .095) {
+    if (value < .171) {
       return expandedOffset +
           ((hiddenOffset - expandedOffset) *
-              Curves.easeInCubic.transform((value - .075) / .020));
+              Curves.easeInCubic.transform((value - .151) / .020));
     }
 
     return hiddenOffset;

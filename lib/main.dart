@@ -8,7 +8,7 @@ import 'package:venture_saldify/smxThemeData.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  //_applyDevCodigoInvitacion();
+  _applyDevCodigoInvitacion(isInvitado: false);
 
   final queryParameters = Uri.base.queryParameters;
   final saldifyLogonAssets = SmxSaldifyLogon.warmUpAssets();
@@ -24,10 +24,10 @@ void main() async {
   runApp(MyAppSmx());
 }
 
-void _applyDevCodigoInvitacion() {
-  if (!kDebugMode) return;
+void _applyDevCodigoInvitacion({required bool isInvitado}) {
+  if (!kDebugMode || !isInvitado) return;
 
-  const String codigo = 'SF479689914378';
+  const String codigo = 'SF341716854136';
 
   if (Uri.base.queryParameters.containsKey(SmxConstants.codigoInvitacionKey)) {
     return;

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:venture_saldify/smxApis/smxConstants.dart';
-import 'package:venture_saldify/smxColors.dart';
+import 'package:venture_saldify/smxLayout/smxColors.dart';
 import 'package:venture_saldify/smxLayout/smxLayout.dart';
 import '../smxLogonMovil/logon/smxLogonMovil_controller.dart';
 import '../smxSaldifyAssistant/smxSaldifyAssistant.dart';
@@ -88,19 +88,13 @@ class _SmxSaldiFy extends State<SmxSaldiFy> {
         ? SmxSaldiFyDashboard(
             key: ValueKey('saldify-dashboard-$_dashboardRefreshRevision'),
             adminName: adminName,
-            isMobile: layout.isMobile,
-            isDesktop: layout.isDesktop,
-            maxContentWidth: layout.saldifyMaxContentWidth,
-            pagePadding: layout.saldifyPagePadding,
-            quickActionCardWidth: layout.saldifyQuickActionCardWidth,
+            layout: layout,
             menuButton: menuButton,
             onRefresh: _refreshDashboard,
           )
         : SmxSaldiFyPerfil(
             onNavigateToHome: () => _selectPage(0),
-            isMobile: layout.isMobile,
-            maxContentWidth: layout.saldifyMaxContentWidth,
-            pagePadding: layout.saldifyPagePadding,
+            layout: layout,
             menuButton: menuButton,
           );
 
@@ -114,10 +108,6 @@ class _SmxSaldiFy extends State<SmxSaldiFy> {
   }
 
   void _selectPage(int index) {
-    if (Navigator.canPop(context)) {
-      Navigator.pop(context);
-    }
-
     setState(() {
       _selectedIndex = index;
     });

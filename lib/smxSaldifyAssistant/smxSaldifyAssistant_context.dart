@@ -1,3 +1,5 @@
+import '../smxApis/smxConfig.dart';
+
 enum SmxSaldifyAssistantRole { publico, anfitrion, invitado }
 
 extension SmxSaldifyAssistantRoleLabel on SmxSaldifyAssistantRole {
@@ -29,7 +31,7 @@ enum SmxSaldifyAssistantScreen {
 extension SmxSaldifyAssistantScreenLabel on SmxSaldifyAssistantScreen {
   String get label {
     return switch (this) {
-      SmxSaldifyAssistantScreen.logon => 'Acceso SaldiFY',
+      SmxSaldifyAssistantScreen.logon => 'Acceso ${SmxConfig.titulo}',
       SmxSaldifyAssistantScreen.dashboardAnfitrion => 'Dashboard anfitrion',
       SmxSaldifyAssistantScreen.perfilAnfitrion => 'Perfil anfitrion',
       SmxSaldifyAssistantScreen.dashboardCliente => 'Dashboard cliente',

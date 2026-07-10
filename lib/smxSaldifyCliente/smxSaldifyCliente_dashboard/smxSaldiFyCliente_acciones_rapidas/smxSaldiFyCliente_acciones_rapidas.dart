@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:venture_saldify/smxColors.dart';
+import 'package:venture_saldify/smxLayout/smxColors.dart';
 
 class SmxSaldiFyClienteAccionesRapidas extends StatelessWidget {
   final bool isMobile;
@@ -68,7 +68,7 @@ class _ActionsHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Text(
-      'Acciones rapidas',
+      'Acciones rápidas',
       style: TextStyle(
         color: SmxColors.white,
         fontSize: 22,

@@ -3,7 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:venture_core_connect/smxDataBase/smxRowSet.dart';
 
-import '../smxColors.dart';
+import '../smxLayout/smxColors.dart';
 
 class SmxSaldiFyCreditoResumen extends StatelessWidget {
   final double credito;

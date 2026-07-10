@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:venture_saldify/smxColors.dart';
+import 'package:venture_saldify/smxApis/smxConfig.dart';
+import 'package:venture_saldify/smxLayout/smxColors.dart';
 import 'package:venture_saldify/smxLayout/smxLayout.dart';
 
 import '../smxSaldiFyCliente_controller.dart';
@@ -12,20 +13,14 @@ import 'smxSaldiFyCliente_metricas/smxSaldiFyCliente_metricas.dart';
 
 class SmxSaldiFyClienteDashboard extends StatefulWidget {
   final SmxSaldiFyClienteController controller;
-  final bool isMobile;
-  final bool isDesktop;
-  final double maxContentWidth;
-  final EdgeInsets pagePadding;
+  final SmxLayoutSize layout;
   final Widget? menuButton;
   final Future<void> Function()? onRefresh;
 
   const SmxSaldiFyClienteDashboard({
     super.key,
     required this.controller,
-    required this.isMobile,
-    required this.isDesktop,
-    required this.maxContentWidth,
-    required this.pagePadding,
+    required this.layout,
     this.menuButton,
     this.onRefresh,
   });
@@ -68,6 +63,7 @@ class _SmxSaldiFyClienteDashboardState
   Widget build(BuildContext context) {
     final topContentInset = SmxLayout.topContentInset(context);
     final bottomContentInset = SmxLayout.bottomContentInset(context);
+    final layout = widget.layout;
 
     return SizedBox.expand(
       child: SmxSaldifyBackground(
@@ -77,7 +73,9 @@ class _SmxSaldiFyClienteDashboardState
           child: Align(
             alignment: Alignment.topCenter,
             child: ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: widget.maxContentWidth),
+              constraints: BoxConstraints(
+                maxWidth: layout.saldifyMaxContentWidth,
+              ),
               child: RefreshIndicator(
                 onRefresh: dashboardController.refresh,
                 color: SmxColors.brandAccent,
@@ -88,10 +86,10 @@ class _SmxSaldiFyClienteDashboardState
                     SliverToBoxAdapter(
                       child: Padding(
                         padding: EdgeInsets.fromLTRB(
-                          widget.pagePadding.left,
-                          widget.pagePadding.top + topContentInset,
-                          widget.pagePadding.right,
-                          widget.pagePadding.bottom + bottomContentInset,
+                          layout.saldifyPagePadding.left,
+                          layout.saldifyPagePadding.top + topContentInset,
+                          layout.saldifyPagePadding.right,
+                          layout.saldifyPagePadding.bottom + bottomContentInset,
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -104,7 +102,7 @@ class _SmxSaldiFyClienteDashboardState
                                   !SmxLayout.isWebMobile(context) &&
                                   !SmxLayout.isWebStandalone,
                             ),
-                            SizedBox(height: widget.isMobile ? 26 : 34),
+                            SizedBox(height: layout.isMobile ? 26 : 34),
                             Text(
                               'Hola, ${dashboardController.clientName}',
                               style: const TextStyle(
@@ -115,13 +113,13 @@ class _SmxSaldiFyClienteDashboardState
                             ),
                             const SizedBox(height: 12),
                             SmxSaldiFyClienteMetricas(
-                              isMobile: widget.isMobile,
+                              isMobile: layout.isMobile,
                               relaSysuser10Anfitrion:
                                   dashboardController.relaSysuser10Anfitrion,
                               onMetricasChanged:
                                   dashboardController.setMetricasSnapshot,
                             ),
-                            SizedBox(height: widget.isMobile ? 16 : 20),
+                            SizedBox(height: layout.isMobile ? 16 : 20),
                             Text(
                               'Tu anfitrion',
                               style: const TextStyle(
@@ -130,20 +128,20 @@ class _SmxSaldiFyClienteDashboardState
                                 fontWeight: FontWeight.w700,
                               ),
                             ),
-                            SizedBox(height: widget.isMobile ? 16 : 20),
+                            SizedBox(height: layout.isMobile ? 16 : 20),
                             SmxSaldiFyClienteAnfitrion(
                               dashboardController: dashboardController,
                             ),
-                            SizedBox(height: widget.isMobile ? 16 : 20),
+                            SizedBox(height: layout.isMobile ? 16 : 20),
                             SmxSaldiFyClienteAccionesRapidas(
-                              isMobile: widget.isMobile,
+                              isMobile: layout.isMobile,
                               onActionTap: (title) => dashboardController
                                   .openClienteAction(context, title),
                             ),
-                            SizedBox(height: widget.isMobile ? 26 : 30),
+                            SizedBox(height: layout.isMobile ? 26 : 30),
                             SmxSaldiFyClienteHistorial(
-                              isMobile: widget.isMobile,
-                              isDesktop: widget.isDesktop,
+                              isMobile: layout.isMobile,
+                              isDesktop: layout.isDesktop,
                               relaSysuser10Anfitrion:
                                   dashboardController.relaSysuser10Anfitrion,
                             ),
@@ -180,22 +178,19 @@ class _ClienteHeader extends StatelessWidget {
         if (menuButton != null) ...[menuButton!, const SizedBox(width: 14)],
         ClipOval(
           child: SizedBox(
-            width: 54,
-            height: 54,
-            child: Image.asset(
-              'assets/images/logo_logon.png',
-              fit: BoxFit.cover,
-            ),
+            width: 34,
+            height: 34,
+            child: SmxConfig.logo(fit: BoxFit.cover),
           ),
         ),
         const SizedBox(width: 14),
-        const Expanded(
+        Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'SALDIFY',
-                style: TextStyle(
+                SmxConfig.titulo.toUpperCase(),
+                style: const TextStyle(
                   color: SmxColors.white,
                   fontFamily: 'Segoe UI',
                   fontFamilyFallback: ['Tahoma', 'Geneva', 'Verdana', 'Arial'],
@@ -205,12 +200,12 @@ class _ClienteHeader extends StatelessWidget {
                   letterSpacing: 2.6,
                 ),
               ),
-              SizedBox(height: 5),
+              const SizedBox(height: 5),
               Text(
-                'CLIENT CREDIT PORTAL',
+                SmxConfig.descripcion,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(
+                style: const TextStyle(
                   color: SmxColors.brandAccent,
                   fontFamily: 'Segoe UI',
                   fontSize: 11,

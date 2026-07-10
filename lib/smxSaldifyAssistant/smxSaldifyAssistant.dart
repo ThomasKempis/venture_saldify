@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:venture_saldify/smxColors.dart';
+import 'package:venture_saldify/smxLayout/smxColors.dart';
 import 'package:venture_saldify/smxLayout/smxLayout.dart';
+import 'package:venture_saldify/smxSaldifyBackgrounds/assistant_body_bg.dart';
+import 'package:venture_saldify/smxSaldifyBackgrounds/assistant_header_bg.dart';
 import 'package:venture_widgets/smxCallBaseStateful.dart';
 import 'package:venture_widgets/smxController/smxControllerSendData.dart';
 
+import '../smxApis/smxConfig.dart';
 import 'smxSaldifyAssistant_context.dart';
 import 'smxSaldifyAssistant_controller.dart';
 import 'smxSaldifyAssistant_screen_mock.dart';
@@ -131,7 +134,7 @@ class _AssistantLauncher extends StatelessWidget {
     final size = isMobile ? 58.0 : 62.0;
 
     return Tooltip(
-      message: 'Ayuda SaldiFY',
+      message: 'Ayuda ${SmxConfig.titulo}',
       child: Material(
         color: SmxColors.transparent,
         child: InkWell(
@@ -227,28 +230,33 @@ class _AssistantPanelState extends State<_AssistantPanel> {
               onClear: widget.controller.clear,
             ),
             Expanded(
-              child: ValueListenableBuilder<List<SmxSaldifyAssistantMessage>>(
-                valueListenable: widget.controller.messagesNotifier,
-                builder: (context, messages, _) {
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    if (!_scrollController.hasClients) return;
-                    _scrollController.animateTo(
-                      _scrollController.position.maxScrollExtent,
-                      duration: const Duration(milliseconds: 240),
-                      curve: Curves.easeOut,
-                    );
-                  });
+              child: Stack(
+                children: [
+                  const Positioned.fill(child: AssistantBodyBg()),
+                  ValueListenableBuilder<List<SmxSaldifyAssistantMessage>>(
+                    valueListenable: widget.controller.messagesNotifier,
+                    builder: (context, messages, _) {
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        if (!_scrollController.hasClients) return;
+                        _scrollController.animateTo(
+                          _scrollController.position.maxScrollExtent,
+                          duration: const Duration(milliseconds: 240),
+                          curve: Curves.easeOut,
+                        );
+                      });
 
-                  return ListView.separated(
-                    controller: _scrollController,
-                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
-                    itemBuilder: (context, index) {
-                      return _AssistantBubble(message: messages[index]);
+                      return ListView.separated(
+                        controller: _scrollController,
+                        padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+                        itemBuilder: (context, index) {
+                          return _AssistantBubble(message: messages[index]);
+                        },
+                        separatorBuilder: (_, _) => const SizedBox(height: 10),
+                        itemCount: messages.length,
+                      );
                     },
-                    separatorBuilder: (_, _) => const SizedBox(height: 10),
-                    itemCount: messages.length,
-                  );
-                },
+                  ),
+                ],
               ),
             ),
             ValueListenableBuilder<bool>(
@@ -308,67 +316,74 @@ class _AssistantHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(16, 14, 10, 14),
       decoration: const BoxDecoration(gradient: SmxGradients.saldifyBackground),
-      child: Row(
+      child: Stack(
         children: [
-          Container(
-            width: 42,
-            height: 42,
-            decoration: BoxDecoration(
-              color: SmxColors.whiteAlpha(.16),
-              shape: BoxShape.circle,
-              border: Border.all(color: SmxColors.whiteAlpha(.22)),
-            ),
-            child: const Icon(
-              Icons.smart_toy_rounded,
-              color: SmxColors.white,
-              size: 24,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          const Positioned.fill(child: AssistantHeaderBg()),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 14, 10, 14),
+            child: Row(
               children: [
-                const Text(
-                  'Asistente SaldiFY',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
+                Container(
+                  width: 42,
+                  height: 42,
+                  decoration: BoxDecoration(
+                    color: SmxColors.whiteAlpha(.16),
+                    shape: BoxShape.circle,
+                    border: Border.all(color: SmxColors.whiteAlpha(.22)),
+                  ),
+                  child: const Icon(
+                    Icons.smart_toy_rounded,
                     color: SmxColors.white,
-                    fontSize: 17,
-                    fontWeight: FontWeight.w900,
+                    size: 24,
                   ),
                 ),
-                const SizedBox(height: 3),
-                Text(
-                  '${role.label} - ${screen.label}',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: SmxColors.white70,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Asistente ${SmxConfig.titulo}',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: SmxColors.white,
+                          fontSize: 17,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        '${role.label} - ${screen.label}',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: SmxColors.white70,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Tooltip(
+                  message: 'Limpiar',
+                  child: IconButton(
+                    onPressed: onClear,
+                    icon: const Icon(Icons.refresh_rounded),
+                    color: SmxColors.white,
+                  ),
+                ),
+                Tooltip(
+                  message: 'Cerrar',
+                  child: IconButton(
+                    onPressed: onClose,
+                    icon: const Icon(Icons.close_rounded),
+                    color: SmxColors.white,
                   ),
                 ),
               ],
-            ),
-          ),
-          Tooltip(
-            message: 'Limpiar',
-            child: IconButton(
-              onPressed: onClear,
-              icon: const Icon(Icons.refresh_rounded),
-              color: SmxColors.white,
-            ),
-          ),
-          Tooltip(
-            message: 'Cerrar',
-            child: IconButton(
-              onPressed: onClose,
-              icon: const Icon(Icons.close_rounded),
-              color: SmxColors.white,
             ),
           ),
         ],
@@ -524,7 +539,7 @@ class _AssistantInput extends StatelessWidget {
                 textInputAction: TextInputAction.send,
                 onSubmitted: (_) => onSend(),
                 decoration: InputDecoration(
-                  hintText: 'Pregunta sobre SaldiFY',
+                  hintText: 'Pregunta sobre ${SmxConfig.titulo}',
                   filled: true,
                   fillColor: SmxColors.white,
                   contentPadding: const EdgeInsets.symmetric(

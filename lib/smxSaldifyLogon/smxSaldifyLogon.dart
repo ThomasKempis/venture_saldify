@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:venture_saldify/smxColors.dart';
+import 'package:venture_saldify/smxApis/smxConfig.dart';
+import 'package:venture_saldify/smxLayout/smxColors.dart';
 import 'package:venture_saldify/smxLayout/smxLayout.dart';
 import 'package:venture_saldify/smxLogonMovil/logon/smxLogonMovil.dart';
 import 'package:venture_saldify/smxSaldifyAssistant/smxSaldifyAssistant.dart';
@@ -12,7 +13,6 @@ import 'package:venture_widgets/smxController/smxControllerSendData.dart';
 import 'smxSaldifyLogon_controller.dart';
 
 class SmxSaldifyLogon extends StatelessWidget {
-  static const logoAsset = SmxSaldifyLogonController.logoAsset;
   static const welcomeAsset = SmxSaldifyLogonController.welcomeAsset;
   static const welcomeAssetHd = SmxSaldifyLogonController.welcomeAssetHd;
 
@@ -284,11 +284,11 @@ class _SaldifyBrand extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Transform.translate(
-          offset: Offset(0, compact ? -7 : -9),
+          offset: Offset(0, compact ? 5 : 5),
           child: SizedBox(
             width: logoWidth,
             height: logoSize,
-            child: Image.asset(SmxSaldifyLogon.logoAsset, fit: BoxFit.contain),
+            child: SmxConfig.logo(fit: BoxFit.contain),
           ),
         ),
         const SizedBox(width: 16),
@@ -297,7 +297,7 @@ class _SaldifyBrand extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'SALDIFY',
+              SmxConfig.titulo.toUpperCase(),
               textAlign: TextAlign.left,
               style: TextStyle(
                 color: SmxColors.white,
@@ -316,7 +316,7 @@ class _SaldifyBrand extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'SMART BALANCE & CREDITS CONTROL',
+              SmxConfig.descripcion,
               textAlign: TextAlign.left,
               style: TextStyle(
                 color: SmxColors.brandAccent,
@@ -413,7 +413,7 @@ class _WelcomeCard extends StatelessWidget {
                 ),
                 SizedBox(height: compact ? 8 : 10),
                 Text(
-                  'Elige cómo quieres ingresar a SaldiFY.',
+                  'Elige cómo quieres ingresar a ${SmxConfig.titulo}.',
                   textAlign: compact ? TextAlign.left : TextAlign.center,
                   style: TextStyle(
                     color: SmxColors.textMuted,

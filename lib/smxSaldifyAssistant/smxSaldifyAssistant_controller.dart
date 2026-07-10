@@ -5,6 +5,7 @@ import 'package:venture_saldify/smxApis/smxConstants.dart';
 import 'package:venture_widgets/smxClassDrivers.dart';
 import 'package:venture_widgets/smxController/smxController.dart';
 
+import '../smxApis/smxConfig.dart';
 import 'smxSaldifyAssistant_context.dart';
 import 'smxSaldifyAssistant_screen_mock.dart';
 
@@ -143,7 +144,7 @@ class SmxSaldifyAssistantController extends SmxController {
     messagesNotifier.value = [
       SmxSaldifyAssistantMessage(
         text:
-            'Hola, soy el asistente de SaldiFY. Estoy aquí para ayudarle sobre la aplicación.',
+            'Hola, soy el asistente de ${SmxConfig.titulo}. Estoy aquí para ayudarle sobre la aplicación.',
         isUser: false,
         createdAt: DateTime.now(),
       ),

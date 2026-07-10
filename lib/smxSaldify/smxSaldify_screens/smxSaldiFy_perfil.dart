@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:venture_saldify/smxColors.dart';
+import 'package:venture_saldify/smxApis/smxConfig.dart';
+import 'package:venture_saldify/smxLayout/smxColors.dart';
 import 'package:venture_saldify/smxLayout/smxLayout.dart';
 import 'package:venture_saldify/smxLogonMovil/logon/smxPerfil/smxPerfil.dart';
 
@@ -9,17 +10,13 @@ import '../../smxLogonMovil/logon/smxLogonMovil_controller.dart';
 class SmxSaldiFyPerfil extends StatelessWidget {
   final SmxLogonMovil_controller controllerMain = SmxConstants.controllerMain;
   final VoidCallback onNavigateToHome;
-  final bool isMobile;
-  final double maxContentWidth;
-  final EdgeInsets pagePadding;
+  final SmxLayoutSize layout;
   final Widget? menuButton;
 
   SmxSaldiFyPerfil({
     super.key,
     required this.onNavigateToHome,
-    required this.isMobile,
-    required this.maxContentWidth,
-    required this.pagePadding,
+    required this.layout,
     this.menuButton,
   });
 
@@ -36,14 +33,16 @@ class SmxSaldiFyPerfil extends StatelessWidget {
           child: Align(
             alignment: Alignment.topCenter,
             child: ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: maxContentWidth),
+              constraints: BoxConstraints(
+                maxWidth: layout.saldifyMaxContentWidth,
+              ),
               child: Column(
                 children: [
                   Padding(
                     padding: EdgeInsets.fromLTRB(
-                      pagePadding.left,
-                      pagePadding.top + topContentInset,
-                      pagePadding.right,
+                      layout.saldifyPagePadding.left,
+                      layout.saldifyPagePadding.top + topContentInset,
+                      layout.saldifyPagePadding.right,
                       0,
                     ),
                     child: _SaldifyPerfilHeader(menuButton: menuButton),
@@ -77,12 +76,9 @@ class _SaldifyPerfilHeader extends StatelessWidget {
         if (menuButton != null) ...[menuButton!, const SizedBox(width: 14)],
         ClipOval(
           child: SizedBox(
-            width: 54,
-            height: 54,
-            child: Image.asset(
-              'assets/images/logo_logon.png',
-              fit: BoxFit.cover,
-            ),
+            width: 34,
+            height: 34,
+            child: SmxConfig.logo(fit: BoxFit.cover),
           ),
         ),
         const SizedBox(width: 14),

@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:venture_saldify/smxColors.dart';
+import 'package:venture_saldify/smxApis/smxConfig.dart';
+import 'package:venture_saldify/smxLayout/smxColors.dart';
 import 'package:venture_saldify/smxLayout/smxLayout.dart';
 
 import '../../smxApis/smxConstants.dart';
@@ -13,22 +14,14 @@ import 'smxSaldify_alertas/acciones_pendientes_center.dart';
 class SmxSaldiFyDashboard extends StatefulWidget {
   final String adminName;
   final String uuidAnfitrion = SmxConstants.controllerMain.getUuid();
-  final bool isMobile;
-  final bool isDesktop;
-  final double maxContentWidth;
-  final EdgeInsets pagePadding;
-  final double quickActionCardWidth;
+  final SmxLayoutSize layout;
   final Widget? menuButton;
   final Future<void> Function()? onRefresh;
 
   SmxSaldiFyDashboard({
     super.key,
     required this.adminName,
-    required this.isMobile,
-    required this.isDesktop,
-    required this.maxContentWidth,
-    required this.pagePadding,
-    required this.quickActionCardWidth,
+    required this.layout,
     this.menuButton,
     this.onRefresh,
   });
@@ -51,6 +44,7 @@ class _SmxSaldiFyDashboardState extends State<SmxSaldiFyDashboard> {
   Widget build(BuildContext context) {
     final topContentInset = SmxLayout.topContentInset(context);
     final bottomContentInset = SmxLayout.bottomContentInset(context);
+    final layout = widget.layout;
 
     return SizedBox.expand(
       child: SmxSaldifyBackground(
@@ -60,7 +54,9 @@ class _SmxSaldiFyDashboardState extends State<SmxSaldiFyDashboard> {
           child: Align(
             alignment: Alignment.topCenter,
             child: ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: widget.maxContentWidth),
+              constraints: BoxConstraints(
+                maxWidth: layout.saldifyMaxContentWidth,
+              ),
               child: Stack(
                 children: [
                   RefreshIndicator(
@@ -73,10 +69,11 @@ class _SmxSaldiFyDashboardState extends State<SmxSaldiFyDashboard> {
                         SliverToBoxAdapter(
                           child: Padding(
                             padding: EdgeInsets.fromLTRB(
-                              widget.pagePadding.left,
-                              widget.pagePadding.top + topContentInset,
-                              widget.pagePadding.right,
-                              widget.pagePadding.bottom + bottomContentInset,
+                              layout.saldifyPagePadding.left,
+                              layout.saldifyPagePadding.top + topContentInset,
+                              layout.saldifyPagePadding.right,
+                              layout.saldifyPagePadding.bottom +
+                                  bottomContentInset,
                             ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -91,7 +88,7 @@ class _SmxSaldiFyDashboardState extends State<SmxSaldiFyDashboard> {
                                       !SmxLayout.isWebMobile(context) &&
                                       !SmxLayout.isWebStandalone,
                                 ),
-                                SizedBox(height: widget.isMobile ? 26 : 34),
+                                SizedBox(height: layout.isMobile ? 26 : 34),
                                 Text(
                                   'Hola, ${widget.adminName}',
                                   style: const TextStyle(
@@ -102,11 +99,11 @@ class _SmxSaldiFyDashboardState extends State<SmxSaldiFyDashboard> {
                                 ),
                                 const SizedBox(height: 8),
                                 SmxSaldiFyMetricas(
-                                  isMobile: widget.isMobile,
+                                  isMobile: layout.isMobile,
                                   refreshNotifier:
                                       _controller.metricasRevisionNotifier,
                                 ),
-                                SizedBox(height: widget.isMobile ? 16 : 20),
+                                SizedBox(height: layout.isMobile ? 16 : 20),
                                 ValueListenableBuilder<
                                   SmxSaldiFyDashboardContentMode
                                 >(
@@ -117,10 +114,10 @@ class _SmxSaldiFyDashboardState extends State<SmxSaldiFyDashboard> {
                                       controller: _controller,
                                       uuidAnfitrion: widget.uuidAnfitrion,
                                       anfitrionNombre: widget.adminName,
-                                      isMobile: widget.isMobile,
-                                      isDesktop: widget.isDesktop,
+                                      isMobile: layout.isMobile,
+                                      isDesktop: layout.isDesktop,
                                       quickActionCardWidth:
-                                          widget.quickActionCardWidth,
+                                          layout.saldifyQuickActionCardWidth,
                                       onRefresh: _refreshDashboard,
                                     );
 
@@ -137,7 +134,7 @@ class _SmxSaldiFyDashboardState extends State<SmxSaldiFyDashboard> {
                                             SmxSaldiFyDashboardContentMode
                                                 .initial)
                                           SmxSaldiFyDashboardIni(
-                                            isMobile: widget.isMobile,
+                                            isMobile: layout.isMobile,
                                             onContinue: () async {
                                               final saved = await _controller
                                                   .openCliente(context);
@@ -157,7 +154,7 @@ class _SmxSaldiFyDashboardState extends State<SmxSaldiFyDashboard> {
                                             SmxSaldiFyDashboardContentMode
                                                 .loading)
                                           SizedBox(
-                                            height: widget.isMobile ? 360 : 330,
+                                            height: layout.isMobile ? 360 : 330,
                                           ),
                                       ],
                                     );
@@ -172,7 +169,7 @@ class _SmxSaldiFyDashboardState extends State<SmxSaldiFyDashboard> {
                   ),
                   Positioned(
                     right: 0,
-                    bottom: bottomContentInset + (widget.isMobile ? 18 : 24),
+                    bottom: bottomContentInset + (layout.isMobile ? 18 : 24),
                     child: ValueListenableBuilder<int>(
                       valueListenable:
                           _controller.pendingActionsRevisionNotifier,
@@ -182,11 +179,15 @@ class _SmxSaldiFyDashboardState extends State<SmxSaldiFyDashboard> {
                             AccionPendienteTipo.clientesPendientes,
                           if (_controller.hasCreditoPendiente)
                             AccionPendienteTipo.creditoPendiente,
+                          if (_controller.hasGestionPendiente)
+                            AccionPendienteTipo.gestionPendiente,
+                          if (_controller.hasCobranzaPendiente)
+                            AccionPendienteTipo.cobranzaPendiente,
                         ];
 
                         return AccionesPendientesCenter(
                           acciones: acciones,
-                          isMobile: widget.isMobile,
+                          isMobile: layout.isMobile,
                         );
                       },
                     ),
@@ -224,22 +225,19 @@ class _SaldifyHeader extends StatelessWidget {
         if (menuButton != null) ...[menuButton!, const SizedBox(width: 14)],
         ClipOval(
           child: SizedBox(
-            width: 54,
-            height: 54,
-            child: Image.asset(
-              'assets/images/logo_logon.png',
-              fit: BoxFit.cover,
-            ),
+            width: 34,
+            height: 34,
+            child: SmxConfig.logo(fit: BoxFit.cover),
           ),
         ),
         const SizedBox(width: 14),
-        const Expanded(
+        Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'SALDIFY',
-                style: TextStyle(
+                SmxConfig.titulo.toUpperCase(),
+                style: const TextStyle(
                   color: SmxColors.white,
                   fontFamily: 'Segoe UI',
                   fontFamilyFallback: ['Tahoma', 'Geneva', 'Verdana', 'Arial'],
@@ -249,12 +247,12 @@ class _SaldifyHeader extends StatelessWidget {
                   letterSpacing: 2.6,
                 ),
               ),
-              SizedBox(height: 5),
+              const SizedBox(height: 5),
               Text(
-                'SMART BALANCE & CREDITS CONTROL',
+                SmxConfig.descripcion,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(
+                style: const TextStyle(
                   color: SmxColors.brandAccent,
                   fontFamily: 'Segoe UI',
                   fontSize: 11,

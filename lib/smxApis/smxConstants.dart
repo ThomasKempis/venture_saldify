@@ -6,14 +6,17 @@ import 'package:venture_widgets/smxConstants_widgets.dart';
 import '../firebase_options.dart';
 import '../smxLogonMovil/logon/smxLogonMovil_controller.dart';
 
-enum SmxServiciosSaldify {
-  CHATBOT_IA_SALDIFY
-}
+enum SmxServiciosSaldify { CHATBOT_IA_SALDIFY }
 
 abstract class SmxConstants {
+  static const String URL_IMAGES_SALDIFY =
+      'https://venture.jars.mx/sovimex/Temps/saldify/';
+  static const String URL_IMAGES_PRODUCTOS = '${URL_IMAGES_SALDIFY}SYSUSER41';
+
   static late SmxLogonMovil_controller controllerMain;
   static SmxRowSet? rstCompraVacia;
   static SmxRowSet? rstPagoVacio;
+  static SmxRowSet? rstProductoVacio;
 
   static const String codigoInvitacionKey = 'codigo';
 

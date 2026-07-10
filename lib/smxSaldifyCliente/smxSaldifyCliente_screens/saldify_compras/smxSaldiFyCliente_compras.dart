@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:venture_core_connect/smxDataBase/smxRowSet.dart';
-import 'package:venture_saldify/smxColors.dart';
+import 'package:venture_saldify/smxLayout/smxColors.dart';
 import 'package:venture_saldify/smxLayout/smxLayout.dart';
+import 'package:venture_saldify/smxSaldifyBackgrounds/invita_cliente_card_bg.dart';
 import 'package:venture_saldify/smxSaldifyBackgrounds/operacion_bg_panel.dart';
 import 'package:venture_widgets/smxCallBaseStateful.dart';
 import 'package:venture_widgets/smxController/smxControllerSendData.dart';
@@ -470,62 +471,68 @@ class _CompraTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
+      clipBehavior: Clip.antiAlias,
       color: SmxColors.whiteAlpha(.96),
       borderRadius: BorderRadius.circular(16),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          children: [
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                color: SmxColors.surfacePill,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: const Icon(
-                Icons.shopping_cart_checkout_rounded,
-                color: Color(0xFF166534),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    concepto.isEmpty ? 'Compra' : concepto,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: SmxColors.textDark,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w900,
-                    ),
+      child: Stack(
+        children: [
+          const Positioned.fill(child: InvitaClienteCardBg()),
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: SmxColors.surfacePill,
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  const SizedBox(height: 5),
-                  Text(
-                    fecha,
-                    style: const TextStyle(
-                      color: SmxColors.textMuted,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w800,
-                    ),
+                  child: const Icon(
+                    Icons.shopping_cart_checkout_rounded,
+                    color: Color(0xFF166534),
                   ),
-                ],
-              ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        concepto.isEmpty ? 'Compra' : concepto,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: SmxColors.textDark,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                      const SizedBox(height: 5),
+                      Text(
+                        fecha,
+                        style: const TextStyle(
+                          color: SmxColors.textMuted,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  importe,
+                  style: const TextStyle(
+                    color: SmxColors.textDark,
+                    fontSize: 17,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(width: 12),
-            Text(
-              importe,
-              style: const TextStyle(
-                color: SmxColors.textDark,
-                fontSize: 17,
-                fontWeight: FontWeight.w900,
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:venture_core_connect/smxDataBase/smxRowSet.dart';
-import 'package:venture_saldify/smxColors.dart';
+import 'package:venture_saldify/smxLayout/smxColors.dart';
 import 'package:venture_widgets/smxCallBaseStateful.dart';
 import 'package:venture_widgets/smxController/smxControllerSendData.dart';
 
@@ -76,7 +76,7 @@ class _ActionsHeader extends StatelessWidget {
       children: [
         const Expanded(
           child: Text(
-            'Acciones rapidas',
+            'Acciones rápidas',
             style: TextStyle(
               color: SmxColors.white,
               fontSize: 22,

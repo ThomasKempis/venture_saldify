@@ -76,6 +76,11 @@ class SmxSaldiFyDashboardMain extends StatelessWidget {
               return;
             }
 
+            if (title == 'Productos') {
+              await controller.openProductos(context);
+              return;
+            }
+
             controller.openUnderConstruction(context, title);
           },
         ),

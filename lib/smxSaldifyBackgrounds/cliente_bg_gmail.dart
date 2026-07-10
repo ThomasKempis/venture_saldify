@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:venture_saldify/smxColors.dart';
+import 'package:venture_saldify/smxApis/smxConfig.dart';
+import 'package:venture_saldify/smxLayout/smxColors.dart';
 
 import 'cliente_bg_inicio.dart';
 
@@ -99,10 +100,10 @@ class _GmailCopy extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Column(
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
+        const Text(
           'Gmail del cliente',
           style: TextStyle(
             color: Color(0xFF123247),
@@ -111,10 +112,10 @@ class _GmailCopy extends StatelessWidget {
             height: 1.08,
           ),
         ),
-        SizedBox(height: 10),
+        const SizedBox(height: 10),
         Text(
-          'Saldify usa Gmail para identificarlo e invitarlo. Escribe solo el usuario, sin el dominio.',
-          style: TextStyle(
+          '${SmxConfig.titulo} usa Gmail para identificarlo e invitarlo. Escribe solo el usuario, sin el dominio.',
+          style: const TextStyle(
             color: Color(0xFF31566B),
             fontSize: 14,
             fontWeight: FontWeight.w700,

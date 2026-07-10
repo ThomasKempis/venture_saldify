@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:venture_core_connect/smxDataBase/smxRowSet.dart';
-import 'package:venture_saldify/smxColors.dart';
+import 'package:venture_saldify/smxLayout/smxColors.dart';
 import 'package:venture_saldify/smxSaldifyBackgrounds/saldify_circles_background.dart';
 import 'package:venture_widgets/smxCallBaseStateful.dart';
 import 'package:venture_widgets/smxController/smxControllerSendData.dart';
@@ -490,11 +490,13 @@ class SmxSaldiFyClientTapData {
 enum _ClientStatusType {
   ok,
   warning,
+  alert,
   danger;
 
   static _ClientStatusType fromValue(String? value) {
     return switch (value) {
       'warning' => _ClientStatusType.warning,
+      'alert' => _ClientStatusType.alert,
       'danger' => _ClientStatusType.danger,
       _ => _ClientStatusType.ok,
     };
@@ -538,6 +540,7 @@ class _ClientCard extends StatelessWidget {
     final accentColor = switch (statusType) {
       _ClientStatusType.ok => SmxColors.successForeground,
       _ClientStatusType.warning => SmxColors.warningForeground,
+      _ClientStatusType.alert => SmxColors.alertForeground,
       _ClientStatusType.danger => SmxColors.dangerForeground,
     };
 
@@ -676,6 +679,10 @@ class _StatusBadge extends StatelessWidget {
       _ClientStatusType.warning => (
         bg: SmxColors.warningBackground,
         fg: SmxColors.warningForeground,
+      ),
+      _ClientStatusType.alert => (
+        bg: SmxColors.alertBackground,
+        fg: SmxColors.alertForeground,
       ),
       _ClientStatusType.danger => (
         bg: SmxColors.dangerBackground,

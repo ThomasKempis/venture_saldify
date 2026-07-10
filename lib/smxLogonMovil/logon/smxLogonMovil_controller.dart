@@ -8,13 +8,12 @@ import 'package:venture_saldify/smxApis/smxConstants.dart';
 import 'package:venture_core_connect/smxConstants_core.dart';
 import 'package:venture_core_connect/smxJson/SmxJsonUtil.dart';
 import 'package:venture_core_connect/smxJson/smxJsonFiles.dart';
-import 'package:venture_widgets/smxInfoUser/smxInfoUser.dart';
 import 'package:venture_widgets/smxTmpScreen.dart';
 import 'package:universal_html/html.dart' as html;
 import 'package:venture_core_connect/smxDataBase/smxRowSet.dart';
 import 'package:venture_widgets/smxShowDialog/smxShowDialogs.dart';
+import 'package:venture_widgets/smxViewMap/smxLocationReporter.dart';
 
-import '../../smxApis/smxLocationReporter.dart';
 import '../../smxSaldify/smxSaldify.dart';
 import '../../smxSaldifyCliente/smxSaldifyCliente.dart';
 import '../../smxSaldifyLogon/smxSaldifyAccessSession.dart';
@@ -22,16 +21,9 @@ import '../../smxSaldifyLogon/smxSaldifyAccessSession.dart';
 class SmxLogonMovil_controller extends SmxTmpCtl {
   static const edad_maxima = 14;
   late SmxRowSet rstSysUser10;
-  late final SmxInfoUser infoUser;
 
   SmxLogonMovil_controller() {
-    infoUser = SmxInfoUser();
     SmxConstants.controllerMain = this;
-  }
-
-  Future<void> checkPermissionLocation() async {
-    await infoUser.checkLocationPermission();
-    SmxConstants_core.geoLocalizacion = infoUser.location;
   }
 
   Future<void> checkPermissionCamara() async {
@@ -133,7 +125,11 @@ class SmxLogonMovil_controller extends SmxTmpCtl {
       await callTroncalSave(rstSysUser10);
     }
 
-    await SmxLocationReporter.report(accion: 'LOGIN');
+    await SmxLocationReporter.report(
+      controller: this,
+      idSysuser10: rstSysUser10.getId(),
+      accion: 'LOGIN',
+    );
 
     SmxSaldifyAccessSession.markActive(
       SmxConstants.isClienteInvitado

@@ -1,8 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:venture_saldify/smxColors.dart';
-import 'package:venture_saldify/smxLayout/smxLayout.dart';
 import 'package:venture_saldify/smxLogonMovil/logon/smxAuth/AuthRepository.dart';
 import 'package:venture_saldify/smxLogonMovil/logon/smxAuth/AuthService.dart';
 import 'package:venture_saldify/smxLogonMovil/logon/smxAuth/AuthViewModel.dart';
@@ -23,7 +21,6 @@ class _SmxLogonMovilState extends State<SmxLogonMovil> {
   void initState() {
     super.initState();
     controller = SmxLogonMovil_controller();
-    controller.checkPermissionLocation();
     //controller.checkPermissionCamara();
   }
 
@@ -55,21 +52,9 @@ class _LogonFrontEndBody extends StatefulWidget {
 }
 
 class _LogonFrontEndBodyState extends State<_LogonFrontEndBody> {
-  String _version = '';
-  bool _alreadyNavigated = false; // ⬅️ bandera
-
-  @override
-  void initState() {
-    super.initState();
-    _getVersion();
-  }
-
-  Future<void> _getVersion() async {
-    final info = await widget.controller.infoUser.getVersion();
-    setState(() {
-      _version = info;
-    });
-  }
+  bool _alreadyNavigated = false;
+  bool _googleLoginStarted = false;
+  GoogleLoginStatus? _dialogStatus;
 
   @override
   Widget build(BuildContext context) {
@@ -85,41 +70,171 @@ class _LogonFrontEndBodyState extends State<_LogonFrontEndBody> {
     }
 
     // Si no está logueado, ejecutamos la lógica en segundo plano
-    return _alreadyNavigated
-        ? const SizedBox.shrink()
-        : _buildAuth();
+    return _alreadyNavigated ? const SizedBox.shrink() : _buildAuth();
   }
 
   Widget _buildAuth() {
-    return Center(
-      child: Consumer<AuthViewModel>(
-        builder: (context, viewModel, _) {
-          return StreamBuilder<User?>(
-            stream: viewModel.authStateChanges,
-            builder: (context, snapshot) {
-              if (snapshot.hasData && snapshot.data != null) {
-                final user = snapshot.data!;
-                if (!_alreadyNavigated) {
-                  _alreadyNavigated = true;
-                  Future.microtask(() async {
-                    await widget.controller.saveCredentials(user);
-                    if (!mounted) return;
-                    widget.controller.navigateToAppMovil(context);
-                  });
-                }
-              } else if (!viewModel.isLoading && !_alreadyNavigated) {
-                // No hay sesión activa y no está en proceso de carga: disparar Google automáticamente
-                Future.microtask(() {
-                  viewModel.signInWithGoogle();
+    return Consumer<AuthViewModel>(
+      builder: (context, viewModel, _) {
+        return StreamBuilder<User?>(
+          stream: viewModel.authStateChanges,
+          builder: (context, snapshot) {
+            if (snapshot.hasData && snapshot.data != null) {
+              final user = snapshot.data!;
+              if (!_alreadyNavigated) {
+                _alreadyNavigated = true;
+                Future.microtask(() async {
+                  await widget.controller.saveCredentials(user);
+                  if (!mounted) return;
+                  widget.controller.navigateToAppMovil(context);
                 });
               }
+            } else if (!_googleLoginStarted &&
+                !viewModel.isLoading &&
+                viewModel.googleLoginStatus == GoogleLoginStatus.idle &&
+                !_alreadyNavigated) {
+              _googleLoginStarted = true;
+              Future.microtask(() {
+                viewModel.signInWithGoogle();
+              });
+            }
 
-              // Esta pantalla es invisible
-              return const SizedBox.shrink();
-            },
-          );
-        },
+            if (_mustShowRecovery(viewModel.googleLoginStatus) &&
+                _dialogStatus != viewModel.googleLoginStatus) {
+              _dialogStatus = viewModel.googleLoginStatus;
+              Future.microtask(() {
+                if (!mounted) return;
+                _showGoogleLoginDialog(viewModel);
+              });
+            }
+
+            return const _GoogleLoginProgress();
+          },
+        );
+      },
+    );
+  }
+
+  bool _mustShowRecovery(GoogleLoginStatus status) {
+    return status == GoogleLoginStatus.popupBlocked ||
+        status == GoogleLoginStatus.popupClosed ||
+        status == GoogleLoginStatus.cancelled ||
+        status == GoogleLoginStatus.error;
+  }
+
+  Future<void> _showGoogleLoginDialog(AuthViewModel viewModel) async {
+    final navigator = Navigator.of(context);
+
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) {
+        return _GoogleLoginDialog(
+          status: viewModel.googleLoginStatus,
+          message: viewModel.googleLoginErrorMessage,
+          errorCode: viewModel.googleLoginErrorCode,
+          onRetry: () {
+            Navigator.of(dialogContext).pop();
+            _dialogStatus = null;
+            viewModel.signInWithGoogle();
+          },
+          onBack: () {
+            Navigator.of(dialogContext).pop();
+            navigator.maybePop();
+          },
+        );
+      },
+    );
+  }
+}
+
+class _GoogleLoginProgress extends StatelessWidget {
+  const _GoogleLoginProgress();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Material(
+      type: MaterialType.transparency,
+      child: Stack(
+        children: [
+          Positioned.fill(
+            child: ModalBarrier(
+              color: Colors.black.withValues(alpha: 0.08),
+              dismissible: false,
+            ),
+          ),
+          Center(child: CircularProgressIndicator(color: theme.primaryColor)),
+        ],
       ),
     );
+  }
+}
+
+class _GoogleLoginDialog extends StatelessWidget {
+  final GoogleLoginStatus status;
+  final String? message;
+  final String? errorCode;
+  final VoidCallback onRetry;
+  final VoidCallback onBack;
+
+  const _GoogleLoginDialog({
+    required this.status,
+    required this.message,
+    required this.errorCode,
+    required this.onRetry,
+    required this.onBack,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return AlertDialog(
+      icon: Icon(
+        Icons.open_in_new_off_rounded,
+        size: 42,
+        color: theme.primaryColor,
+      ),
+      title: Text(_title, textAlign: TextAlign.center),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            message ??
+                'No se pudo abrir el ingreso con Google. Intenta nuevamente.',
+            textAlign: TextAlign.center,
+          ),
+          if (errorCode != null && errorCode!.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Text(
+              errorCode!,
+              textAlign: TextAlign.center,
+              style: theme.textTheme.bodySmall?.copyWith(color: Colors.black54),
+            ),
+          ],
+        ],
+      ),
+      actionsAlignment: MainAxisAlignment.center,
+      actions: [
+        TextButton(onPressed: onBack, child: const Text('Volver')),
+        FilledButton.icon(
+          onPressed: onRetry,
+          icon: const Icon(Icons.refresh_rounded),
+          label: const Text('Reintentar'),
+        ),
+      ],
+    );
+  }
+
+  String get _title {
+    return switch (status) {
+      GoogleLoginStatus.popupBlocked => 'Ventana emergente bloqueada',
+      GoogleLoginStatus.popupClosed => 'Ingreso cancelado',
+      GoogleLoginStatus.cancelled => 'Ingreso en proceso',
+      GoogleLoginStatus.error => 'No se pudo ingresar',
+      _ => 'Ingreso con Google',
+    };
   }
 }

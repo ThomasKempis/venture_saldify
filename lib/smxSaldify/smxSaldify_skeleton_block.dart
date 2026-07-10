@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../smxColors.dart';
+import '../smxLayout/smxColors.dart';
 
 class SmxSaldiFySkeletonBlock extends StatelessWidget {
   final double? width;

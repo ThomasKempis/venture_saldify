@@ -8,6 +8,7 @@ import '../smxSaldify_screens/saldify_compras/smxSaldiFy_compras.dart';
 import '../smxSaldify_screens/saldify_credito/smxSaldiFy_cliente_credito.dart';
 import '../smxSaldify_screens/saldify_historial/smxSaldiFy_historial.dart';
 import '../smxSaldify_screens/saldify_pagos/smxSaldiFy_pagos.dart';
+import '../smxSaldify_screens/saldify_productos/smxSaldiFy_productos.dart';
 import 'smxSaldiFy_clientes/smxSaldiFy_clientes.dart';
 import 'smxSaldiFy_dashboard_menu.dart';
 import '../../smxLayout/smxScreenTmp.dart';
@@ -101,6 +102,10 @@ class SmxSaldiFyDashboardController {
 
   bool get hasCreditoPendiente => _hasStatusPendiente();
 
+  bool get hasGestionPendiente => _hasGestionPendiente();
+
+  bool get hasCobranzaPendiente => _hasCobranzaPendiente();
+
   void _mergeClientesActivosVsPendientes() {
     final rstActivos = _rstClientesActivos;
     if (rstActivos == null) return;
@@ -154,6 +159,77 @@ class SmxSaldiFyDashboardController {
     return false;
   }
 
+  bool _hasGestionPendiente() {
+    if (_rstClientesActivos == null ||
+        _rstClientesActivos!.getRowCount() == 0) {
+      return false;
+    }
+
+    final rstClientes = _rstClientesActivos!;
+    rstClientes.beforeFirst();
+    while (rstClientes.next()) {
+      final compras = _getIntValue(rstClientes, 'NOVE_COMPRAS');
+      final pagos = _getIntValue(rstClientes, 'NOVE_PAGOS');
+
+      if (compras + pagos > 0) {
+        rstClientes.first();
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  bool _hasCobranzaPendiente() {
+    if (_rstClientesActivos == null ||
+        _rstClientesActivos!.getRowCount() == 0) {
+      return false;
+    }
+
+    final rstClientes = _rstClientesActivos!;
+    rstClientes.beforeFirst();
+    while (rstClientes.next()) {
+      final status = rstClientes.getValue('SYSUSER12_STATUS')?.toString();
+      final statusType = rstClientes
+          .getValue('SYSUSER12_STATUS_TIPO')
+          ?.toString();
+
+      if (_isCobranzaPendienteStatus(status, statusType)) {
+        rstClientes.first();
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  bool _isCobranzaPendienteStatus(String? status, String? statusType) {
+    final normalizedStatus = (status ?? '').trim().toLowerCase();
+    final normalizedType = (statusType ?? '').trim().toLowerCase();
+
+    if (normalizedStatus == 'pendiente') return false;
+    if (normalizedStatus == 'al dia' || normalizedStatus == 'al día') {
+      return false;
+    }
+
+    if (normalizedStatus.isNotEmpty) return true;
+
+    return normalizedType == 'warning' ||
+        normalizedType == 'alert' ||
+        normalizedType == 'danger';
+  }
+
+  int _getIntValue(SmxRowSet rst, String field) {
+    try {
+      final value = rst.getValue(field);
+      if (value is int) return value;
+      if (value is double) return value.toInt();
+      return int.tryParse(value?.toString() ?? '') ?? 0;
+    } catch (_) {
+      return 0;
+    }
+  }
+
   void _notifyPendingActionsChanged() {
     pendingActionsRevisionNotifier.value++;
   }
@@ -192,6 +268,12 @@ class SmxSaldiFyDashboardController {
     return Navigator.of(
       context,
     ).push<void>(MaterialPageRoute(builder: (_) => const SmxSaldiFyCobranza()));
+  }
+
+  Future<void> openProductos(BuildContext context) {
+    return Navigator.of(context).push<void>(
+      MaterialPageRoute(builder: (_) => const SmxSaldiFyProductos()),
+    );
   }
 
   Future<bool?> openClienteCredito(

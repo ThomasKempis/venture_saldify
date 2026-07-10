@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:venture_saldify/smxColors.dart';
+import 'package:venture_saldify/smxApis/smxConfig.dart';
+import 'package:venture_saldify/smxLayout/smxColors.dart';
 import 'package:venture_saldify/smxLayout/smxLayout.dart';
 
 class SmxSaldiFyClienteInvitacionEstado extends StatelessWidget {
@@ -90,8 +91,8 @@ class _SaldifyBrand extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final logoSize = compact ? 78.0 : 96.0;
-    final logoWidth = logoSize * 266 / 386;
+    final double logoSize = 54;
+    final double logoWidth = 54;
 
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -99,14 +100,11 @@ class _SaldifyBrand extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Transform.translate(
-          offset: Offset(0, compact ? -7 : -9),
+          offset: Offset(0, compact ? 0 : 0),
           child: SizedBox(
             width: logoWidth,
             height: logoSize,
-            child: Image.asset(
-              'assets/images/logo_logon_trimmed.png',
-              fit: BoxFit.contain,
-            ),
+            child: SmxConfig.logo(fit: BoxFit.contain),
           ),
         ),
         const SizedBox(width: 16),
@@ -115,7 +113,7 @@ class _SaldifyBrand extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'SALDIFY',
+              SmxConfig.titulo.toUpperCase(),
               textAlign: TextAlign.left,
               style: TextStyle(
                 color: SmxColors.white,
@@ -134,7 +132,7 @@ class _SaldifyBrand extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'CLIENT CREDIT PORTAL',
+              SmxConfig.descripcion,
               textAlign: TextAlign.left,
               style: TextStyle(
                 color: SmxColors.brandAccent,

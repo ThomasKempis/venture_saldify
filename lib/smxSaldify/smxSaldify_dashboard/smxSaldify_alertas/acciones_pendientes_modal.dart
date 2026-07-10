@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:venture_saldify/smxColors.dart';
+import 'package:venture_saldify/smxLayout/smxColors.dart';
 
-enum AccionPendienteTipo { clientesPendientes, creditoPendiente }
+enum AccionPendienteTipo {
+  clientesPendientes,
+  creditoPendiente,
+  gestionPendiente,
+  cobranzaPendiente,
+}
 
 class AccionesPendientesModal extends StatelessWidget {
   final List<AccionPendienteTipo> acciones;
@@ -190,6 +195,18 @@ class _PendingActionData {
         title: 'Credito pendiente',
         body:
             'Da clic sobre la tarjeta del cliente y selecciona Actualizar credito.',
+      ),
+      AccionPendienteTipo.gestionPendiente => const _PendingActionData(
+        icon: Icons.notifications_active_rounded,
+        title: 'Gestión pendiente',
+        body:
+            'Un cliente a solicitado compra o registrado pago. Verifique la campana de notificaciones en la tarjeta del cliente.',
+      ),
+      AccionPendienteTipo.cobranzaPendiente => const _PendingActionData(
+        icon: Icons.event_busy_rounded,
+        title: 'Cobranza pendiente',
+        body:
+            'Tiene uno o mas clientes para auditar en cobranza. Mantenga su cartera al dia.',
       ),
     };
   }

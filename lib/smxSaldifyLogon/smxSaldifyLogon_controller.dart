@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:venture_core_connect/smxConstants_core.dart';
+import 'package:venture_saldify/smxApis/smxConfig.dart';
 import 'package:venture_widgets/smxClassDrivers.dart';
 import 'package:venture_widgets/smxController/smxController.dart';
 import 'package:venture_widgets/smxShowDialog/smxShowDialogs.dart';
@@ -11,10 +12,8 @@ import '../../smxApis/smxConstants.dart';
 import 'smxSaldifyAccessSession.dart';
 
 class SmxSaldifyLogonController extends SmxController {
-  static const logoAsset = 'assets/images/logo_logon_trimmed.png';
   static const welcomeAsset = 'assets/images/saldify_invitation_welcome.png';
-  static const welcomeAssetHd =
-      'assets/images/saldify_invitation_welcome_hd.png';
+  static const welcomeAssetHd = 'assets/images/saldify_invitation_welcome_hd.png';
   static const _codigoStorageKey = 'saldify_codigo_invitado';
   static const _uuidAnfitrionStorageKey = 'saldify_uuid_anfitrion';
   static const _correoInvitadoStorageKey = 'saldify_correo_invitado';
@@ -34,7 +33,7 @@ class SmxSaldifyLogonController extends SmxController {
     required super.data,
     String codigoInicial = '',
   }) {
-    SmxConstants_core.instancia = 'SALDIFY';
+    SmxConstants_core.instancia = SmxConfig.titulo.toUpperCase();
     resetJsonSend();
 
     hasCodigoInicialValido = SmxCodeInvitado.isValid(codigoInicial);
@@ -48,7 +47,7 @@ class SmxSaldifyLogonController extends SmxController {
 
   static Future<void> warmUpAssets() async {
     await Future.wait([
-      rootBundle.load(logoAsset),
+      rootBundle.load(SmxConfig.logoPath),
       rootBundle.load(welcomeAsset),
     ]);
   }
@@ -67,7 +66,7 @@ class SmxSaldifyLogonController extends SmxController {
     _notify();
 
     await Future.wait([
-      precacheImage(const AssetImage(logoAsset), context),
+      precacheImage(AssetImage(SmxConfig.logoPath), context),
       precacheImage(AssetImage(welcomeAsset), context),
     ]);
 

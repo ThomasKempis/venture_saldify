@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../smxColors.dart';
+import '../../../smxLayout/smxColors.dart';
 import '../../../smxSaldify/smxSaldify_skeleton_block.dart';
 
 class SmxSaldiFyClienteAnfitrionSkeleton extends StatelessWidget {

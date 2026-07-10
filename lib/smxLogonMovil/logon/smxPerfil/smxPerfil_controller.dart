@@ -1,9 +1,9 @@
 import 'package:flutter/cupertino.dart';
-import 'package:venture_core_connect/smxConstants_core.dart';
 import 'package:venture_widgets/smxTmpScreen.dart';
 import 'dart:typed_data';
 import 'package:venture_widgets/smxShowDialog/smxShowDialogs.dart';
 import 'package:venture_widgets/smxTextField/smxTextField.dart';
+import 'package:venture_widgets/smxViewMap/smxLocationReporter.dart';
 
 import '../../../smxApis/smxConstants.dart';
 import '../smxLogonMovil_controller.dart';
@@ -21,8 +21,11 @@ class SmxPerfil_controller extends SmxTmpCtl {
 
   @override
   Future<void> save() async {
-    controllerMain.checkPermissionLocation();
-    controllerMain.rstSysUser10.update('SYSUSER10_GEOLOC_ULT', SmxConstants_core.geoLocalizacion);
+    await SmxLocationReporter.report(
+      controller: controllerMain,
+      idSysuser10: controllerMain.rstSysUser10.getId(),
+      accion: 'PERFIL',
+    );
 
     await showDialogWait(context, () async {
       await callTroncalSave(controllerMain.rstSysUser10);
@@ -39,7 +42,9 @@ class SmxPerfil_controller extends SmxTmpCtl {
 
   String getNombres() {
     String nombres = controllerMain.rstSysUser10.getValue('SYSUSER10_NOMBRES');
-    String apellidos = controllerMain.rstSysUser10.getValue('SYSUSER10_APELLIDOS');
+    String apellidos = controllerMain.rstSysUser10.getValue(
+      'SYSUSER10_APELLIDOS',
+    );
     return "$nombres $apellidos";
   }
 
@@ -48,18 +53,24 @@ class SmxPerfil_controller extends SmxTmpCtl {
       return false;
     }
 
-    if (!(getValueFactory('SYSUSER10_TELEFONO').getWidGet() as SmxTextField).isValidaStringSpecial) {
-      showValidDialog(context, mensaje:"Debe ingresar un Teléfono válido");
+    if (!(getValueFactory('SYSUSER10_TELEFONO').getWidGet() as SmxTextField)
+        .isValidaStringSpecial) {
+      showValidDialog(context, mensaje: "Debe ingresar un Teléfono válido");
       return false;
     }
 
-    if (!(getValueFactory('SYSUSER10_CORREO_01').getWidGet() as SmxTextField).isValidaStringSpecial) {
-      showValidDialog(context, mensaje:"Debe ingresar un correo válido");
+    if (!(getValueFactory('SYSUSER10_CORREO_01').getWidGet() as SmxTextField)
+        .isValidaStringSpecial) {
+      showValidDialog(context, mensaje: "Debe ingresar un correo válido");
       return false;
     }
 
     if (!(controllerMain.isMayorEdad(getDate('SYSUSER10_FECHA')))) {
-      showValidDialog(context, mensaje:"Debe ingresar una edad mayor a ${SmxLogonMovil_controller.edad_maxima} años");
+      showValidDialog(
+        context,
+        mensaje:
+            "Debe ingresar una edad mayor a ${SmxLogonMovil_controller.edad_maxima} años",
+      );
       return false;
     }
 

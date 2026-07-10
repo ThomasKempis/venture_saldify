@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:venture_saldify/smxColors.dart';
+import 'package:venture_saldify/smxApis/smxConfig.dart';
+import 'package:venture_saldify/smxLayout/smxColors.dart';
 import 'package:venture_saldify/smxLayout/smxLayout.dart';
 import 'package:venture_saldify/smxMenuVersion.dart';
 
@@ -143,22 +144,19 @@ class SmxSaldiFyClienteDrawer extends StatelessWidget {
                     children: [
                       ClipOval(
                         child: SizedBox(
-                          width: 54,
-                          height: 54,
-                          child: Image.asset(
-                            'assets/images/logo_logon.png',
-                            fit: BoxFit.cover,
-                          ),
+                          width: 34,
+                          height: 34,
+                          child: SmxConfig.logo(fit: BoxFit.cover),
                         ),
                       ),
                       const SizedBox(width: 14),
-                      const Expanded(
+                      Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'SALDIFY',
-                              style: TextStyle(
+                              SmxConfig.titulo.toUpperCase(),
+                              style: const TextStyle(
                                 color: SmxColors.white,
                                 fontFamily: 'Segoe UI',
                                 fontFamilyFallback: [
@@ -173,12 +171,12 @@ class SmxSaldiFyClienteDrawer extends StatelessWidget {
                                 letterSpacing: 2.4,
                               ),
                             ),
-                            SizedBox(height: 6),
+                            const SizedBox(height: 6),
                             Text(
-                              'CLIENT CREDIT PORTAL',
+                              SmxConfig.descripcion,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
+                              style: const TextStyle(
                                 color: SmxColors.brandAccent,
                                 fontFamily: 'Segoe UI',
                                 fontSize: 10,
@@ -196,13 +194,19 @@ class SmxSaldiFyClienteDrawer extends StatelessWidget {
                   icon: Icons.dashboard_rounded,
                   label: 'Inicio',
                   selected: selectedIndex == 0,
-                  onTap: () => onSelect(0),
+                  onTap: () {
+                    Navigator.of(context).pop();
+                    onSelect(0);
+                  },
                 ),
                 _DrawerItem(
                   icon: Icons.person_rounded,
                   label: 'Perfil',
                   selected: selectedIndex == 1,
-                  onTap: () => onSelect(1),
+                  onTap: () {
+                    Navigator.of(context).pop();
+                    onSelect(1);
+                  },
                 ),
                 const Divider(color: SmxColors.white24, height: 28),
                 const _DisabledDrawerItem(
@@ -258,9 +262,9 @@ class _NavigationBrand extends StatelessWidget {
   Widget build(BuildContext context) {
     final logo = ClipOval(
       child: SizedBox(
-        width: 50,
-        height: 50,
-        child: Image.asset('assets/images/logo_logon.png', fit: BoxFit.cover),
+        width: 34,
+        height: 34,
+        child: SmxConfig.logo(fit: BoxFit.cover),
       ),
     );
 
@@ -270,13 +274,13 @@ class _NavigationBrand extends StatelessWidget {
       children: [
         logo,
         const SizedBox(width: 12),
-        const Expanded(
+        Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'SALDIFY',
-                style: TextStyle(
+                SmxConfig.titulo.toUpperCase(),
+                style: const TextStyle(
                   color: SmxColors.white,
                   fontFamily: 'Segoe UI',
                   fontFamilyFallback: ['Tahoma', 'Geneva', 'Verdana', 'Arial'],
@@ -286,12 +290,12 @@ class _NavigationBrand extends StatelessWidget {
                   letterSpacing: 2.4,
                 ),
               ),
-              SizedBox(height: 5),
+              const SizedBox(height: 5),
               Text(
-                'CLIENT CREDIT PORTAL',
+                SmxConfig.descripcion,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(
+                style: const TextStyle(
                   color: SmxColors.brandAccent,
                   fontFamily: 'Segoe UI',
                   fontSize: 9,

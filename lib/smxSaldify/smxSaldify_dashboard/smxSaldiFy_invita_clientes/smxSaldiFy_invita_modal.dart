@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show Clipboard, ClipboardData;
 import 'package:url_launcher/url_launcher.dart';
 import 'package:venture_core_connect/smxDataBase/smxRowSet.dart';
-import 'package:venture_saldify/smxColors.dart';
+import 'package:venture_saldify/smxApis/smxConfig.dart';
+import 'package:venture_saldify/smxLayout/smxColors.dart';
+import 'package:venture_saldify/smxSaldifyBackgrounds/invita_cliente_card_bg.dart';
+import 'package:venture_saldify/smxSaldifyBackgrounds/invita_modal_bg.dart';
 
 import 'smxSaldiFy_invita_clientes_models.dart';
 
@@ -100,7 +103,7 @@ String _buildWhatsAppMessage({
       : anfitrionNombre.trim();
 
   return [
-    'SALDIFY',
+    SmxConfig.titulo.toUpperCase(),
     'Anfitrion: $anfitrion',
     'Te comparto tu invitacion para entrar a mi red de clientes.',
     '',
@@ -123,7 +126,7 @@ String _buildClipboardInviteMessage({
       : anfitrionNombre.trim();
 
   return [
-    'SALDIFY',
+    SmxConfig.titulo.toUpperCase(),
     'Anfitrion: $anfitrion',
     'Link de invitacion:',
     invite.link,
@@ -215,7 +218,8 @@ class _InviteLinkDialogState extends State<_InviteLinkDialog> {
       backgroundColor: SmxColors.transparent,
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 680, maxHeight: 620),
-        child: DecoratedBox(
+        child: Container(
+          clipBehavior: Clip.antiAlias,
           decoration: BoxDecoration(
             gradient: SmxGradients.saldifyBackground,
             borderRadius: BorderRadius.circular(20),
@@ -228,80 +232,85 @@ class _InviteLinkDialogState extends State<_InviteLinkDialog> {
               ),
             ],
           ),
-          child: DefaultTabController(
-            length: 2,
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Row(
+          child: Stack(
+            children: [
+              const Positioned.fill(child: InvitaModalBg()),
+              DefaultTabController(
+                length: 2,
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      const Expanded(
-                        child: Text(
-                          'Crear invitacion',
-                          style: TextStyle(
-                            color: SmxColors.white,
-                            fontSize: 24,
+                      Row(
+                        children: [
+                          const Expanded(
+                            child: Text(
+                              'Crear invitacion',
+                              style: TextStyle(
+                                color: SmxColors.white,
+                                fontSize: 24,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
+                          ),
+                          IconButton(
+                            tooltip: 'Cancelar',
+                            onPressed: () => Navigator.of(context).pop(),
+                            icon: const Icon(
+                              Icons.close_rounded,
+                              color: SmxColors.white,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: SmxColors.whiteAlpha(.1),
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: const TabBar(
+                          indicatorSize: TabBarIndicatorSize.tab,
+                          indicator: BoxDecoration(
+                            color: SmxColors.brandAccent,
+                            borderRadius: BorderRadius.all(Radius.circular(14)),
+                          ),
+                          labelColor: SmxColors.navigationDark,
+                          unselectedLabelColor: SmxColors.white70,
+                          labelStyle: TextStyle(
+                            fontSize: 12,
                             fontWeight: FontWeight.w900,
                           ),
+                          tabs: [
+                            Tab(text: 'Cliente existente'),
+                            Tab(text: 'Correo invitado'),
+                          ],
                         ),
                       ),
-                      IconButton(
-                        tooltip: 'Cancelar',
-                        onPressed: () => Navigator.of(context).pop(),
-                        icon: const Icon(
-                          Icons.close_rounded,
-                          color: SmxColors.white,
+                      const SizedBox(height: 18),
+                      Expanded(
+                        child: TabBarView(
+                          children: [
+                            _ClienteExistenteTab(
+                              clientes: _clientes,
+                              action: widget.action,
+                              onInvite: _sendClienteLink,
+                            ),
+                            _CorreoInvitadoTab(
+                              correoController: _correoController,
+                              telefonoController: _telefonoController,
+                              action: widget.action,
+                              onInvite: _sendCorreoLink,
+                            ),
+                          ],
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: SmxColors.whiteAlpha(.1),
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    child: const TabBar(
-                      indicatorSize: TabBarIndicatorSize.tab,
-                      indicator: BoxDecoration(
-                        color: SmxColors.brandAccent,
-                        borderRadius: BorderRadius.all(Radius.circular(14)),
-                      ),
-                      labelColor: SmxColors.navigationDark,
-                      unselectedLabelColor: SmxColors.white70,
-                      labelStyle: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w900,
-                      ),
-                      tabs: [
-                        Tab(text: 'Cliente existente'),
-                        Tab(text: 'Correo invitado'),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 18),
-                  Expanded(
-                    child: TabBarView(
-                      children: [
-                        _ClienteExistenteTab(
-                          clientes: _clientes,
-                          action: widget.action,
-                          onInvite: _sendClienteLink,
-                        ),
-                        _CorreoInvitadoTab(
-                          correoController: _correoController,
-                          telefonoController: _telefonoController,
-                          action: widget.action,
-                          onInvite: _sendCorreoLink,
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+                ),
               ),
-            ),
+            ],
           ),
         ),
       ),
@@ -429,72 +438,82 @@ class _ClienteExistenteTab extends StatelessWidget {
                   clientes.getValue('SYSUSER10_TELEFONO')?.toString() ?? '';
 
               return Material(
+                clipBehavior: Clip.antiAlias,
                 color: SmxColors.whiteAlpha(.92),
                 borderRadius: BorderRadius.circular(14),
-                child: InkWell(
-                  onTap: uuidInvitado.isEmpty
-                      ? null
-                      : () => onInvite(
-                          _ClienteInvitadoInfo(
-                            uuidInvitado: uuidInvitado,
-                            telefono: telefono,
-                          ),
-                        ),
-                  borderRadius: BorderRadius.circular(14),
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(14, 12, 12, 12),
-                    child: Row(
-                      children: [
-                        const Icon(
-                          Icons.person_rounded,
-                          color: SmxColors.brandPrimary,
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                name,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                  color: SmxColors.textDark,
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w900,
-                                ),
+                child: Stack(
+                  children: [
+                    const Positioned.fill(child: InvitaClienteCardBg()),
+                    InkWell(
+                      onTap: uuidInvitado.isEmpty
+                          ? null
+                          : () => onInvite(
+                              _ClienteInvitadoInfo(
+                                uuidInvitado: uuidInvitado,
+                                telefono: telefono,
                               ),
-                              const SizedBox(height: 3),
-                              Text(
-                                status,
-                                style: const TextStyle(
-                                  color: SmxColors.textMuted,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                              if (_isWhatsApp) ...[
-                                const SizedBox(height: 3),
-                                Text(
-                                  telefono.isEmpty ? 'Sin telefono' : telefono,
-                                  style: const TextStyle(
-                                    color: SmxColors.textMuted,
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w600,
+                            ),
+                      borderRadius: BorderRadius.circular(14),
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(14, 12, 12, 12),
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.person_rounded,
+                              color: SmxColors.brandPrimary,
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    name,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      color: SmxColors.textDark,
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w900,
+                                    ),
                                   ),
-                                ),
-                              ],
-                            ],
-                          ),
+                                  const SizedBox(height: 3),
+                                  Text(
+                                    status,
+                                    style: const TextStyle(
+                                      color: SmxColors.textMuted,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                  if (_isWhatsApp) ...[
+                                    const SizedBox(height: 3),
+                                    Text(
+                                      telefono.isEmpty
+                                          ? 'Sin telefono'
+                                          : telefono,
+                                      style: const TextStyle(
+                                        color: SmxColors.textMuted,
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
+                                ],
+                              ),
+                            ),
+                            Icon(
+                              _isWhatsApp
+                                  ? Icons.chat_rounded
+                                  : Icons.copy_rounded,
+                              color: SmxColors.brandSecondary,
+                              size: 20,
+                            ),
+                          ],
                         ),
-                        Icon(
-                          _isWhatsApp ? Icons.chat_rounded : Icons.copy_rounded,
-                          color: SmxColors.brandSecondary,
-                          size: 20,
-                        ),
-                      ],
+                      ),
                     ),
-                  ),
+                  ],
                 ),
               );
             },

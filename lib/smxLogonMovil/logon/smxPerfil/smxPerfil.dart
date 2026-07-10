@@ -1,8 +1,7 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import 'package:venture_saldify/smxColors.dart';
+import 'package:venture_saldify/smxLayout/smxColors.dart';
 import 'package:venture_saldify/smxLogonMovil/logon/smxPerfil/smxPerfil_controller.dart';
-import 'package:venture_saldify/smxLayout/smxScreenTmp.dart';
 import 'package:venture_widgets/smxDatePicker/smxDatePicker.dart';
 import 'package:venture_widgets/smxTextField/smxTextField.dart';
 
@@ -184,13 +183,15 @@ class _SmxPerfil extends State<SmxPerfil> {
               ),
             ),
             child: InkWell(
-              onTap: () {
+              onTap: () async {
                 if (!controller.showValida()) {
                   _restoreOriginalValues();
                   return;
                 }
 
-                controller.save();
+                await controller.save();
+                if (!mounted) return;
+
                 widget.onNavigateToHome();
               },
               child: const Row(
@@ -310,10 +311,4 @@ class _SmxPerfil extends State<SmxPerfil> {
       ),
     );
   }
-}
-
-void _openUnderConstruction(BuildContext context, String title) {
-  Navigator.of(context).push(
-    MaterialPageRoute<void>(builder: (_) => SmxSaldiFyScreenTmp(title: title)),
-  );
 }

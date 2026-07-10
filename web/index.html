@@ -1,27 +1,46 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <base href="/venture_saldify/">
+  <script>
+    // Parche para desarrollo: Rellena los marcadores si estamos en localhost
+    (function() {
+      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        const devValues = {
+          '{{APP_TITLE}}': 'Saldify [Dev]',
+          '{{APP_TITLE_UPPER}}': 'SALDIFY',
+          '{{APP_DESCRIPTION}}': 'SMART BALANCE & CREDITS CONTROL [DEV]'
+        };
+        document.title = devValues['{{APP_TITLE}}'];
+        window.addEventListener('DOMContentLoaded', () => {
+          const nameEl = document.querySelector('.app-name');
+          const sloganEl = document.querySelector('.app-slogan');
+          if (nameEl && nameEl.textContent.includes('{{')) nameEl.textContent = devValues['{{APP_TITLE_UPPER}}'];
+          if (sloganEl && sloganEl.textContent.includes('{{')) sloganEl.textContent = devValues['{{APP_DESCRIPTION}}'];
+        });
+      }
+    })();
+  </script>
+  <base href="$FLUTTER_BASE_HREF">
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="description" content="Venture Web">
+  <meta name="description" content="{{APP_DESCRIPTION}}">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-  <meta property="og:title" content="Saldify">
-  <meta property="og:description" content="Gestion de creditos y saldos en linea">
-  <meta property="og:image" content="https://venture.jars.mx/venture_saldify/logo.png">
+  <meta property="og:title" content="{{APP_TITLE}}">
+  <meta property="og:description" content="{{APP_DESCRIPTION}}">
+  <meta property="og:image" content="https://venture.jars.mx/venture_saldify/icons/Icon-512.png">
   <meta property="og:url" content="https://venture.jars.mx/venture_saldify/">
 
   <meta name="theme-color" content="#155C37">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="Saldify">
+  <meta name="apple-mobile-web-app-title" content="{{APP_TITLE}}">
 
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
   <link rel="icon" type="image/png" href="favicon.png">
-  <title>Saldify</title>
+  <title>{{APP_TITLE}}</title>
 
   <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
@@ -251,8 +270,8 @@
       <div class="logo-container">
         <img src="icons/Icon-512.png" alt="Saldify Icon">
       </div>
-      <div class="app-name">SALDIFY</div>
-      <div class="app-slogan">SMART BALANCE & CREDITS CONTROL</div>
+      <div class="app-name">{{APP_TITLE_UPPER}}</div>
+      <div class="app-slogan">{{APP_DESCRIPTION}}</div>
       <div class="loader"></div>
     </div>
   </div>

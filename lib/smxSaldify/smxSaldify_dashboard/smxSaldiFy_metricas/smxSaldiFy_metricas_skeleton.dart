@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../smxSaldify_skeleton_block.dart';
-import '../../../smxColors.dart';
+import '../../../smxLayout/smxColors.dart';
 
 class SmxSaldiFyMetricasSkeleton extends StatelessWidget {
   final bool isMobile;
