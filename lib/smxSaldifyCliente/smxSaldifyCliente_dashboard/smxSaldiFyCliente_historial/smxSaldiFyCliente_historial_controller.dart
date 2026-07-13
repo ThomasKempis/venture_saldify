@@ -57,7 +57,23 @@ class SmxSaldiFyClienteHistorialController extends SmxController {
   }
 
   String getMovimientoImporte() {
-    return rstHistorial.getValueFormatAmount('SYSUSER90_IMPORTE');
+    final total = rstHistorial.getValue('SYSUSER90_TOTAL');
+    final value = total ?? rstHistorial.getValue('SYSUSER90_IMPORTE');
+    final amount = value is num
+        ? value.toDouble()
+        : double.tryParse(value?.toString() ?? '') ?? 0.0;
+    return SmxRowSet.formatAmount(amount);
+  }
+
+  String getMovimientoCalculo() {
+    if (getMovimientoTipo().toLowerCase() != 'compra') return '';
+    final cantidad = rstHistorial.getValue('SYSUSER90_CANTIDAD');
+    if (cantidad == null) return '';
+    final cantidadText = cantidad is num && cantidad == cantidad.toInt()
+        ? cantidad.toInt().toString()
+        : cantidad.toString();
+    final importe = rstHistorial.getValueFormatAmount('SYSUSER90_IMPORTE');
+    return '$cantidadText × $importe';
   }
 
   String getMovimientoFecha() {

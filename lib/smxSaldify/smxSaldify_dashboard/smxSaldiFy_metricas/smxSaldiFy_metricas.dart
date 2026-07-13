@@ -3,12 +3,12 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:venture_core_connect/smxDataBase/smxRowSet.dart';
-import 'package:venture_saldify/smxSaldify/smxSaldify_credito_resumen.dart';
+import 'package:venture_saldify/smxLayout/smxScreens/smxMetricasResumen/smxMetricasResumen.dart';
+import 'package:venture_saldify/smxLayout/smxScreens/smxMetricasResumen/smxMetricasResumenSkeleton.dart';
 import 'package:venture_widgets/smxCallBaseStateful.dart';
 import 'package:venture_widgets/smxController/smxControllerSendData.dart';
 
 import 'smxSaldiFy_metricas_controller.dart';
-import 'smxSaldiFy_metricas_skeleton.dart';
 
 class SmxSaldiFyMetricas extends StatefulWidget {
   final bool isMobile;
@@ -33,7 +33,7 @@ class _SmxSaldiFyMetricasState extends State<SmxSaldiFyMetricas> {
         data: SmxControllerSendData(context: context),
       ),
       loadingBuilder: (_) =>
-          SmxSaldiFyMetricasSkeleton(isMobile: widget.isMobile),
+          SmxMetricasResumenSkeleton(isMobile: widget.isMobile),
       builder: (context, controller) {
         return _SmxSaldiFyMetricasRefreshListener(
           controller: controller,
@@ -123,7 +123,7 @@ class _SmxSaldiFyMetricasView extends StatelessWidget {
           builder: (context, rstMetricas, _) {
             final metricas = _MetricasResumen.fromRowSet(rstMetricas);
 
-            return SmxSaldiFyCreditoResumen(
+            return SmxMetricasResumen(
               key: ValueKey(rstMetricas),
               credito: metricas.credito,
               disponible: metricas.disponible,

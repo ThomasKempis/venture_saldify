@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:venture_core_connect/smxDataBase/smxRowSet.dart';
 import 'package:venture_saldify/smxLayout/smxColors.dart';
-import 'package:venture_saldify/smxSaldifyBackgrounds/cliente_movimiento_bg.dart';
+import 'package:venture_saldify/smxLayout/smxBackgrounds/cliente_movimiento_bg.dart';
 import 'package:venture_widgets/smxCallBaseStateful.dart';
 import 'package:venture_widgets/smxController/smxControllerSendData.dart';
 
@@ -175,6 +175,7 @@ class _MovimientoCards extends StatelessWidget {
             controller.getMovimientoConcepto,
           ),
           importe: _getMovimientoValue(index, controller.getMovimientoImporte),
+          calculo: _getMovimientoValue(index, controller.getMovimientoCalculo),
           fecha: _getMovimientoValue(index, controller.getMovimientoFecha),
           status: _getMovimientoStatus(index),
         ),
@@ -223,6 +224,7 @@ class _MovimientoCard extends StatelessWidget {
   final String tipo;
   final String concepto;
   final String importe;
+  final String calculo;
   final String fecha;
   final int status;
 
@@ -231,6 +233,7 @@ class _MovimientoCard extends StatelessWidget {
     required this.tipo,
     required this.concepto,
     required this.importe,
+    required this.calculo,
     required this.fecha,
     required this.status,
   });
@@ -298,6 +301,19 @@ class _MovimientoCard extends StatelessWidget {
                           _MovimientoStatusBadge(data: data),
                         ],
                       ),
+                      if (calculo.isNotEmpty) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          calculo,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: SmxColors.textMuted,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ],
                       const SizedBox(height: 8),
                       Row(
                         children: [

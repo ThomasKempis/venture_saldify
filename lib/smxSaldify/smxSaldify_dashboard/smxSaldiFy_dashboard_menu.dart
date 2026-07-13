@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:venture_saldify/smxApis/smxConfig.dart';
 import 'package:venture_saldify/smxLayout/smxColors.dart';
-import 'package:venture_saldify/smxSaldifyBackgrounds/cliente_actions_bg.dart';
+import 'package:venture_saldify/smxLayout/smxBackgrounds/cliente_actions_bg.dart';
 
 import 'smxSaldiFy_clientes/smxSaldiFy_clientes.dart';
 

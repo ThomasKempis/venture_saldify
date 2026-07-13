@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:venture_saldify/smxLayout/smxColors.dart';
 import 'package:venture_saldify/smxLayout/smxLayout.dart';
-import 'package:venture_saldify/smxSaldifyBackgrounds/invita_cliente_card_bg.dart';
-import 'package:venture_saldify/smxSaldifyBackgrounds/operacion_bg_panel.dart';
+import 'package:venture_saldify/smxLayout/smxBackgrounds/invita_cliente_card_bg.dart';
+import 'package:venture_saldify/smxLayout/smxBackgrounds/operacion_bg_panel.dart';
 import 'package:venture_widgets/smxCallBaseStateful.dart';
 import 'package:venture_widgets/smxController/smxControllerSendData.dart';
 import 'package:venture_widgets/smxImagesCrud/smxImagesCrud.dart';
@@ -87,7 +87,7 @@ class _ProductosViewState extends State<_ProductosView> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      _Header(savedSomething: _savedSomething),
+                      _Header(controller: widget.controller),
                       const SizedBox(height: 24),
                       _ListHeader(
                         showForm: _showForm,
@@ -145,16 +145,18 @@ class _ProductosViewState extends State<_ProductosView> {
 }
 
 class _Header extends StatelessWidget {
-  final bool savedSomething;
+  final SmxSaldiFyProductosController controller;
 
-  const _Header({required this.savedSomething});
+  const _Header({required this.controller});
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
         IconButton(
-          onPressed: () => Navigator.of(context).pop(savedSomething),
+          onPressed: () => Navigator.of(
+            context,
+          ).pop(controller.cambioDisponibilidadCatalogo),
           icon: const Icon(Icons.arrow_back_rounded),
           color: SmxColors.white,
           style: IconButton.styleFrom(
@@ -265,6 +267,41 @@ class _FormPanel extends StatelessWidget {
             label: 'Nombre del Producto',
             isValid: true,
           ),
+          const SizedBox(height: 16),
+          if (isEditing)
+            Row(
+              children: [
+                Expanded(
+                  child: SmxNumberField(
+                    field: 'SYSUSER41_EXISTENCIA_INFO',
+                    controller: controller,
+                    input: controller.existenciaActual,
+                    label: 'Existencia',
+                    decimales: 0,
+                    readOnly: true,
+                    color: const Color(0xFF168653),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: SmxNumberField(
+                    field: 'SYSUSER41_INVENTARIO',
+                    controller: controller,
+                    label: 'Inventario',
+                    decimales: 0,
+                    isValid: true,
+                  ),
+                ),
+              ],
+            )
+          else
+            SmxNumberField(
+              field: 'SYSUSER41_INVENTARIO',
+              controller: controller,
+              label: 'Inventario',
+              decimales: 0,
+              isValid: true,
+            ),
           const SizedBox(height: 16),
           SmxNumberField(
             field: 'SYSUSER41_IMPORTE',
@@ -465,6 +502,7 @@ class _ProductosSection extends StatelessWidget {
             _ProductoTile(
               nombre: controller.getProductoAt(indexes[position]),
               importe: controller.getImporteAt(indexes[position]),
+              existencia: controller.getExistenciaAt(indexes[position]),
               imageUrl: controller.getProductoImageUrlAt(indexes[position]),
               status: controller.getStatusAt(indexes[position]),
               onTap: () => onEdit(indexes[position]),
@@ -504,6 +542,7 @@ class _EmptyProductosList extends StatelessWidget {
 class _ProductoTile extends StatelessWidget {
   final String nombre;
   final String importe;
+  final int existencia;
   final String imageUrl;
   final int status;
   final VoidCallback onTap;
@@ -512,6 +551,7 @@ class _ProductoTile extends StatelessWidget {
   const _ProductoTile({
     required this.nombre,
     required this.importe,
+    required this.existencia,
     required this.imageUrl,
     required this.status,
     required this.onTap,
@@ -557,15 +597,43 @@ class _ProductoTile extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 5),
-                        Text(
-                          'Precio base: $importe',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            color: SmxColors.textMuted,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w800,
-                          ),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                'Precio base: $importe',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  color: SmxColors.textMuted,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                            ),
+                            Tooltip(
+                              message: 'Existencia disponible',
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.inventory_2_outlined,
+                                    size: 17,
+                                    color: _existenciaColor,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    '$existencia',
+                                    style: TextStyle(
+                                      color: _existenciaColor,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w900,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
@@ -587,6 +655,12 @@ class _ProductoTile extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Color get _existenciaColor {
+    if (existencia <= 0) return const Color(0xFFD63C32);
+    if (existencia <= 5) return const Color(0xFFC47A08);
+    return const Color(0xFF168653);
   }
 }
 

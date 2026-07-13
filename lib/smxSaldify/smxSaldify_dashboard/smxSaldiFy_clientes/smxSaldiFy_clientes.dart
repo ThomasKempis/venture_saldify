@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:venture_core_connect/smxDataBase/smxRowSet.dart';
 import 'package:venture_saldify/smxLayout/smxColors.dart';
-import 'package:venture_saldify/smxSaldifyBackgrounds/saldify_circles_background.dart';
+import 'package:venture_saldify/smxLayout/smxBackgrounds/saldify_circles_background.dart';
 import 'package:venture_widgets/smxCallBaseStateful.dart';
 import 'package:venture_widgets/smxController/smxControllerSendData.dart';
 
@@ -305,9 +305,14 @@ class _ClientCards extends StatelessWidget {
         index,
         controller.getClientNovePagos,
       );
+      final conCatalogo = _getClientIntValue(
+        index,
+        controller.getClientConCatalogo,
+      );
       final clientTapData = SmxSaldiFyClientTapData(
         idSysuser11: idSysuser11,
         relaSysuser10Cliente: relaSysuser10Cliente,
+        conCatalogo: conCatalogo == 1,
         name: name,
         credit: credit,
         availableCredit: availableCredit,
@@ -476,11 +481,13 @@ class SmxSaldiFyClientTapData {
   final String credit;
   final String availableCredit;
   final String balance;
+  final bool conCatalogo;
 
   const SmxSaldiFyClientTapData({
     required this.idSysuser11,
     required this.relaSysuser10Cliente,
     required this.name,
+    this.conCatalogo = false,
     this.credit = '0',
     this.availableCredit = '0',
     this.balance = '0',

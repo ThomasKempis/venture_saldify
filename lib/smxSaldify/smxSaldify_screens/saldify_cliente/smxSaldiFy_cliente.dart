@@ -6,9 +6,9 @@ import 'package:venture_widgets/smxController/smxControllerSendData.dart';
 import 'package:venture_widgets/smxDatePicker/smxDatePicker.dart';
 import 'package:venture_widgets/smxTextField/smxTextField.dart';
 
-import 'package:venture_saldify/smxSaldifyBackgrounds/cliente_bg_datos.dart';
-import 'package:venture_saldify/smxSaldifyBackgrounds/cliente_bg_gmail.dart';
-import 'package:venture_saldify/smxSaldifyBackgrounds/cliente_bg_inicio.dart';
+import 'package:venture_saldify/smxLayout/smxBackgrounds/cliente_bg_datos.dart';
+import 'package:venture_saldify/smxLayout/smxBackgrounds/cliente_bg_gmail.dart';
+import 'package:venture_saldify/smxLayout/smxBackgrounds/cliente_bg_inicio.dart';
 import 'smxSaldiFy_cliente_controller.dart';
 
 class SmxSaldiFyCliente extends StatelessWidget {

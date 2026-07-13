@@ -4,8 +4,8 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:venture_core_connect/smxDataBase/smxRowSet.dart';
 import 'package:venture_saldify/smxApis/smxConfig.dart';
 import 'package:venture_saldify/smxLayout/smxColors.dart';
-import 'package:venture_saldify/smxSaldifyBackgrounds/invita_cliente_card_bg.dart';
-import 'package:venture_saldify/smxSaldifyBackgrounds/invita_modal_bg.dart';
+import 'package:venture_saldify/smxLayout/smxBackgrounds/invita_cliente_card_bg.dart';
+import 'package:venture_saldify/smxLayout/smxBackgrounds/invita_modal_bg.dart';
 
 import 'smxSaldiFy_invita_clientes_models.dart';
 

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:venture_saldify/smxLayout/smxColors.dart';
 import 'package:venture_saldify/smxLayout/smxLayout.dart';
-import 'package:venture_saldify/smxSaldifyBackgrounds/assistant_body_bg.dart';
-import 'package:venture_saldify/smxSaldifyBackgrounds/assistant_header_bg.dart';
+import 'package:venture_saldify/smxLayout/smxBackgrounds/assistant_body_bg.dart';
+import 'package:venture_saldify/smxLayout/smxBackgrounds/assistant_header_bg.dart';
 import 'package:venture_widgets/smxCallBaseStateful.dart';
 import 'package:venture_widgets/smxController/smxControllerSendData.dart';
 

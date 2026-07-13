@@ -43,8 +43,8 @@ class SmxSaldiFyClienteController extends SmxController {
     addSql(
       aliasSql,
       "select * from QRY_SYSUSER10_SYSUSER11 "
-          "where UUID_ANFITRION = '${SmxConstants.uuidAnfitrionParam}' "
-          "and ${_getInvitadoSqlCondition()}",
+      "where UUID_ANFITRION = '${SmxConstants.uuidAnfitrionParam}' "
+      "and ${_getInvitadoSqlCondition()}",
     );
 
     await getRowSetFuture(aliasSql);
@@ -107,7 +107,8 @@ class SmxSaldiFyClienteController extends SmxController {
       SmxSaldiFyClienteStatus.pendiente => 'Invitacion pendiente',
       SmxSaldiFyClienteStatus.archivado => 'Vinculo archivado',
       SmxSaldiFyClienteStatus.invalido => 'Link de invitacion no valido',
-      SmxSaldiFyClienteStatus.usuarioNoCorresponde => 'Invitación de otro usuario',
+      SmxSaldiFyClienteStatus.usuarioNoCorresponde =>
+        'Invitación de otro usuario',
       SmxSaldiFyClienteStatus.aceptado => '',
     };
   }
@@ -181,6 +182,8 @@ class SmxSaldiFyClienteController extends SmxController {
   int get relaSysuser10Anfitrion {
     return _getInvitacionInt('RELA_SYSUSER10');
   }
+
+  bool get conCatalogo => _getInvitacionInt('CON_CATALOGO') == 1;
 
   int get idSysuser11 {
     if (rstClienteCredito.getRowCount() == 0) return -1;

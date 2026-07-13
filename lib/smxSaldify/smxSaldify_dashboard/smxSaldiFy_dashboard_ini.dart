@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:venture_saldify/smxSaldifyBackgrounds/cliente_bg_inicio.dart';
+import 'package:venture_saldify/smxLayout/smxBackgrounds/cliente_bg_inicio.dart';
 
 class SmxSaldiFyDashboardIni extends StatelessWidget {
   final bool isMobile;

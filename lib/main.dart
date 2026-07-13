@@ -27,7 +27,8 @@ void main() async {
 void _applyDevCodigoInvitacion({required bool isInvitado}) {
   if (!kDebugMode || !isInvitado) return;
 
-  const String codigo = 'SF341716854136';
+  //const String codigo = 'SF341716854136'; //joseanibalmohr
+  const String codigo = 'SF283443935715'; //santiagoazaelmohr
 
   if (Uri.base.queryParameters.containsKey(SmxConstants.codigoInvitacionKey)) {
     return;

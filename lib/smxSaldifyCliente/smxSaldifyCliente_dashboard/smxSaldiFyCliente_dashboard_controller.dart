@@ -32,6 +32,8 @@ class SmxSaldiFyClienteDashboardController {
 
   int get relaSysuser10Anfitrion => clienteController.relaSysuser10Anfitrion;
 
+  bool get conCatalogo => clienteController.conCatalogo;
+
   void setMetricasSnapshot(SmxSaldiFyClienteMetricasSnapshot snapshot) {
     metricasSnapshot = snapshot;
   }
@@ -80,6 +82,7 @@ class SmxSaldiFyClienteDashboardController {
                 clientName: clientName,
                 idSysuser11: idSysuser11,
                 relaSysuser10Anfitrion: relaSysuser10Anfitrion,
+                conCatalogo: conCatalogo,
                 metricasIniciales: metricasSnapshot,
               ),
       ),

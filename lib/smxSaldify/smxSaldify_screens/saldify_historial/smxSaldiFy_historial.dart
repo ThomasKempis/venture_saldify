@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:venture_saldify/smxLayout/smxColors.dart';
 import 'package:venture_saldify/smxLayout/smxLayout.dart';
 import 'package:venture_saldify/smxSaldify/smxSaldify_dashboard/smxSaldiFy_clientes/smxSaldiFy_clientes.dart';
-import 'package:venture_saldify/smxSaldifyBackgrounds/historial_linear_bg.dart';
+import 'package:venture_saldify/smxLayout/smxBackgrounds/historial_linear_bg.dart';
 import 'package:venture_widgets/smxCallBaseStateful.dart';
 import 'package:venture_widgets/smxController/smxControllerSendData.dart';
 
@@ -239,6 +239,7 @@ class _HistorialPanel extends StatelessWidget {
                       tipo: controller.getTipoAt(index),
                       concepto: controller.getConceptoAt(index),
                       importe: controller.getImporteAt(index),
+                      calculo: controller.getCalculoAt(index),
                       fecha: controller.getFechaAt(index),
                       owner: controller.getOwnerAt(index),
                       status: controller.getStatusAt(index),
@@ -312,6 +313,7 @@ class _HistorialRow extends StatelessWidget {
   final String tipo;
   final String concepto;
   final String importe;
+  final String calculo;
   final String fecha;
   final String owner;
   final int status;
@@ -325,6 +327,7 @@ class _HistorialRow extends StatelessWidget {
     required this.tipo,
     required this.concepto,
     required this.importe,
+    required this.calculo,
     required this.fecha,
     required this.owner,
     required this.status,
@@ -355,39 +358,73 @@ class _HistorialRow extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Row(
-            children: [
-              _TipoBadge(label: tipo, color: accent),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Align(
-                  alignment: Alignment.centerRight,
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    alignment: Alignment.centerRight,
-                    child: Text(
-                      importe,
-                      maxLines: 1,
-                      style: TextStyle(
-                        color: accent,
-                        fontSize: 15,
-                        fontWeight: FontWeight.w900,
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final compact = constraints.maxWidth < 440;
+              final totalWidth = compact ? 88.0 : 120.0;
+              final dateWidth = compact ? 82.0 : 100.0;
+
+              return Row(
+                children: [
+                  Expanded(
+                    child: Row(
+                      children: [
+                        _TipoBadge(label: tipo, color: accent),
+                        if (calculo.isNotEmpty) ...[
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              calculo,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                color: SmxColors.textMuted,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  SizedBox(
+                    width: totalWidth,
+                    child: Align(
+                      alignment: Alignment.centerRight,
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerRight,
+                        child: Text(
+                          importe,
+                          maxLines: 1,
+                          style: TextStyle(
+                            color: accent,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Text(
-                fecha,
-                maxLines: 1,
-                style: const TextStyle(
-                  color: SmxColors.textMuted,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-            ],
+                  const SizedBox(width: 12),
+                  SizedBox(
+                    width: dateWidth,
+                    child: Text(
+                      fecha,
+                      maxLines: 1,
+                      textAlign: TextAlign.right,
+                      style: const TextStyle(
+                        color: SmxColors.textMuted,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            },
           ),
           const SizedBox(height: 7),
           Text(

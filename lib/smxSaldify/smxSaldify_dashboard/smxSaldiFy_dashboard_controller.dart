@@ -270,8 +270,8 @@ class SmxSaldiFyDashboardController {
     ).push<void>(MaterialPageRoute(builder: (_) => const SmxSaldiFyCobranza()));
   }
 
-  Future<void> openProductos(BuildContext context) {
-    return Navigator.of(context).push<void>(
+  Future<bool?> openProductos(BuildContext context) {
+    return Navigator.of(context).push<bool>(
       MaterialPageRoute(builder: (_) => const SmxSaldiFyProductos()),
     );
   }

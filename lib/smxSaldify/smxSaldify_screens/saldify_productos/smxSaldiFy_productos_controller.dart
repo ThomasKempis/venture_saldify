@@ -21,12 +21,15 @@ class SmxSaldiFyProductosController extends SmxController {
 
   bool lastSaveOk = false;
   bool lastStatusOk = false;
+  double _existenciaActual = 0;
+  late bool _teniaCatalogoAlEntrar;
   final Map<int, int> _imageVersions = {};
 
   SmxSaldiFyProductosController({required super.alias, required super.data});
 
   int get rowCount => rstProductos.getRowCount();
   bool get isEditing => data.accion == AccionNN.W;
+  double get existenciaActual => _existenciaActual;
   List<int> get productosActivosIndexes => _getProductoIndexesByStatus(0);
   List<int> get productosArchivadosIndexes => _getProductoIndexesByStatus(1);
 
@@ -36,8 +39,12 @@ class SmxSaldiFyProductosController extends SmxController {
     beginDB();
 
     await _loadProductos();
+    _teniaCatalogoAlEntrar = productosActivosIndexes.isNotEmpty;
     await prepareNuevo();
   }
+
+  bool get cambioDisponibilidadCatalogo =>
+      _teniaCatalogoAlEntrar != productosActivosIndexes.isNotEmpty;
 
   Future<void> _loadProductos() async {
     await _ensureProductoVacio();
@@ -62,6 +69,7 @@ class SmxSaldiFyProductosController extends SmxController {
     data.tablaTroncal = TABLE_PRODUCTOS;
 
     _setDefaults();
+    _existenciaActual = 0;
     _clearInputs();
     _clearImages();
     notifyListeners();
@@ -69,6 +77,10 @@ class SmxSaldiFyProductosController extends SmxController {
 
   Future<void> setProductoIndex(int index) async {
     rstProductos.index(index);
+    final existencia = rstProductos.getValue('SYSUSER41_EXISTENCIA');
+    _existenciaActual = existencia is num
+        ? existencia.toDouble()
+        : double.tryParse(existencia?.toString() ?? '') ?? 0;
 
     // Modificación: Siempre sobre copia del vacio para aislar la transacción
     rstProducto = _createProductoWriteRow();
@@ -85,6 +97,10 @@ class SmxSaldiFyProductosController extends SmxController {
     setText(
       'SYSUSER41_PRODUCTO',
       rstProducto.getValue('SYSUSER41_PRODUCTO') ?? '',
+    );
+    setNumericDbl(
+      'SYSUSER41_INVENTARIO',
+      rstProducto.getValue('SYSUSER41_INVENTARIO') ?? 0.0,
     );
     setNumericDbl(
       'SYSUSER41_IMPORTE',
@@ -179,6 +195,7 @@ class SmxSaldiFyProductosController extends SmxController {
     final producto =
         rstProducto.getValue('SYSUSER41_PRODUCTO')?.toString() ?? '';
     final importe = rstProducto.getValue('SYSUSER41_IMPORTE') ?? 0.0;
+    final inventario = rstProducto.getValue('SYSUSER41_INVENTARIO') ?? 0.0;
 
     removeSql(ALIAS_ADD);
     addSTrans(
@@ -186,7 +203,8 @@ class SmxSaldiFyProductosController extends SmxController {
       "select * from ADD_SYSUSER41("
       "$relaSysuser10, "
       "'${_sql(producto)}', "
-      "$importe)",
+      "$importe, "
+      "$inventario)",
     );
 
     await getCallWS();
@@ -212,11 +230,34 @@ class SmxSaldiFyProductosController extends SmxController {
   }
 
   void _addProductoToList() {
-    rstProducto.first();
-    final row = rstProducto.getRow().clone();
-    row.accion = AccionNN.N.toJson();
-    rstProductos.getRowsList().add(row);
-    rstProductos.last();
+    rstProductos.insert();
+    rstProductos.update('ID_SYSUSER41', rstProducto.getId());
+    rstProductos.update(
+      'RELA_SYSUSER10',
+      rstProducto.getValue('RELA_SYSUSER10'),
+    );
+    rstProductos.update(
+      'SYSUSER41_PRODUCTO',
+      rstProducto.getValue('SYSUSER41_PRODUCTO'),
+    );
+    rstProductos.update(
+      'SYSUSER41_INVENTARIO',
+      rstProducto.getValue('SYSUSER41_INVENTARIO'),
+    );
+    rstProductos.update(
+      'SYSUSER41_EXISTENCIA',
+      rstProducto.getValue('SYSUSER41_INVENTARIO'),
+    );
+    rstProductos.update(
+      'SYSUSER41_IMPORTE',
+      rstProducto.getValue('SYSUSER41_IMPORTE'),
+    );
+    rstProductos.update(
+      'SYSUSER41_STATUS',
+      rstProducto.getValue('SYSUSER41_STATUS'),
+    );
+    rstProductos.update('SYSUSER41_IMAGE', '');
+    rstProductos.setAccion(AccionNN.N);
   }
 
   void _updateProductoInList() {
@@ -226,6 +267,14 @@ class SmxSaldiFyProductosController extends SmxController {
     rstProductos.update(
       'SYSUSER41_PRODUCTO',
       rstProducto.getValue('SYSUSER41_PRODUCTO'),
+    );
+    rstProductos.update(
+      'SYSUSER41_INVENTARIO',
+      rstProducto.getValue('SYSUSER41_INVENTARIO'),
+    );
+    rstProductos.update(
+      'SYSUSER41_EXISTENCIA',
+      rstProducto.getValue('SYSUSER41_INVENTARIO'),
     );
     rstProductos.update(
       'SYSUSER41_IMPORTE',
@@ -267,6 +316,10 @@ class SmxSaldiFyProductosController extends SmxController {
       'SYSUSER41_PRODUCTO',
       rstProductos.getValue('SYSUSER41_PRODUCTO'),
     );
+    row.update(
+      'SYSUSER41_INVENTARIO',
+      rstProductos.getValue('SYSUSER41_INVENTARIO'),
+    );
     row.update('SYSUSER41_IMPORTE', rstProductos.getValue('SYSUSER41_IMPORTE'));
     row.update('SYSUSER41_STATUS', rstProductos.getValue('SYSUSER41_STATUS'));
   }
@@ -299,12 +352,14 @@ class SmxSaldiFyProductosController extends SmxController {
       SmxConstants.controllerMain.rstSysUser10.getId(),
     );
     rstProducto.update('SYSUSER41_PRODUCTO', '');
+    rstProducto.update('SYSUSER41_INVENTARIO', 0.0);
     rstProducto.update('SYSUSER41_IMPORTE', 0.0);
     rstProducto.update('SYSUSER41_STATUS', 0);
   }
 
   void _clearInputs() {
     setText('SYSUSER41_PRODUCTO', '');
+    setNumericDbl('SYSUSER41_INVENTARIO', 0.0);
     setNumericDbl('SYSUSER41_IMPORTE', 0.0);
   }
 
@@ -333,6 +388,15 @@ class SmxSaldiFyProductosController extends SmxController {
   String getImporteAt(int index) {
     rstProductos.index(index);
     return rstProductos.getValueFormatAmount('SYSUSER41_IMPORTE');
+  }
+
+  int getExistenciaAt(int index) {
+    rstProductos.index(index);
+    final value = rstProductos.getValue('SYSUSER41_EXISTENCIA');
+    final existencia = value is num
+        ? value.toInt()
+        : int.tryParse(value?.toString() ?? '') ?? 0;
+    return existencia < 0 ? 0 : existencia;
   }
 
   String getProductoImageUrlAt(int index) {

@@ -29,7 +29,7 @@ class SmxMenuVersion extends StatelessWidget {
       future: _versionFuture,
       builder: (context, snapshot) {
         return Text(
-          snapshot.data ?? 'Versión del sistema',
+          snapshot.data ?? 'Versión',
           textAlign: textAlign,
           style: style,
         );

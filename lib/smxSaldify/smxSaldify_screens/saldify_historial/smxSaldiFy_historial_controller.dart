@@ -60,7 +60,19 @@ class SmxSaldiFyHistorialController extends SmxController {
 
   String getImporteAt(int index) {
     rstHistorial.index(index);
-    return rstHistorial.getValueFormatAmount('SYSUSER90_IMPORTE');
+    return SmxRowSet.formatAmount(_getTotalValue());
+  }
+
+  String getCalculoAt(int index) {
+    rstHistorial.index(index);
+    if (getTipoAt(index).toLowerCase() != 'compra') return '';
+    final cantidad = rstHistorial.getValue('SYSUSER90_CANTIDAD');
+    if (cantidad == null) return '';
+    final cantidadText = cantidad is num && cantidad == cantidad.toInt()
+        ? cantidad.toInt().toString()
+        : cantidad.toString();
+    final importe = rstHistorial.getValueFormatAmount('SYSUSER90_IMPORTE');
+    return '$cantidadText × $importe';
   }
 
   String getFechaAt(int index) {
@@ -175,6 +187,7 @@ class SmxSaldiFyHistorialController extends SmxController {
 
     rstHistorial.index(index);
     rstHistorial.update('SYSUSER90_STATUS', status);
+    saldo = _sumImportes();
     hasChanges = true;
     return true;
   }
@@ -195,10 +208,27 @@ class SmxSaldiFyHistorialController extends SmxController {
 
     rstHistorial.beforeFirst();
     while (rstHistorial.next()) {
-      total += rstHistorial.getValue('SYSUSER90_IMPORTE');
+      final tipo =
+          rstHistorial
+              .getValue('SYSUSER90_TIPO')
+              ?.toString()
+              .trim()
+              .toLowerCase() ??
+          '';
+      final status = _getIntValue('SYSUSER90_STATUS');
+      if (tipo == 'pago' && status != 1) continue;
+
+      total += _getTotalValue();
     }
 
     return total;
+  }
+
+  double _getTotalValue() {
+    final total = rstHistorial.getValue('SYSUSER90_TOTAL');
+    final value = total ?? rstHistorial.getValue('SYSUSER90_IMPORTE');
+    if (value is num) return value.toDouble();
+    return double.tryParse(value?.toString() ?? '') ?? 0.0;
   }
 
   int _getIntValue(String field) {

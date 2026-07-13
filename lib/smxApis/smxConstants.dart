@@ -17,6 +17,8 @@ abstract class SmxConstants {
   static SmxRowSet? rstCompraVacia;
   static SmxRowSet? rstPagoVacio;
   static SmxRowSet? rstProductoVacio;
+  static SmxRowSet? rstCabeceraVacia;
+  static SmxRowSet? rstDetallesVacios;
 
   static const String codigoInvitacionKey = 'codigo';
 

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:venture_saldify/smxLayout/smxColors.dart';
-import 'package:venture_saldify/smxSaldifyBackgrounds/saldify_circles_background.dart';
+import 'package:venture_saldify/smxLayout/smxBackgrounds/saldify_circles_background.dart';
 import 'package:venture_widgets/smxCallBaseStateful.dart';
 import 'package:venture_widgets/smxController/smxControllerSendData.dart';
 

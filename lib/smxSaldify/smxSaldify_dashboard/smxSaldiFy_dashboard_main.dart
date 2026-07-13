@@ -77,7 +77,10 @@ class SmxSaldiFyDashboardMain extends StatelessWidget {
             }
 
             if (title == 'Productos') {
-              await controller.openProductos(context);
+              final cambioCatalogo = await controller.openProductos(context);
+              if (cambioCatalogo == true) {
+                await onRefresh();
+              }
               return;
             }
 

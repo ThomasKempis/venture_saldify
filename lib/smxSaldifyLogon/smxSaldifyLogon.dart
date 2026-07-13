@@ -6,7 +6,7 @@ import 'package:venture_saldify/smxLayout/smxLayout.dart';
 import 'package:venture_saldify/smxLogonMovil/logon/smxLogonMovil.dart';
 import 'package:venture_saldify/smxSaldifyAssistant/smxSaldifyAssistant.dart';
 import 'package:venture_saldify/smxSaldifyAssistant/smxSaldifyAssistant_context.dart';
-import 'package:venture_saldify/smxSaldifyBackgrounds/logon_access_bg.dart';
+import 'package:venture_saldify/smxLayout/smxBackgrounds/logon_access_bg.dart';
 import 'package:venture_widgets/smxCallBaseStateful.dart';
 import 'package:venture_widgets/smxController/smxControllerSendData.dart';
 

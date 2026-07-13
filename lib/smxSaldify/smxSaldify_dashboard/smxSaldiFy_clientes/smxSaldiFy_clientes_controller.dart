@@ -78,6 +78,10 @@ class SmxSaldiFyClientesController extends SmxController {
     return _getIntValue('NOVE_PAGOS');
   }
 
+  int getClientConCatalogo() {
+    return _getIntValue('CON_CATALOGO');
+  }
+
   int getClientRelationId() {
     return rstClientes.getId();
   }
