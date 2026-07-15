@@ -52,6 +52,18 @@ class SmxSaldiFyClienteHistorialController extends SmxController {
     return int.tryParse(value?.toString() ?? '') ?? 0;
   }
 
+  String getMovimientoFolio() {
+    final tipo = getMovimientoTipo().trim().toLowerCase();
+    final id = getMovimientoId();
+    final prefix = tipo == 'pago'
+        ? 'P'
+        : tipo == 'compra'
+        ? 'C'
+        : 'M';
+
+    return '$prefix-${id.toString().padLeft(5, '0')}';
+  }
+
   String getMovimientoConcepto() {
     return rstHistorial.getValue('SYSUSER90_CONCEPTO')?.toString() ?? '';
   }
@@ -85,6 +97,14 @@ class SmxSaldiFyClienteHistorialController extends SmxController {
     if (value is int) return value;
     if (value is double) return value.toInt();
     return int.tryParse(value?.toString() ?? '') ?? 0;
+  }
+
+  String getMovimientoMotivo() {
+    try {
+      return rstHistorial.getValue('SYSUSER90_MOTIVO')?.toString().trim() ?? '';
+    } catch (_) {
+      return '';
+    }
   }
 
   String _formatDateMeses(dynamic value) {

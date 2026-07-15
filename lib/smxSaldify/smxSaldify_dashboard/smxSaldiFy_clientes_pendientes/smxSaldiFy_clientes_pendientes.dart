@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:venture_core_connect/smxDataBase/smxRowSet.dart';
+import 'package:venture_saldify/smxApis/smxDepth.dart';
 import 'package:venture_saldify/smxLayout/smxColors.dart';
+import 'package:venture_saldify/smxLayout/smx_decision_dialog.dart';
 import 'package:venture_saldify/smxLayout/smxBackgrounds/saldify_circles_background.dart';
 import 'package:venture_widgets/smxController/smxControllerSendData.dart';
 
 import '../smxSaldiFy_clientes/smxSaldiFy_clientes.dart';
+import '../smxSaldiFy_invita_clientes/smxSaldiFy_invita_copy.dart';
 import 'smxSaldiFy_clientes_pendientes_controller.dart';
 
 class SmxSaldiFyClientesPendientes extends StatefulWidget {
@@ -117,51 +120,31 @@ class _SmxSaldiFyClientesPendientesState
   }
 
   Future<SmxRowSet?> _activatePendiente(int index, String name) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Activar cliente'),
-        content: Text(
+    final confirmed = await showSmxDecisionDialog(
+      context,
+      title: 'Activar cliente',
+      message:
           'Este cliente pasara a tu lista activa para asignarle credito:\n$name',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancelar'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Activar'),
-          ),
-        ],
-      ),
+      acceptText: 'Activar',
+      icon: Icons.check_circle_outline_rounded,
+      variant: SmxDecisionVariant.success,
     );
 
-    if (confirmed != true) return null;
+    if (!confirmed) return null;
 
     return _controller.activatePendienteAt(index);
   }
 
   Future<bool> _deletePendiente(int index, String name) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Eliminar invitacion'),
-        content: Text('Quieres eliminar la invitacion pendiente de:\n$name?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancelar'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Eliminar'),
-          ),
-        ],
-      ),
+    final confirmed = await showSmxDecisionDialog(
+      context,
+      title: 'Eliminar invitacion',
+      message: 'Quieres eliminar la invitacion pendiente de:\n$name?',
+      acceptText: 'Eliminar',
+      variant: SmxDecisionVariant.danger,
     );
 
-    if (confirmed != true) return false;
+    if (!confirmed) return false;
 
     return _controller.deletePendienteAt(index);
   }
@@ -253,6 +236,7 @@ class _ClientCards extends StatelessWidget {
         index,
         controller.getClientUserId,
       );
+      final uuidInvitado = _getClientValue(index, controller.getClientUuid);
       final name = _getClientValue(index, controller.getClientName);
       final email = _getClientValue(index, controller.getClientEmail);
       final phone = _getClientValue(index, controller.getClientPhone);
@@ -263,10 +247,12 @@ class _ClientCards extends StatelessWidget {
           name: name,
           email: email,
           phone: phone,
+          uuidInvitado: uuidInvitado,
           onTap: () => onClientTap(
             SmxSaldiFyClientTapData(
               idSysuser11: idSysuser11,
               relaSysuser10Cliente: relaSysuser10Cliente,
+              uuidInvitado: uuidInvitado,
               name: name,
             ),
           ),
@@ -329,6 +315,7 @@ class _SlidableClientCard extends StatelessWidget {
   final String name;
   final String email;
   final String phone;
+  final String uuidInvitado;
   final VoidCallback onTap;
   final Future<SmxRowSet?> Function() confirmActivate;
   final Future<bool> Function() confirmDelete;
@@ -340,6 +327,7 @@ class _SlidableClientCard extends StatelessWidget {
     required this.name,
     required this.email,
     required this.phone,
+    required this.uuidInvitado,
     required this.onTap,
     required this.confirmActivate,
     required this.confirmDelete,
@@ -374,18 +362,25 @@ class _SlidableClientCard extends StatelessWidget {
         ],
       ),
       child: Padding(
-        padding: const EdgeInsets.only(right: 6),
-        child: _ClientCard(
-          name: name,
-          email: email,
-          phone: phone,
-          onTap: onTap,
-          onActivate: () async {
-            final rstActivated = await confirmActivate();
-            if (rstActivated != null) {
-              onActivated(rstActivated);
-            }
-          },
+        padding: EdgeInsets.zero,
+        child: SmxDepth(
+          radius: 20,
+          depth: 3,
+          opacity: .14,
+          blurRadius: 7,
+          child: _ClientCard(
+            name: name,
+            email: email,
+            phone: phone,
+            uuidInvitado: uuidInvitado,
+            onTap: onTap,
+            onActivate: () async {
+              final rstActivated = await confirmActivate();
+              if (rstActivated != null) {
+                onActivated(rstActivated);
+              }
+            },
+          ),
         ),
       ),
     );
@@ -396,6 +391,7 @@ class _ClientCard extends StatelessWidget {
   final String name;
   final String email;
   final String phone;
+  final String uuidInvitado;
   final VoidCallback onTap;
   final Future<void> Function() onActivate;
 
@@ -403,6 +399,7 @@ class _ClientCard extends StatelessWidget {
     required this.name,
     required this.email,
     required this.phone,
+    required this.uuidInvitado,
     required this.onTap,
     required this.onActivate,
   });
@@ -458,22 +455,48 @@ class _ClientCard extends StatelessWidget {
                     const SizedBox(height: 14),
                     Align(
                       alignment: Alignment.centerRight,
-                      child: FilledButton.icon(
-                        onPressed: onActivate,
-                        icon: const Icon(Icons.check_circle_outline_rounded),
-                        label: const Text('Activar cliente'),
-                        style: FilledButton.styleFrom(
-                          backgroundColor: SmxColors.brandAccent,
-                          foregroundColor: SmxColors.textDark,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 14,
-                            vertical: 10,
+                      child: Wrap(
+                        alignment: WrapAlignment.end,
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: [
+                          FilledButton.icon(
+                            onPressed: () => _copyInvitationLink(context),
+                            icon: const Icon(Icons.link),
+                            label: const Text('Invitar'),
+                            style: FilledButton.styleFrom(
+                              backgroundColor: SmxColors.whiteAlpha(.84),
+                              foregroundColor: SmxColors.brandPrimary,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 14,
+                                vertical: 10,
+                              ),
+                              textStyle: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
                           ),
-                          textStyle: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w900,
+                          FilledButton.icon(
+                            onPressed: onActivate,
+                            icon: const Icon(
+                              Icons.check_circle_outline_rounded,
+                            ),
+                            label: const Text('Activar cliente'),
+                            style: FilledButton.styleFrom(
+                              backgroundColor: SmxColors.brandAccent,
+                              foregroundColor: SmxColors.textDark,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 14,
+                                vertical: 10,
+                              ),
+                              textStyle: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
                           ),
-                        ),
+                        ],
                       ),
                     ),
                   ],
@@ -483,6 +506,13 @@ class _ClientCard extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+
+  Future<void> _copyInvitationLink(BuildContext context) async {
+    await SmxSaldifyInvitaCopy.copyInvitadoRegistradoLink(
+      context: context,
+      uuidInvitado: uuidInvitado,
     );
   }
 }

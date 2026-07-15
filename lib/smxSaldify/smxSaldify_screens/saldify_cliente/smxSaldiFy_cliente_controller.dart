@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:venture_saldify/smxLayout/smx_message_dialog.dart';
 import 'package:uuid/uuid.dart';
 import 'package:venture_core_connect/smxDataBase/smxRowSet.dart';
 import 'package:venture_core_connect/smxJson/SmxJsonUtil.dart';
@@ -94,7 +95,7 @@ class SmxSaldiFyClienteController extends SmxController {
     editaFind = -1;
 
     if (!_isValidGmailUser(value)) {
-      showValidDialog(
+      showSmxValidDialog(
         context,
         mensaje: 'Debe ingresar un usuario Gmail valido.',
       );
@@ -121,7 +122,7 @@ class SmxSaldiFyClienteController extends SmxController {
     if (jsonSend.getError() != null) {
       final currentContext = data.context;
       if (currentContext != null && currentContext.mounted) {
-        showSystemErrorDialog(currentContext, message: jsonSend.error!);
+        showSmxSystemErrorDialog(currentContext, message: jsonSend.error!);
       }
       return false;
     }
@@ -143,7 +144,7 @@ class SmxSaldiFyClienteController extends SmxController {
     editaFind = edita;
 
     if (isUpdate && idSysuser10 > 0 && idSysuser10 != relaSysuser10Cliente) {
-      showValidDialog(
+      showSmxValidDialog(
         context,
         mensaje: 'Este correo pertenece a otro cliente.',
       );
@@ -152,7 +153,7 @@ class SmxSaldiFyClienteController extends SmxController {
 
     if (!isUpdate && edita == 2) {
       isCorreoResolved = false;
-      showValidDialog(context, mensaje: 'Ya esta registrado en mi sistema.');
+      showSmxValidDialog(context, mensaje: 'Ya esta registrado en mi sistema.');
       return false;
     }
 
@@ -172,12 +173,15 @@ class SmxSaldiFyClienteController extends SmxController {
     if (context == null) return;
 
     if (!isCorreoResolved) {
-      showValidDialog(context, mensaje: 'Debe buscar el correo del cliente.');
+      showSmxValidDialog(
+        context,
+        mensaje: 'Debe buscar el correo del cliente.',
+      );
       return;
     }
 
     if (editaFind == 2 && !isUpdate) {
-      showValidDialog(context, mensaje: 'Ya esta registrado en mi sistema.');
+      showSmxValidDialog(context, mensaje: 'Ya esta registrado en mi sistema.');
       return;
     }
 
@@ -187,7 +191,9 @@ class SmxSaldiFyClienteController extends SmxController {
     }
 
     if (datosEditable) {
-      if (!validateWidgets(context)) {
+      final mensajeValidar = getValidateOnlyMessage();
+      if (mensajeValidar != null) {
+        showSmxValidDialog(context, mensaje: mensajeValidar);
         return;
       }
 
@@ -306,12 +312,12 @@ class SmxSaldiFyClienteController extends SmxController {
   bool _validateSpecialFields(BuildContext context) {
     if (!(getValueFactory('SYSUSER10_TELEFONO').getWidGet() as SmxTextField)
         .isValidaStringSpecial) {
-      showValidDialog(context, mensaje: 'Debe ingresar un telefono valido.');
+      showSmxValidDialog(context, mensaje: 'Debe ingresar un telefono valido.');
       return false;
     }
 
     if (!_isValidGmailUser(getText('SYSUSER10_CORREO'))) {
-      showValidDialog(
+      showSmxValidDialog(
         context,
         mensaje: 'Debe ingresar un usuario Gmail valido.',
       );
@@ -353,7 +359,7 @@ class SmxSaldiFyClienteController extends SmxController {
     if (jsonSend.getError() != null) {
       final currentContext = data.context;
       if (currentContext != null && currentContext.mounted) {
-        showSystemErrorDialog(currentContext, message: jsonSend.error!);
+        showSmxSystemErrorDialog(currentContext, message: jsonSend.error!);
       }
       return;
     }
@@ -375,7 +381,7 @@ class SmxSaldiFyClienteController extends SmxController {
     if (jsonSend.getError() != null) {
       final currentContext = data.context;
       if (currentContext != null && currentContext.mounted) {
-        showSystemErrorDialog(currentContext, message: jsonSend.error!);
+        showSmxSystemErrorDialog(currentContext, message: jsonSend.error!);
       }
       return;
     }

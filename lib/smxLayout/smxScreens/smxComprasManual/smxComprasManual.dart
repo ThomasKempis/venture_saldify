@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:venture_core_connect/smxDataBase/smxRowSet.dart';
 import 'package:venture_saldify/smxLayout/smxColors.dart';
+import 'package:venture_saldify/smxLayout/smx_decision_dialog.dart';
 import 'package:venture_saldify/smxLayout/smxLayout.dart';
 import 'package:venture_saldify/smxLayout/smxBackgrounds/invita_cliente_card_bg.dart';
 import 'package:venture_saldify/smxLayout/smxBackgrounds/operacion_bg_panel.dart';
@@ -68,10 +69,11 @@ class _SmxComprasManualState extends State<SmxComprasManual> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      _Header(
+                      SmxSaldifyScreenHeader(
                         title: widget.model.clientName,
                         sectionLabel: widget.model.headerLabel,
-                        savedSomething: _savedSomething,
+                        onBackPressed: () =>
+                            Navigator.of(context).pop(_savedSomething),
                       ),
                       const SizedBox(height: 18),
                       _SummaryPanel(
@@ -158,64 +160,6 @@ class _SmxComprasManualState extends State<SmxComprasManual> {
           ),
         ),
       ),
-    );
-  }
-}
-
-class _Header extends StatelessWidget {
-  final String title;
-  final String sectionLabel;
-  final bool savedSomething;
-
-  const _Header({
-    required this.title,
-    required this.sectionLabel,
-    required this.savedSomething,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        IconButton(
-          onPressed: () => Navigator.of(context).pop(savedSomething),
-          icon: const Icon(Icons.arrow_back_rounded),
-          color: SmxColors.white,
-          style: IconButton.styleFrom(
-            backgroundColor: SmxColors.whiteAlpha(.12),
-            fixedSize: const Size(44, 44),
-          ),
-        ),
-        const SizedBox(width: 14),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  color: SmxColors.white,
-                  fontSize: 24,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
-              const SizedBox(height: 3),
-              Text(
-                sectionLabel,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  color: SmxColors.brandAccent,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
     );
   }
 }
@@ -659,27 +603,14 @@ class _CompraDismissible extends StatelessWidget {
         children: [
           SlidableAction(
             onPressed: (_) async {
-              final shouldDelete = await showDialog<bool>(
-                context: context,
-                builder: (context) => AlertDialog(
-                  title: const Text('¿Borrar compra?'),
-                  content: const Text('Esta compra será eliminada.'),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context, false),
-                      child: const Text('Cancelar'),
-                    ),
-                    TextButton(
-                      onPressed: () => Navigator.pop(context, true),
-                      child: const Text(
-                        'Borrar',
-                        style: TextStyle(color: Colors.red),
-                      ),
-                    ),
-                  ],
-                ),
+              final shouldDelete = await showSmxDecisionDialog(
+                context,
+                title: 'Borrar compra',
+                message: 'Esta compra sera eliminada.',
+                acceptText: 'Borrar',
+                variant: SmxDecisionVariant.danger,
               );
-              if (shouldDelete != true) return;
+              if (!shouldDelete) return;
 
               final importe = controller.getImporteValueAt(index);
               final deleted = await controller.deleteCompraAt(index);

@@ -32,23 +32,9 @@ class SmxSaldiFyDashboardMain extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        ValueListenableBuilder<SmxRowSet?>(
-          valueListenable: controller.clientesInvitacionNotifier,
-          builder: (context, rstClientes, _) {
-            final enabled = rstClientes != null;
-
-            return AbsorbPointer(
-              absorbing: !enabled,
-              child: Opacity(
-                opacity: enabled ? 1 : .55,
-                child: SmxSaldiFyInvitaClientes(
-                  uuidAnfitrion: uuidAnfitrion,
-                  anfitrionNombre: anfitrionNombre,
-                  clientes: rstClientes,
-                ),
-              ),
-            );
-          },
+        SmxSaldiFyInvitaClientes(
+          uuidAnfitrion: uuidAnfitrion,
+          anfitrionNombre: anfitrionNombre,
         ),
         SizedBox(height: isMobile ? 24 : 30),
         SmxSaldiFyAccionesRapidas(

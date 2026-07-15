@@ -175,6 +175,46 @@ Puede validar:
 
 La validacion no es solo visual. Esta conectada al controller y al metadata del rowset.
 
+### Validacion sin dialogo interno
+
+Ademas del flujo historico:
+
+```dart
+validateWidgets(BuildContext context)
+```
+
+el controller puede exponer un camino de validacion que no abre dialogos por si mismo:
+
+```dart
+String? getValidateOnlyMessage()
+```
+
+Este metodo devuelve:
+
+- `null` cuando todos los widgets registrados son validos;
+- un `String` con el primer mensaje de validacion encontrado cuando falta un dato requerido.
+
+La idea es separar dos responsabilidades:
+
+```text
+validar widgets
+mostrar mensaje en UI
+```
+
+`validateWidgets(context)` sigue siendo util para pantallas genericas del framework, porque valida y muestra el dialogo interno del core.
+
+`getValidateOnlyMessage()` es preferible cuando una app concreta quiere conservar su propio sistema visual de mensajes. En ese caso la app hace:
+
+```dart
+final mensajeValidar = getValidateOnlyMessage();
+if (mensajeValidar != null) {
+  mostrarDialogoPropio(mensajeValidar);
+  return;
+}
+```
+
+Esto evita pasar callbacks con `BuildContext` desde el core hacia la app y reduce problemas de contexto al abrir modales desde flujos genericos.
+
 ## Familias de widgets
 
 El paquete `venture_widgets` incluye varias familias. Algunas son directamente transaccionales y otras son estructurales, auxiliares o especializadas.

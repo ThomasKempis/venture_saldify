@@ -1,4 +1,5 @@
 import 'package:venture_core_connect/smxDataBase/smxRowSet.dart';
+import 'package:venture_saldify/smxLayout/smx_message_dialog.dart';
 import 'package:venture_saldify/smxApis/smxConstants.dart';
 import 'package:venture_saldify/smxLayout/smxScreens/smxComprasCarrito/smxComprasCarritoControllerContract.dart';
 import 'package:venture_widgets/smxClassDrivers.dart';
@@ -80,11 +81,11 @@ class SmxSaldiFyClienteComprasCarritoController
               ((item['importe'] as num?)?.toDouble() ?? 0),
     );
     if (total <= 0) {
-      showValidDialog(context, mensaje: 'El carrito no contiene compras.');
+      showSmxValidDialog(context, mensaje: 'El carrito no contiene compras.');
       return false;
     }
     if (total > disponible) {
-      showValidDialog(
+      showSmxValidDialog(
         context,
         mensaje: 'El total del carrito supera el saldo disponible.',
       );
@@ -116,7 +117,7 @@ class SmxSaldiFyClienteComprasCarritoController
 
     if (jsonSend.getError() != null) {
       if (context.mounted) {
-        showSystemErrorDialog(context, message: jsonSend.error!);
+        showSmxSystemErrorDialog(context, message: jsonSend.error!);
       }
       return false;
     }

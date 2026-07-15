@@ -1,4 +1,5 @@
 import 'package:venture_core_connect/smxDataBase/smxRowSet.dart';
+import 'package:venture_saldify/smxLayout/smx_message_dialog.dart';
 import 'package:venture_core_connect/smxJson/SmxJsonUtil.dart';
 import 'package:venture_saldify/smxApis/smxConstants.dart';
 import 'package:venture_saldify/smxLayout/smxScreens/smxPagos/smxPagosControllerContract.dart';
@@ -24,7 +25,9 @@ class SmxSaldiFyClientePagosController extends SmxPagosControllerContract {
   late SmxRowSet rstPago;
   late SmxRowSet rstImages;
   SmxRowSet? rstMetricas;
+  @override
   bool lastSaveOk = false;
+  @override
   double lastSavedImporte = 0.0;
   final Map<int, int> _imageVersions = {};
 
@@ -42,12 +45,19 @@ class SmxSaldiFyClientePagosController extends SmxPagosControllerContract {
   String get imagesTable => TABLE_IMAGES;
 
   int get rowCount => rstPagos.getRowCount();
+  @override
   List<int> get pagosPendientesIndexes => _getPagoIndexes(0);
+  @override
   List<int> get pagosConfirmadosIndexes => _getPagoIndexes(1);
+  @override
   int get currentPagoId => rstPago.getId();
+  @override
   bool get isPagoPersistido => currentPagoId > 0;
+  @override
   bool get isPagoNuevo => data.accion == AccionNN.I;
+  @override
   bool get isSoloImagenes => isPagoPersistido && data.accion == AccionNN.N;
+  @override
   bool get canEditPagoData =>
       _getStatusValue(rstPago.getValue('SYSUSER50_STATUS')) == 0;
 
@@ -72,12 +82,14 @@ class SmxSaldiFyClientePagosController extends SmxPagosControllerContract {
     final context = data.context;
     if (context == null) return;
 
-    if (!validateWidgets(context)) {
+    final mensajeValidar = getValidateOnlyMessage();
+    if (mensajeValidar != null) {
+      showSmxValidDialog(context, mensaje: mensajeValidar);
       return;
     }
 
     if (!canEditPagoData) {
-      showValidDialog(
+      showSmxValidDialog(
         context,
         mensaje: 'Este pago ya no permite modificar datos.',
       );
@@ -88,7 +100,7 @@ class SmxSaldiFyClientePagosController extends SmxPagosControllerContract {
     final importeAnterior = isAlta ? 0.0 : _getPagoImporteFromList();
     final double importe = rstPago.getValue('SYSUSER50_IMPORTE');
     if (importe <= 0) {
-      showValidDialog(
+      showSmxValidDialog(
         context,
         mensaje: 'Debe ingresar un importe mayor a cero.',
       );
@@ -97,7 +109,10 @@ class SmxSaldiFyClientePagosController extends SmxPagosControllerContract {
 
     final limiteSaldo = saldo;
     if (limiteSaldo != null && importe > limiteSaldo) {
-      showValidDialog(context, mensaje: 'El pago supera el saldo pendiente.');
+      showSmxValidDialog(
+        context,
+        mensaje: 'El pago supera el saldo pendiente.',
+      );
       return;
     }
 
@@ -108,7 +123,7 @@ class SmxSaldiFyClientePagosController extends SmxPagosControllerContract {
     if (jsonSend.getError() != null) {
       final currentContext = data.context;
       if (currentContext != null && currentContext.mounted) {
-        showSystemErrorDialog(currentContext, message: jsonSend.error!);
+        showSmxSystemErrorDialog(currentContext, message: jsonSend.error!);
       }
       return;
     }
@@ -141,39 +156,47 @@ class SmxSaldiFyClientePagosController extends SmxPagosControllerContract {
 
   double get saldo => _getMetrica('SYSUSER12_BALANCE');
 
+  @override
   String getReferenciaAt(int index) {
     rstPagos.index(index);
     return rstPagos.getValue('SYSUSER50_REFERENCIA')?.toString() ?? '';
   }
 
+  @override
   String getFechaAt(int index) {
     rstPagos.index(index);
     return rstPagos.getValueFormatDate('SYSUSER50_FECHA');
   }
 
+  @override
   String getImporteAt(int index) {
     rstPagos.index(index);
     return rstPagos.getValueFormatAmount('SYSUSER50_IMPORTE');
   }
 
+  @override
   int getStatusAt(int index) {
     rstPagos.index(index);
     return _getStatusValue(rstPagos.getValue('SYSUSER50_STATUS'));
   }
 
+  @override
   String getStatusLabelAt(int index) =>
       getStatusAt(index) == 0 ? 'Pendiente' : 'Depósito confirmado';
 
+  @override
   int getPagoIdAt(int index) {
     rstPagos.index(index);
     return rstPagos.getId();
   }
 
+  @override
   double getImporteValueAt(int index) {
     rstPagos.index(index);
     return _toDouble(rstPagos.getValue('SYSUSER50_IMPORTE'));
   }
 
+  @override
   String getPagoImageUrlAt(int index) {
     rstPagos.index(index);
     final image = rstPagos.getValue('SYSUSER50_IMAGE')?.toString() ?? '';
@@ -212,6 +235,7 @@ class SmxSaldiFyClientePagosController extends SmxPagosControllerContract {
     rstPagos = getRowset(ALIAS_LIST);
   }
 
+  @override
   Future<void> preparePagoNuevo() async {
     await _ensurePagoVacio();
 
@@ -227,10 +251,12 @@ class SmxSaldiFyClientePagosController extends SmxPagosControllerContract {
     notifyListeners();
   }
 
+  @override
   Future<void> setPagoIndex(int index) async {
     await _setPagoIndex(index, readOnlyData: false);
   }
 
+  @override
   Future<void> setPagoImagesIndex(int index) async {
     await _setPagoIndex(index, readOnlyData: true);
   }
@@ -360,6 +386,7 @@ class SmxSaldiFyClientePagosController extends SmxPagosControllerContract {
     rstImages.tabla = TABLE_IMAGES;
   }
 
+  @override
   Future<bool> deletePagoAt(int index) async {
     final context = data.context;
     if (context == null || getStatusAt(index) != 0) return false;
@@ -372,7 +399,7 @@ class SmxSaldiFyClientePagosController extends SmxPagosControllerContract {
     await showDialogWait(context, () async => callDeleteAlt(row));
     if (jsonSend.getError() != null) {
       if (context.mounted) {
-        showSystemErrorDialog(context, message: jsonSend.error!);
+        showSmxSystemErrorDialog(context, message: jsonSend.error!);
       }
       return false;
     }
@@ -381,6 +408,7 @@ class SmxSaldiFyClientePagosController extends SmxPagosControllerContract {
     return true;
   }
 
+  @override
   bool syncEditingImageToList() {
     if (currentPagoId <= 0) return false;
     var uuid = '';
@@ -400,6 +428,7 @@ class SmxSaldiFyClientePagosController extends SmxPagosControllerContract {
     return true;
   }
 
+  @override
   SmxRowSet getRstImages() => rstImages;
 
   double _getMetrica(String field) {

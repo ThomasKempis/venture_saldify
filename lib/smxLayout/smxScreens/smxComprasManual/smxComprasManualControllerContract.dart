@@ -23,6 +23,7 @@ abstract class SmxComprasManualControllerContract extends SmxController {
   Future<void> setCompraIndex(int index);
   Future<void> setCompraImagesIndex(int index);
   Future<bool> deleteCompraAt(int index);
+  @override
   Future<void> save({double? disponible});
   bool syncEditingImageToList();
   SmxRowSet getRstImages();

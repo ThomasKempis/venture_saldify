@@ -1,11 +1,11 @@
 {
-    "name": "venture_saldify",
-    "short_name": "venture_saldify",
+    "name": "{{APP_TITLE}}",
+    "short_name": "{{APP_TITLE}}",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#155C37",
     "theme_color": "#155C37",
-    "description": "A new Flutter project.",
+    "description": "{{APP_DESCRIPTION}}",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

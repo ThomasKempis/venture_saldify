@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:venture_saldify/smxApis/smxConstants.dart';
 import 'package:venture_saldify/smxLayout/smxColors.dart';
 import 'package:venture_saldify/smxLayout/smxLayout.dart';
-import '../smxLogonMovil/logon/smxLogonMovil_controller.dart';
+import '../smxAuth/smxLogonMovil.dart';
 import '../smxSaldifyAssistant/smxSaldifyAssistant.dart';
 import '../smxSaldifyAssistant/smxSaldifyAssistant_context.dart';
 import 'smxSaldify_dashboard/smxSaldiFy_dashboard.dart';
@@ -10,7 +10,7 @@ import 'smxSaldify_menu_lateral.dart';
 import 'smxSaldify_screens/smxSaldiFy_perfil.dart';
 
 class SmxSaldiFy extends StatefulWidget {
-  final SmxLogonMovil_controller controllerMain = SmxConstants.controllerMain;
+  final SmxLogonMovil controllerMain = SmxConstants.controllerMain;
 
   SmxSaldiFy({super.key});
 

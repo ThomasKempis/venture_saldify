@@ -20,6 +20,10 @@ if [ $? -eq 0 ]; then
     sed -i '' "s/{{APP_TITLE_UPPER}}/$APP_TITLE_UPPER/g" build/web/index.html
     sed -i '' "s/{{APP_DESCRIPTION}}/$APP_DESCRIPTION/g" build/web/index.html
 
+    echo "📝 Inyectando textos en manifest.json..."
+    sed -i '' "s/{{APP_TITLE}}/$APP_TITLE/g" build/web/manifest.json
+    sed -i '' "s/{{APP_DESCRIPTION}}/$APP_DESCRIPTION/g" build/web/manifest.json
+
     echo "🖼️  Aplicando iconos de PWA (RedControl):"
     cp -v web/icons/redcontrol/* build/web/icons/
 

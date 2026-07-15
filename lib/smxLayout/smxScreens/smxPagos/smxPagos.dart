@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:venture_core_connect/smxDataBase/smxRowSet.dart';
 import 'package:venture_saldify/smxLayout/smxColors.dart';
+import 'package:venture_saldify/smxLayout/smx_decision_dialog.dart';
 import 'package:venture_saldify/smxLayout/smxLayout.dart';
 import 'package:venture_saldify/smxLayout/smxBackgrounds/invita_cliente_card_bg.dart';
 import 'package:venture_saldify/smxLayout/smxBackgrounds/operacion_bg_panel.dart';
@@ -63,9 +64,11 @@ class _SmxPagosState extends State<SmxPagos> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      _Header(
+                      SmxSaldifyScreenHeader(
                         title: widget.model.clientName,
-                        savedSomething: _savedSomething,
+                        sectionLabel: 'Pagos',
+                        onBackPressed: () =>
+                            Navigator.of(context).pop(_savedSomething),
                       ),
                       const SizedBox(height: 18),
                       _SummaryPanel(
@@ -146,59 +149,6 @@ class _SmxPagosState extends State<SmxPagos> {
           ),
         ),
       ),
-    );
-  }
-}
-
-class _Header extends StatelessWidget {
-  final String title;
-  final bool savedSomething;
-
-  const _Header({required this.title, required this.savedSomething});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        IconButton(
-          onPressed: () => Navigator.of(context).pop(savedSomething),
-          icon: const Icon(Icons.arrow_back_rounded),
-          color: SmxColors.white,
-          style: IconButton.styleFrom(
-            backgroundColor: SmxColors.whiteAlpha(.12),
-            fixedSize: const Size(44, 44),
-          ),
-        ),
-        const SizedBox(width: 14),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  color: SmxColors.white,
-                  fontSize: 24,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
-              const SizedBox(height: 3),
-              const Text(
-                'Pagos',
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  color: SmxColors.brandAccent,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
     );
   }
 }
@@ -608,27 +558,14 @@ class _PagoSlidable extends StatelessWidget {
         children: [
           SlidableAction(
             onPressed: (_) async {
-              final confirmed = await showDialog<bool>(
-                context: context,
-                builder: (context) => AlertDialog(
-                  title: const Text('¿Borrar pago?'),
-                  content: const Text('Este pago será eliminado.'),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context, false),
-                      child: const Text('Cancelar'),
-                    ),
-                    TextButton(
-                      onPressed: () => Navigator.pop(context, true),
-                      child: const Text(
-                        'Borrar',
-                        style: TextStyle(color: Colors.red),
-                      ),
-                    ),
-                  ],
-                ),
+              final confirmed = await showSmxDecisionDialog(
+                context,
+                title: 'Borrar pago',
+                message: 'Este pago sera eliminado.',
+                acceptText: 'Borrar',
+                variant: SmxDecisionVariant.danger,
               );
-              if (confirmed != true) return;
+              if (!confirmed) return;
               final importe = controller.getImporteValueAt(index);
               if (await controller.deletePagoAt(index)) onDeleted(importe);
             },

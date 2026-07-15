@@ -3,7 +3,7 @@ import 'package:venture_widgets/smxClassDrivers.dart';
 import 'package:venture_widgets/smxController/smxController.dart';
 
 import '../smxApis/smxConstants.dart';
-import '../smxLogonMovil/logon/smxLogonMovil_controller.dart';
+import '../smxAuth/smxLogonMovil.dart';
 
 enum SmxSaldiFyClienteStatus {
   pendiente,
@@ -14,7 +14,7 @@ enum SmxSaldiFyClienteStatus {
 }
 
 class SmxSaldiFyClienteController extends SmxController {
-  final SmxLogonMovil_controller controllerMain = SmxConstants.controllerMain;
+  final SmxLogonMovil controllerMain = SmxConstants.controllerMain;
   late SmxRowSet rstClienteCredito;
   SmxSaldiFyClienteStatus status = SmxSaldiFyClienteStatus.invalido;
 

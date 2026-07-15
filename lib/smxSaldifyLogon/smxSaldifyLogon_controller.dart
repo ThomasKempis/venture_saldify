@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:venture_saldify/smxLayout/smx_message_dialog.dart';
 import 'package:flutter/services.dart';
 import 'package:venture_core_connect/smxConstants_core.dart';
 import 'package:venture_saldify/smxApis/smxConfig.dart';
@@ -7,13 +8,13 @@ import 'package:venture_widgets/smxController/smxController.dart';
 import 'package:venture_widgets/smxShowDialog/smxShowDialogs.dart';
 import 'package:universal_html/html.dart' as html;
 
-import 'smxSaldifyCodeInvitado.dart';
 import '../../smxApis/smxConstants.dart';
-import 'smxSaldifyAccessSession.dart';
+import '../smxSaldify/smxSaldify_dashboard/smxSaldiFy_invita_clientes/smxSaldiFy_invita_service.dart';
 
 class SmxSaldifyLogonController extends SmxController {
   static const welcomeAsset = 'assets/images/saldify_invitation_welcome.png';
-  static const welcomeAssetHd = 'assets/images/saldify_invitation_welcome_hd.png';
+  static const welcomeAssetHd =
+      'assets/images/saldify_invitation_welcome_hd.png';
   static const _codigoStorageKey = 'saldify_codigo_invitado';
   static const _uuidAnfitrionStorageKey = 'saldify_uuid_anfitrion';
   static const _correoInvitadoStorageKey = 'saldify_correo_invitado';
@@ -82,51 +83,64 @@ class SmxSaldifyLogonController extends SmxController {
     _notify();
   }
 
-  void validarCodigo(ValueChanged<String>? onValidCodigo) async {
-    if (_validandoCodigo) return;
-
+  String? validarFormatoCodigo() {
     final codigo = SmxCodeInvitado.normalizar(codigoController.text);
 
     if (!SmxCodeInvitado.isValid(codigo)) {
       codigoError = 'Ingresa un código válido';
       _notify();
-      return;
+      return null;
     }
 
     codigoController.text = codigo;
     codigoError = null;
+    _notify();
+    return codigo;
+  }
+
+  Future<bool> validarCodigoAutenticado(
+    String codigo,
+    String correoGoogle, {
+    required String uuidUsuario,
+  }) async {
+    if (_validandoCodigo) return false;
     _validandoCodigo = true;
 
     try {
       await showDialogWait(data.context!, () async {
-        codigoError = await isValidaIntoDataBase(codigo);
+        codigoError = await isValidaIntoDataBase(
+          codigo,
+          correoGoogle: correoGoogle,
+          uuidUsuario: uuidUsuario,
+        );
       });
     } finally {
       _validandoCodigo = false;
     }
 
     if (codigoError == null) {
-      _cerrarModoCodigoInicial();
-      _notify();
-      onValidCodigo?.call(codigo);
-      return;
+      return true;
     }
 
     _notify();
+    return false;
   }
 
   bool cargarInvitadoGuardado(BuildContext context) {
     final codigo = _codigoGuardado;
-    final uuidAnfitrion = html.window.localStorage[_uuidAnfitrionStorageKey]?.trim() ?? '';
-    final correoInvitado = html.window.localStorage[_correoInvitadoStorageKey]?.trim() ?? '';
-    final uuidInvitado = html.window.localStorage[_uuidInvitadoStorageKey]?.trim() ?? '';
+    final uuidAnfitrion =
+        html.window.localStorage[_uuidAnfitrionStorageKey]?.trim() ?? '';
+    final correoInvitado =
+        html.window.localStorage[_correoInvitadoStorageKey]?.trim() ?? '';
+    final uuidInvitado =
+        html.window.localStorage[_uuidInvitadoStorageKey]?.trim() ?? '';
 
     if (codigo.isEmpty ||
         uuidAnfitrion.isEmpty ||
         (correoInvitado.isEmpty && uuidInvitado.isEmpty) ||
         (correoInvitado.isNotEmpty && uuidInvitado.isNotEmpty)) {
       SmxConstants.clearClienteInvitado();
-      showValidDialog(
+      showSmxValidDialog(
         context,
         mensaje: 'No hay datos de cliente invitado guardados.',
       );
@@ -141,30 +155,30 @@ class SmxSaldifyLogonController extends SmxController {
     return true;
   }
 
-  Future<void> prepareAnfitrionAccess() async {
-    SmxConstants.clearClienteInvitado();
-    await SmxSaldifyAccessSession.prepareAccess(SmxSaldifyAccessMode.anfitrion);
-  }
-
-  Future<void> prepareInvitadoAccess() async {
-    await SmxSaldifyAccessSession.prepareAccess(SmxSaldifyAccessMode.invitado);
-  }
-
-  Future<String?> isValidaIntoDataBase(String codigo) async {
+  Future<String?> isValidaIntoDataBase(
+    String codigo, {
+    String? correoGoogle,
+    String? uuidUsuario,
+  }) async {
     final alias = 'SYSUSER90';
     final codigoNormalizado = SmxCodeInvitado.normalizar(codigo);
     final codigoSql = _sql(codigoNormalizado);
+    final uuidSql = _sql(uuidUsuario?.trim() ?? '');
+    final correoSql = _sql(correoGoogle?.trim().toLowerCase() ?? '');
 
     SmxConstants.clearClienteInvitado();
     removeSql(alias);
 
-    addSql(
+    addSTrans(
       alias,
-      "SELECT * FROM SYSUSER90_TBL_SALDIFY WHERE SYSUSER90_CODIGO = '$codigoSql'",
+      "SELECT * FROM UPDATE_SYSUSER90("
+      "'$codigoSql', "
+      "'$uuidSql', "
+      "'$correoSql')",
     );
 
     try {
-      await getRowSetFuture(alias);
+      await getCallWS();
       final rst = getRowset(alias);
 
       if (jsonSend.getError() != null) {
@@ -184,9 +198,25 @@ class SmxSaldifyLogonController extends SmxController {
       final uuidInvitado =
           rst.getValue('SYSUSER90_INVITADO_UUID')?.toString().trim() ?? '';
 
+      final correoAutenticado = correoGoogle?.trim().toLowerCase() ?? '';
+
+      if (correoInvitado.isNotEmpty &&
+          correoAutenticado.isNotEmpty &&
+          correoInvitado.toLowerCase() != correoAutenticado) {
+        SmxConstants.clearClienteInvitado();
+        return 'El código no corresponde a la cuenta de Google seleccionada';
+      }
+
+      final uuidAutenticado = uuidUsuario?.trim().toLowerCase() ?? '';
+      if (uuidInvitado.isNotEmpty &&
+          uuidAutenticado.isNotEmpty &&
+          uuidInvitado.toLowerCase() != uuidAutenticado) {
+        SmxConstants.clearClienteInvitado();
+        return 'El código no corresponde al usuario autenticado';
+      }
+
       if (uuidAnfitrion.isEmpty ||
-          (correoInvitado.isEmpty && uuidInvitado.isEmpty) ||
-          (correoInvitado.isNotEmpty && uuidInvitado.isNotEmpty)) {
+          (correoInvitado.isEmpty && uuidInvitado.isEmpty)) {
         SmxConstants.clearClienteInvitado();
         return 'El código de invitación no tiene datos válidos';
       }
@@ -237,13 +267,6 @@ class SmxSaldifyLogonController extends SmxController {
 
   static String _sql(String value) {
     return value.replaceAll("'", "''");
-  }
-
-  void _cerrarModoCodigoInicial() {
-    if (!hasCodigoInicialValido) return;
-
-    hasCodigoInicialValido = false;
-    codigoController.clear();
   }
 
   static void _guardarInvitado({

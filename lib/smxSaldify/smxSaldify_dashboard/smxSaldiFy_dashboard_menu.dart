@@ -4,6 +4,7 @@ import 'package:venture_saldify/smxLayout/smxColors.dart';
 import 'package:venture_saldify/smxLayout/smxBackgrounds/cliente_actions_bg.dart';
 
 import 'smxSaldiFy_clientes/smxSaldiFy_clientes.dart';
+import 'smxSaldiFy_invita_clientes/smxSaldiFy_invita_copy.dart';
 
 Future<String?> showSmxSaldiFyDashboardMenu({
   required BuildContext context,
@@ -13,6 +14,7 @@ Future<String?> showSmxSaldiFyDashboardMenu({
     context: context,
     backgroundColor: Colors.transparent,
     isScrollControlled: true,
+    showDragHandle: false,
     builder: (sheetContext) => _ClienteActionsSheet(client: client),
   );
 }
@@ -48,18 +50,8 @@ class _ClienteActionsSheet extends StatelessWidget {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Container(
-                      width: 44,
-                      height: 5,
-                      decoration: BoxDecoration(
-                        color: SmxColors.blackAlpha(.14),
-                        borderRadius: BorderRadius.circular(999),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         SmxConfig.logoCab(
                           width: 72,
@@ -67,16 +59,37 @@ class _ClienteActionsSheet extends StatelessWidget {
                           fit: BoxFit.contain,
                         ),
                         const SizedBox(width: 10),
-                        Flexible(
+                        Expanded(
                           child: Text(
                             client.name,
-                            textAlign: TextAlign.center,
+                            textAlign: TextAlign.left,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             style: const TextStyle(
                               color: SmxColors.textDark,
                               fontSize: 18,
                               fontWeight: FontWeight.w900,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Tooltip(
+                          message: 'Copiar invitacion',
+                          child: Material(
+                            color: SmxColors.whiteAlpha(.82),
+                            shape: const CircleBorder(),
+                            child: InkWell(
+                              customBorder: const CircleBorder(),
+                              onTap: () => _copyInvitationLink(context),
+                              child: const SizedBox(
+                                width: 42,
+                                height: 42,
+                                child: Icon(
+                                  Icons.link,
+                                  color: SmxColors.brandPrimary,
+                                  size: 24,
+                                ),
+                              ),
                             ),
                           ),
                         ),
@@ -103,6 +116,11 @@ class _ClienteActionsSheet extends StatelessWidget {
                       label: 'Ver historial',
                       onTap: () => Navigator.of(context).pop('historial'),
                     ),
+                    _ClienteActionItem(
+                      icon: Icons.account_tree_rounded,
+                      label: 'Mi red de Venta',
+                      onTap: () => Navigator.of(context).pop('mired'),
+                    ),
                   ],
                 ),
               ),
@@ -110,6 +128,14 @@ class _ClienteActionsSheet extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+
+  Future<void> _copyInvitationLink(BuildContext context) async {
+    await SmxSaldifyInvitaCopy.copyInvitadoRegistradoLink(
+      context: context,
+      uuidInvitado: client.uuidInvitado,
+      closeContextOnSuccess: true,
     );
   }
 }

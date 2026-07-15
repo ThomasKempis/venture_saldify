@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:venture_saldify/smxLayout/smx_message_dialog.dart';
 import 'package:venture_core_connect/smxDataBase/smxRowSet.dart';
 import 'package:venture_core_connect/smxJson/SmxJsonUtil.dart';
 import 'package:venture_widgets/smxClassDrivers.dart';
@@ -154,7 +155,9 @@ class SmxSaldiFyClienteCreditoController extends SmxController {
     final context = data.context;
     if (context == null) return;
 
-    if (!validateWidgets(context)) {
+    final mensajeValidar = getValidateOnlyMessage();
+    if (mensajeValidar != null) {
+      showSmxValidDialog(context, mensaje: mensajeValidar);
       return;
     }
 
@@ -222,7 +225,7 @@ class SmxSaldiFyClienteCreditoController extends SmxController {
   bool _validateCorte(BuildContext context) {
     final double credito = rstSysuser12.getValue('SYSUSER12_CREDITO');
     if (credito <= 0) {
-      showValidDialog(
+      showSmxValidDialog(
         context,
         mensaje: 'Debe ingresar un credito mayor a cero.',
       );
@@ -233,7 +236,7 @@ class SmxSaldiFyClienteCreditoController extends SmxController {
     final currentPorcentaje = porcentaje;
     if (currentPlan == 3 &&
         !_porcentajesMinimos.contains(currentPorcentaje.round())) {
-      showValidDialog(
+      showSmxValidDialog(
         context,
         mensaje: 'Debe seleccionar el porcentaje minimo del plan.',
       );
@@ -244,7 +247,7 @@ class SmxSaldiFyClienteCreditoController extends SmxController {
     if (tipo == 1) {
       final dia = _toInt(rstSysuser12.getValue('SYSUSER12_CORTE_DIA'));
       if (dia < 1 || dia > 28) {
-        showValidDialog(
+        showSmxValidDialog(
           context,
           mensaje: 'Para corte mensual el dia debe estar entre 1 y 28.',
         );
@@ -255,7 +258,7 @@ class SmxSaldiFyClienteCreditoController extends SmxController {
     if (tipo == 2) {
       final dia = _toInt(rstSysuser12.getValue('SYSUSER12_CORTE_DIA'));
       if (dia != 0 && dia != 15) {
-        showValidDialog(
+        showSmxValidDialog(
           context,
           mensaje: 'Debe seleccionar primera o segunda quincena.',
         );
@@ -264,7 +267,7 @@ class SmxSaldiFyClienteCreditoController extends SmxController {
     }
 
     if (tipo == 3 && !_diasSemana.contains(corteSemana)) {
-      showValidDialog(
+      showSmxValidDialog(
         context,
         mensaje: 'Debe seleccionar un dia de corte semanal.',
       );

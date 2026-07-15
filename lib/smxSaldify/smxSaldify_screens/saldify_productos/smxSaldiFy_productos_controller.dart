@@ -1,4 +1,5 @@
 import 'package:venture_core_connect/smxDataBase/smxRowSet.dart';
+import 'package:venture_saldify/smxLayout/smx_message_dialog.dart';
 import 'package:venture_core_connect/smxJson/SmxJsonUtil.dart';
 import 'package:venture_saldify/smxApis/smxConstants.dart';
 import 'package:venture_widgets/smxClassDrivers.dart';
@@ -118,7 +119,11 @@ class SmxSaldiFyProductosController extends SmxController {
     final context = data.context;
     if (context == null) return;
 
-    if (!validateWidgets(context)) return;
+    final mensajeValidar = getValidateOnlyMessage();
+    if (mensajeValidar != null) {
+      showSmxValidDialog(context, mensaje: mensajeValidar);
+      return;
+    }
 
     final isAlta = data.accion == AccionNN.I;
 
@@ -132,7 +137,7 @@ class SmxSaldiFyProductosController extends SmxController {
 
     if (jsonSend.getError() != null) {
       if (context.mounted) {
-        showSystemErrorDialog(context, message: jsonSend.error!);
+        showSmxSystemErrorDialog(context, message: jsonSend.error!);
       }
       return;
     }
@@ -173,7 +178,7 @@ class SmxSaldiFyProductosController extends SmxController {
     if (jsonSend.getError() != null) {
       final currentContext = data.context;
       if (currentContext != null && currentContext.mounted) {
-        showSystemErrorDialog(currentContext, message: jsonSend.error!);
+        showSmxSystemErrorDialog(currentContext, message: jsonSend.error!);
       }
       notifyListeners();
       return;

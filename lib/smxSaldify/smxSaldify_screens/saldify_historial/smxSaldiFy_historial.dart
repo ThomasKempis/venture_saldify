@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:venture_saldify/smxLayout/smxColors.dart';
+import 'package:venture_saldify/smxLayout/smx_decision_dialog.dart';
 import 'package:venture_saldify/smxLayout/smxLayout.dart';
 import 'package:venture_saldify/smxSaldify/smxSaldify_dashboard/smxSaldiFy_clientes/smxSaldiFy_clientes.dart';
 import 'package:venture_saldify/smxLayout/smxBackgrounds/historial_linear_bg.dart';
@@ -18,6 +19,72 @@ class SmxSaldiFyHistorial extends StatefulWidget {
 }
 
 class _SmxSaldiFyHistorialState extends State<SmxSaldiFyHistorial> {
+  Future<void> _rejectPago(
+    SmxSaldiFyHistorialController controller,
+    int index,
+  ) async {
+    final motivo = await _showRejectPagoSheet(
+      context,
+      folio: controller.getFolioAt(index),
+      importe: controller.getImporteAt(index),
+      fecha: controller.getFechaAt(index),
+    );
+    if (!mounted || motivo == null) return;
+
+    final updated = await controller.rejectPagoAt(index, motivo);
+    if (!mounted) return;
+    if (updated) {
+      setState(() {});
+    }
+  }
+
+  Future<void> _showRejectedPagoMotivo({
+    required String motivo,
+    required String folio,
+    required String importe,
+    required String fecha,
+  }) async {
+    await showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: SmxColors.transparent,
+      builder: (sheetContext) {
+        return _RejectedPagoMotivoSheet(
+          motivo: motivo,
+          folio: folio,
+          importe: importe,
+          fecha: fecha,
+        );
+      },
+    );
+  }
+
+  Future<String?> _showRejectPagoSheet(
+    BuildContext context, {
+    required String folio,
+    required String importe,
+    required String fecha,
+  }) async {
+    final motivoController = TextEditingController();
+
+    try {
+      return await showModalBottomSheet<String>(
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: SmxColors.transparent,
+        builder: (sheetContext) {
+          return _RejectPagoSheet(
+            controller: motivoController,
+            folio: folio,
+            importe: importe,
+            fecha: fecha,
+          );
+        },
+      );
+    } finally {
+      motivoController.dispose();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return SmxCallBaseStateful<SmxSaldiFyHistorialController>(
@@ -35,6 +102,8 @@ class _SmxSaldiFyHistorialState extends State<SmxSaldiFyHistorial> {
         child: _HistorialView(
           controller: controller,
           client: widget.client,
+          onRejectPago: (index) => _rejectPago(controller, index),
+          onShowRejectedPagoMotivo: _showRejectedPagoMotivo,
           onStatusChange: (index, status) async {
             final updated = await controller.updateMovimientoStatusAt(
               index,
@@ -56,11 +125,21 @@ class _HistorialView extends StatelessWidget {
   final SmxSaldiFyHistorialController controller;
   final SmxSaldiFyClientTapData client;
   final Future<void> Function(int index, int status) onStatusChange;
+  final ValueChanged<int> onRejectPago;
+  final void Function({
+    required String motivo,
+    required String folio,
+    required String importe,
+    required String fecha,
+  })
+  onShowRejectedPagoMotivo;
 
   const _HistorialView({
     required this.controller,
     required this.client,
     required this.onStatusChange,
+    required this.onRejectPago,
+    required this.onShowRejectedPagoMotivo,
   });
 
   @override
@@ -93,9 +172,10 @@ class _HistorialView extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      _Header(
+                      SmxSaldifyScreenHeader(
                         title: client.name,
-                        onBack: () =>
+                        sectionLabel: 'Historial de movimientos',
+                        onBackPressed: () =>
                             Navigator.of(context).pop(controller.hasChanges),
                       ),
                       const SizedBox(height: 22),
@@ -105,6 +185,8 @@ class _HistorialView extends StatelessWidget {
                         _HistorialPanel(
                           controller: controller,
                           onStatusChange: onStatusChange,
+                          onRejectPago: onRejectPago,
+                          onShowRejectedPagoMotivo: onShowRejectedPagoMotivo,
                         ),
                     ],
                   ),
@@ -114,59 +196,6 @@ class _HistorialView extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-}
-
-class _Header extends StatelessWidget {
-  final String title;
-  final VoidCallback onBack;
-
-  const _Header({required this.title, required this.onBack});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        IconButton(
-          onPressed: onBack,
-          icon: const Icon(Icons.arrow_back_rounded),
-          color: SmxColors.white,
-          style: IconButton.styleFrom(
-            backgroundColor: SmxColors.whiteAlpha(.12),
-            fixedSize: const Size(44, 44),
-          ),
-        ),
-        const SizedBox(width: 14),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  color: SmxColors.white,
-                  fontSize: 24,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
-              const SizedBox(height: 3),
-              const Text(
-                'Historial de movimientos',
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  color: SmxColors.brandAccent,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
     );
   }
 }
@@ -208,10 +237,20 @@ class _EmptyState extends StatelessWidget {
 class _HistorialPanel extends StatelessWidget {
   final SmxSaldiFyHistorialController controller;
   final Future<void> Function(int index, int status) onStatusChange;
+  final ValueChanged<int> onRejectPago;
+  final void Function({
+    required String motivo,
+    required String folio,
+    required String importe,
+    required String fecha,
+  })
+  onShowRejectedPagoMotivo;
 
   const _HistorialPanel({
     required this.controller,
     required this.onStatusChange,
+    required this.onRejectPago,
+    required this.onShowRejectedPagoMotivo,
   });
 
   @override
@@ -237,11 +276,13 @@ class _HistorialPanel extends StatelessWidget {
                   )
                     _HistorialRow(
                       tipo: controller.getTipoAt(index),
+                      folio: controller.getFolioAt(index),
                       concepto: controller.getConceptoAt(index),
                       importe: controller.getImporteAt(index),
                       calculo: controller.getCalculoAt(index),
                       fecha: controller.getFechaAt(index),
                       owner: controller.getOwnerAt(index),
+                      motivo: controller.getMotivoAt(index),
                       status: controller.getStatusAt(index),
                       canSetCompraPendiente: controller.canSetCompraPendienteAt(
                         index,
@@ -250,7 +291,23 @@ class _HistorialPanel extends StatelessWidget {
                         index,
                       ),
                       canConfirmPago: controller.canConfirmPagoAt(index),
+                      canRejectPago: controller.canRejectPagoAt(index),
+                      canViewRejectedPagoMotivo: controller
+                          .canViewRejectedPagoMotivoAt(index),
                       onStatusChange: (status) => onStatusChange(index, status),
+                      onRejectPago: () => onRejectPago(index),
+                      onShowRejectedPagoMotivo:
+                          ({
+                            required motivo,
+                            required folio,
+                            required importe,
+                            required fecha,
+                          }) => onShowRejectedPagoMotivo(
+                            motivo: motivo,
+                            folio: folio,
+                            importe: importe,
+                            fecha: fecha,
+                          ),
                       index: index,
                     ),
                 ],
@@ -311,30 +368,48 @@ class _SaldoResumen extends StatelessWidget {
 
 class _HistorialRow extends StatelessWidget {
   final String tipo;
+  final String folio;
   final String concepto;
   final String importe;
   final String calculo;
   final String fecha;
   final String owner;
+  final String motivo;
   final int status;
   final bool canSetCompraPendiente;
   final bool canSetCompraEntregada;
   final bool canConfirmPago;
+  final bool canRejectPago;
+  final bool canViewRejectedPagoMotivo;
   final ValueChanged<int> onStatusChange;
+  final VoidCallback onRejectPago;
+  final void Function({
+    required String motivo,
+    required String folio,
+    required String importe,
+    required String fecha,
+  })
+  onShowRejectedPagoMotivo;
   final int index;
 
   const _HistorialRow({
     required this.tipo,
+    required this.folio,
     required this.concepto,
     required this.importe,
     required this.calculo,
     required this.fecha,
     required this.owner,
+    required this.motivo,
     required this.status,
     required this.canSetCompraPendiente,
     required this.canSetCompraEntregada,
     required this.canConfirmPago,
+    required this.canRejectPago,
+    required this.canViewRejectedPagoMotivo,
     required this.onStatusChange,
+    required this.onRejectPago,
+    required this.onShowRejectedPagoMotivo,
     required this.index,
   });
 
@@ -369,7 +444,11 @@ class _HistorialRow extends StatelessWidget {
                   Expanded(
                     child: Row(
                       children: [
-                        _TipoBadge(label: tipo, color: accent),
+                        _TipoBadge(
+                          label: folio,
+                          color: accent,
+                          onTap: canRejectPago ? onRejectPago : null,
+                        ),
                         if (calculo.isNotEmpty) ...[
                           const SizedBox(width: 10),
                           Expanded(
@@ -444,6 +523,14 @@ class _HistorialRow extends StatelessWidget {
               owner: owner,
               statusLabel: _statusLabel(isPago: isPago, status: status),
               color: accent,
+              onStatusTap: canViewRejectedPagoMotivo
+                  ? () => onShowRejectedPagoMotivo(
+                      motivo: motivo,
+                      folio: folio,
+                      importe: importe,
+                      fecha: fecha,
+                    )
+                  : null,
             ),
             if (hasActions) ...[
               const SizedBox(height: 8),
@@ -466,7 +553,11 @@ class _HistorialRow extends StatelessWidget {
 
   String _statusLabel({required bool isPago, required int status}) {
     if (isPago) {
-      return status == 1 ? 'Deposito confirmado' : 'Pendiente confirmar';
+      return switch (status) {
+        1 => 'Deposito confirmado',
+        2 => 'Pago rechazado',
+        _ => 'Pendiente confirmar',
+      };
     }
 
     return switch (status) {
@@ -481,11 +572,13 @@ class _MovimientoInfo extends StatelessWidget {
   final String owner;
   final String statusLabel;
   final Color color;
+  final VoidCallback? onStatusTap;
 
   const _MovimientoInfo({
     required this.owner,
     required this.statusLabel,
     required this.color,
+    this.onStatusTap,
   });
 
   @override
@@ -496,7 +589,12 @@ class _MovimientoInfo extends StatelessWidget {
       children: [
         if (owner.isNotEmpty)
           _InfoPill(label: owner, icon: Icons.person_outline_rounded),
-        _InfoPill(label: statusLabel, icon: Icons.flag_outlined, color: color),
+        _InfoPill(
+          label: statusLabel,
+          icon: Icons.flag_outlined,
+          color: color,
+          onTap: onStatusTap,
+        ),
       ],
     );
   }
@@ -506,18 +604,27 @@ class _InfoPill extends StatelessWidget {
   final String label;
   final IconData icon;
   final Color? color;
+  final VoidCallback? onTap;
 
-  const _InfoPill({required this.label, required this.icon, this.color});
+  const _InfoPill({
+    required this.label,
+    required this.icon,
+    this.color,
+    this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
     final foreground = color ?? SmxColors.textMuted;
 
-    return Container(
+    final child = Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
       decoration: BoxDecoration(
-        color: foreground.withValues(alpha: .09),
+        color: foreground.withValues(alpha: onTap == null ? .09 : .14),
         borderRadius: BorderRadius.circular(999),
+        border: onTap == null
+            ? null
+            : Border.all(color: foreground.withValues(alpha: .18)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -534,7 +641,27 @@ class _InfoPill extends StatelessWidget {
               fontWeight: FontWeight.w900,
             ),
           ),
+          if (onTap != null) ...[
+            const SizedBox(width: 3),
+            Icon(
+              Icons.keyboard_arrow_down_rounded,
+              size: 13,
+              color: foreground,
+            ),
+          ],
         ],
+      ),
+    );
+
+    if (onTap == null) return child;
+
+    return Material(
+      color: SmxColors.transparent,
+      borderRadius: BorderRadius.circular(999),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(999),
+        child: child,
       ),
     );
   }
@@ -642,27 +769,393 @@ class _ActionPill extends StatelessWidget {
 class _TipoBadge extends StatelessWidget {
   final String label;
   final Color color;
+  final VoidCallback? onTap;
 
-  const _TipoBadge({required this.label, required this.color});
+  const _TipoBadge({required this.label, required this.color, this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final child = Container(
+      constraints: const BoxConstraints(minWidth: 68),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: onTap == null ? .12 : .18),
+        borderRadius: BorderRadius.circular(999),
+        border: onTap == null
+            ? null
+            : Border.all(color: color.withValues(alpha: .18)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            label,
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: color,
+              fontSize: 11,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+          if (onTap != null) ...[
+            const SizedBox(width: 5),
+            Icon(Icons.keyboard_arrow_down_rounded, color: color, size: 14),
+          ],
+        ],
+      ),
+    );
+
+    if (onTap == null) return child;
+
+    return Material(
+      color: SmxColors.transparent,
+      borderRadius: BorderRadius.circular(999),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(999),
+        child: child,
+      ),
+    );
+  }
+}
+
+class _RejectPagoSheet extends StatefulWidget {
+  final TextEditingController controller;
+  final String folio;
+  final String importe;
+  final String fecha;
+
+  const _RejectPagoSheet({
+    required this.controller,
+    required this.folio,
+    required this.importe,
+    required this.fecha,
+  });
+
+  @override
+  State<_RejectPagoSheet> createState() => _RejectPagoSheetState();
+}
+
+class _RejectPagoSheetState extends State<_RejectPagoSheet> {
+  int _motivoLength = 0;
+  bool get _isValidMotivo =>
+      _motivoLength >= SmxSaldiFyHistorialController.rechazoMotivoMinLength;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.controller.addListener(_syncMotivo);
+  }
+
+  @override
+  void dispose() {
+    widget.controller.removeListener(_syncMotivo);
+    super.dispose();
+  }
+
+  void _syncMotivo() {
+    final motivoLength = widget.controller.text.trim().length;
+    if (motivoLength == _motivoLength) return;
+    setState(() {
+      _motivoLength = motivoLength;
+    });
+  }
+
+  Future<void> _confirmReject() async {
+    final motivo = widget.controller.text.trim();
+    if (motivo.length < SmxSaldiFyHistorialController.rechazoMotivoMinLength ||
+        motivo.length > SmxSaldiFyHistorialController.rechazoMotivoMaxLength) {
+      return;
+    }
+
+    final confirmed = await showSmxDecisionDialog(
+      context,
+      title: 'Proceso irreversible',
+      message:
+          'El pago sera rechazado y dejara de afectar el saldo del cliente. Esta accion no se puede deshacer.',
+      acceptText: 'Rechazar pago',
+      icon: Icons.block_rounded,
+      variant: SmxDecisionVariant.danger,
+    );
+
+    if (!mounted || !confirmed) return;
+    Navigator.of(context).pop(motivo);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final bottom = MediaQuery.of(context).viewInsets.bottom;
+
+    return Padding(
+      padding: EdgeInsets.only(bottom: bottom),
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
+        decoration: const BoxDecoration(
+          color: SmxColors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        ),
+        child: SafeArea(
+          top: false,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Center(
+                child: Container(
+                  width: 42,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: SmxColors.blackAlpha(.18),
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 18),
+              const Text(
+                'Pago rechazado',
+                style: TextStyle(
+                  color: SmxColors.textDark,
+                  fontSize: 22,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              const SizedBox(height: 12),
+              _RejectPagoSummary(
+                folio: widget.folio,
+                importe: widget.importe,
+                fecha: widget.fecha,
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Documenta el motivo antes de rechazar este pago confirmado.',
+                style: TextStyle(
+                  color: SmxColors.textMuted,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  height: 1.35,
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: widget.controller,
+                maxLength: SmxSaldiFyHistorialController.rechazoMotivoMaxLength,
+                maxLines: 4,
+                minLines: 3,
+                textInputAction: TextInputAction.newline,
+                decoration: InputDecoration(
+                  labelText: 'Motivo',
+                  helperText:
+                      'Minimo ${SmxSaldiFyHistorialController.rechazoMotivoMinLength} caracteres',
+                  counterText:
+                      '$_motivoLength/${SmxSaldiFyHistorialController.rechazoMotivoMaxLength}',
+                  alignLabelWithHint: true,
+                  filled: true,
+                  fillColor: SmxColors.blackAlpha(.04),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide(color: SmxColors.blackAlpha(.12)),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: const BorderSide(
+                      color: SmxColors.dangerForeground,
+                      width: 1.4,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              FilledButton.icon(
+                onPressed: _isValidMotivo ? _confirmReject : null,
+                icon: const Icon(Icons.block_rounded),
+                label: const Text('Rechazar pago confirmado'),
+                style: FilledButton.styleFrom(
+                  backgroundColor: SmxColors.dangerForeground,
+                  foregroundColor: SmxColors.white,
+                  disabledBackgroundColor: SmxColors.blackAlpha(.10),
+                  disabledForegroundColor: SmxColors.textMuted,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  textStyle: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _RejectPagoSummary extends StatelessWidget {
+  final String folio;
+  final String importe;
+  final String fecha;
+
+  const _RejectPagoSummary({
+    required this.folio,
+    required this.importe,
+    required this.fecha,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      constraints: const BoxConstraints(minWidth: 68),
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: .12),
-        borderRadius: BorderRadius.circular(999),
+        color: SmxColors.dangerBackground.withValues(alpha: .70),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: SmxColors.dangerForeground.withValues(alpha: .12),
+        ),
       ),
-      child: Text(
-        label,
-        textAlign: TextAlign.center,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: TextStyle(
-          color: color,
-          fontSize: 11,
-          fontWeight: FontWeight.w900,
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            decoration: BoxDecoration(
+              color: SmxColors.whiteAlpha(.72),
+              borderRadius: BorderRadius.circular(999),
+            ),
+            child: Text(
+              folio,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                color: SmxColors.dangerForeground,
+                fontSize: 12,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              importe,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: SmxColors.textDark,
+                fontSize: 14,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Text(
+            fecha,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.right,
+            style: const TextStyle(
+              color: SmxColors.textMuted,
+              fontSize: 12,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _RejectedPagoMotivoSheet extends StatelessWidget {
+  final String motivo;
+  final String folio;
+  final String importe;
+  final String fecha;
+
+  const _RejectedPagoMotivoSheet({
+    required this.motivo,
+    required this.folio,
+    required this.importe,
+    required this.fecha,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
+      decoration: const BoxDecoration(
+        color: SmxColors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      child: SafeArea(
+        top: false,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Center(
+              child: Container(
+                width: 42,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: SmxColors.blackAlpha(.18),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+              ),
+            ),
+            const SizedBox(height: 18),
+            const Text(
+              'Pago rechazado',
+              style: TextStyle(
+                color: SmxColors.textDark,
+                fontSize: 22,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+            const SizedBox(height: 12),
+            _RejectPagoSummary(folio: folio, importe: importe, fecha: fecha),
+            const SizedBox(height: 12),
+            const Text(
+              'Motivo',
+              style: TextStyle(
+                color: SmxColors.textMuted,
+                fontSize: 12,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Container(
+              constraints: const BoxConstraints(maxHeight: 220),
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: SmxColors.blackAlpha(.04),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: SmxColors.blackAlpha(.10)),
+              ),
+              child: SingleChildScrollView(
+                child: Text(
+                  motivo,
+                  style: const TextStyle(
+                    color: SmxColors.textDark,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    height: 1.35,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            FilledButton(
+              onPressed: () => Navigator.of(context).pop(),
+              style: FilledButton.styleFrom(
+                backgroundColor: SmxColors.brandPrimary,
+                foregroundColor: SmxColors.white,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+              ),
+              child: const Text('Cerrar'),
+            ),
+          ],
         ),
       ),
     );

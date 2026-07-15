@@ -109,7 +109,15 @@ class _ClienteViewState extends State<_ClienteView> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      _Header(controller: controller),
+                      SmxSaldifyScreenHeader(
+                        title: controller.isUpdate
+                            ? 'Editar cliente'
+                            : 'Nuevo cliente',
+                        sectionLabel: controller.isUpdate
+                            ? 'Actualizar datos'
+                            : 'Alta de cliente',
+                        onBackPressed: () => Navigator.of(context).pop(),
+                      ),
                       const SizedBox(height: 22),
                       if (!controller.isCorreoResolved)
                         _CorreoPanel(
@@ -139,58 +147,6 @@ class _ClienteViewState extends State<_ClienteView> {
           ),
         ),
       ),
-    );
-  }
-}
-
-class _Header extends StatelessWidget {
-  final SmxSaldiFyClienteController controller;
-
-  const _Header({required this.controller});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        IconButton(
-          onPressed: () => Navigator.of(context).pop(),
-          icon: const Icon(Icons.arrow_back_rounded),
-          color: SmxColors.white,
-          style: IconButton.styleFrom(
-            backgroundColor: SmxColors.whiteAlpha(.12),
-            fixedSize: const Size(44, 44),
-          ),
-        ),
-        const SizedBox(width: 14),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                controller.isUpdate ? 'Editar cliente' : 'Nuevo cliente',
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  color: SmxColors.white,
-                  fontSize: 24,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
-              const SizedBox(height: 3),
-              Text(
-                controller.isUpdate ? 'Actualizar datos' : 'Alta de cliente',
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  color: SmxColors.brandAccent,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
     );
   }
 }

@@ -145,6 +145,91 @@ class SmxSaldifyBackground extends StatelessWidget {
   }
 }
 
+class SmxSaldifyScreenHeader extends StatelessWidget {
+  final String title;
+  final String sectionLabel;
+  final VoidCallback onBackPressed;
+  final List<Widget> actions;
+
+  const SmxSaldifyScreenHeader({
+    super.key,
+    required this.title,
+    required this.sectionLabel,
+    required this.onBackPressed,
+    this.actions = const [],
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        SmxSaldifyHeaderIconButton(
+          tooltip: 'Regresar',
+          icon: Icons.arrow_back_rounded,
+          onPressed: onBackPressed,
+        ),
+        const SizedBox(width: 14),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  color: SmxColors.white,
+                  fontSize: 24,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              const SizedBox(height: 3),
+              Text(
+                sectionLabel,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  color: SmxColors.brandAccent,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ],
+          ),
+        ),
+        for (final action in actions) ...[const SizedBox(width: 8), action],
+      ],
+    );
+  }
+}
+
+class SmxSaldifyHeaderIconButton extends StatelessWidget {
+  final String tooltip;
+  final IconData icon;
+  final VoidCallback onPressed;
+
+  const SmxSaldifyHeaderIconButton({
+    super.key,
+    required this.tooltip,
+    required this.icon,
+    required this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      tooltip: tooltip,
+      onPressed: onPressed,
+      icon: Icon(icon),
+      color: SmxColors.white,
+      style: IconButton.styleFrom(
+        backgroundColor: SmxColors.whiteAlpha(.12),
+        fixedSize: const Size(44, 44),
+      ),
+    );
+  }
+}
+
 class _SaldifyBubbles extends CustomPainter {
   const _SaldifyBubbles();
 

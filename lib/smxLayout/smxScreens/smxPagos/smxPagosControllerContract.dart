@@ -21,6 +21,7 @@ abstract class SmxPagosControllerContract extends SmxController {
   Future<void> setPagoImagesIndex(int index);
   Future<bool> deletePagoAt(int index);
   bool syncEditingImageToList();
+  @override
   Future<void> save({double? saldo});
   SmxRowSet getRstImages();
   int getStatusAt(int index);

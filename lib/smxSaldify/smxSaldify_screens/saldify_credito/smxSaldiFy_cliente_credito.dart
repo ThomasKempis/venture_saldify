@@ -73,7 +73,11 @@ class _ClienteCreditoViewState extends State<_ClienteCreditoView> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      _Header(title: widget.client.name),
+                      SmxSaldifyScreenHeader(
+                        title: widget.client.name,
+                        sectionLabel: 'Actualizar credito',
+                        onBackPressed: () => Navigator.of(context).pop(),
+                      ),
                       const SizedBox(height: 22),
                       if (_showPlanSelector)
                         SmxSaldiFyCreditoPlanSelector(
@@ -103,58 +107,6 @@ class _ClienteCreditoViewState extends State<_ClienteCreditoView> {
           ),
         ),
       ),
-    );
-  }
-}
-
-class _Header extends StatelessWidget {
-  final String title;
-
-  const _Header({required this.title});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        IconButton(
-          onPressed: () => Navigator.of(context).pop(),
-          icon: const Icon(Icons.arrow_back_rounded),
-          color: SmxColors.white,
-          style: IconButton.styleFrom(
-            backgroundColor: SmxColors.whiteAlpha(.12),
-            fixedSize: const Size(44, 44),
-          ),
-        ),
-        const SizedBox(width: 14),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  color: SmxColors.white,
-                  fontSize: 24,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
-              const SizedBox(height: 3),
-              const Text(
-                'Actualizar credito',
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  color: SmxColors.brandAccent,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
     );
   }
 }

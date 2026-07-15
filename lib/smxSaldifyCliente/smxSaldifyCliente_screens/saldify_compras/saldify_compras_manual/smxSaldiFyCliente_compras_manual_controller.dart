@@ -1,4 +1,5 @@
 import 'package:venture_core_connect/smxDataBase/smxRowSet.dart';
+import 'package:venture_saldify/smxLayout/smx_message_dialog.dart';
 import 'package:venture_core_connect/smxJson/SmxJsonUtil.dart';
 import 'package:venture_saldify/smxApis/smxConstants.dart';
 import 'package:venture_saldify/smxLayout/smxScreens/smxComprasManual/smxComprasManualControllerContract.dart';
@@ -25,7 +26,9 @@ class SmxSaldiFyClienteComprasController
   late SmxRowSet rstCompra;
   late SmxRowSet rstImages;
   SmxRowSet? rstMetricas;
+  @override
   bool lastSaveOk = false;
+  @override
   double lastSavedImporte = 0.0;
   final Map<int, int> _imageVersions = {};
 
@@ -43,14 +46,21 @@ class SmxSaldiFyClienteComprasController
   String get imagesTable => TABLE_IMAGES;
 
   int get rowCount => rstCompras.getRowCount();
+  @override
   List<int> get comprasPendientesIndexes =>
       _getCompraIndexes((status) => status == 0);
+  @override
   List<int> get comprasRecibidasIndexes =>
       _getCompraIndexes((status) => status != 0);
+  @override
   int get currentCompraId => rstCompra.getId();
+  @override
   bool get isCompraPersistida => currentCompraId > 0;
+  @override
   bool get isCompraNueva => data.accion == AccionNN.I;
+  @override
   bool get isSoloImagenes => isCompraPersistida && data.accion == AccionNN.N;
+  @override
   bool get canEditCompraData =>
       _getStatusValue(rstCompra.getValue('SYSUSER40_STATUS')) == 0;
 
@@ -75,12 +85,14 @@ class SmxSaldiFyClienteComprasController
     final context = data.context;
     if (context == null) return;
 
-    if (!validateWidgets(context)) {
+    final mensajeValidar = getValidateOnlyMessage();
+    if (mensajeValidar != null) {
+      showSmxValidDialog(context, mensaje: mensajeValidar);
       return;
     }
 
     if (!canEditCompraData) {
-      showValidDialog(
+      showSmxValidDialog(
         context,
         mensaje: 'Esta compra ya no permite modificar datos.',
       );
@@ -93,14 +105,14 @@ class SmxSaldiFyClienteComprasController
     final int cantidad = _getCantidadCompra();
     final total = cantidad * importe;
     if (cantidad <= 0) {
-      showValidDialog(
+      showSmxValidDialog(
         context,
         mensaje: 'Debe ingresar una cantidad mayor a cero.',
       );
       return;
     }
     if (importe <= 0) {
-      showValidDialog(
+      showSmxValidDialog(
         context,
         mensaje: 'Debe ingresar un importe mayor a cero.',
       );
@@ -111,7 +123,7 @@ class SmxSaldiFyClienteComprasController
         ? null
         : disponible + (isAlta ? 0.0 : totalAnterior);
     if (limiteDisponible != null && total > limiteDisponible) {
-      showValidDialog(
+      showSmxValidDialog(
         context,
         mensaje: 'La compra supera el credito disponible.',
       );
@@ -125,7 +137,7 @@ class SmxSaldiFyClienteComprasController
     if (jsonSend.getError() != null) {
       final currentContext = data.context;
       if (currentContext != null && currentContext.mounted) {
-        showSystemErrorDialog(currentContext, message: jsonSend.error!);
+        showSmxSystemErrorDialog(currentContext, message: jsonSend.error!);
       }
       return;
     }
@@ -158,37 +170,44 @@ class SmxSaldiFyClienteComprasController
 
   double get saldo => _getMetrica('SYSUSER12_BALANCE');
 
+  @override
   String getProductoAt(int index) {
     rstCompras.index(index);
     return (rstCompras.getValue('SYSUSER40_CONCEPTO')?.toString() ?? '')
         .toUpperCase();
   }
 
+  @override
   String getFechaAt(int index) {
     rstCompras.index(index);
     return rstCompras.getValueFormatDate('SYSUSER40_FECHA');
   }
 
+  @override
   String getImporteAt(int index) {
     rstCompras.index(index);
     return rstCompras.getValueFormatAmount('SYSUSER40_IMPORTE');
   }
 
+  @override
   String getTotalAt(int index) {
     rstCompras.index(index);
     return rstCompras.getValueFormatAmount('SYSUSER40_TOTAL');
   }
 
+  @override
   String getCantidadAt(int index) {
     rstCompras.index(index);
     return (rstCompras.getValue('SYSUSER40_CANTIDAD') ?? 0).toString();
   }
 
+  @override
   int getStatusAt(int index) {
     rstCompras.index(index);
     return _getStatusValue(rstCompras.getValue('SYSUSER40_STATUS'));
   }
 
+  @override
   String getStatusLabelAt(int index) {
     return switch (getStatusAt(index)) {
       0 => 'Solicitada',
@@ -198,16 +217,19 @@ class SmxSaldiFyClienteComprasController
     };
   }
 
+  @override
   int getCompraIdAt(int index) {
     rstCompras.index(index);
     return rstCompras.getId();
   }
 
+  @override
   double getImporteValueAt(int index) {
     rstCompras.index(index);
     return _toDouble(rstCompras.getValue('SYSUSER40_TOTAL'));
   }
 
+  @override
   String getCompraImageUrlAt(int index) {
     rstCompras.index(index);
     final image = rstCompras.getValue('SYSUSER40_IMAGE')?.toString() ?? '';
@@ -247,6 +269,7 @@ class SmxSaldiFyClienteComprasController
     rstCompras = getRowset(ALIAS_LIST);
   }
 
+  @override
   Future<void> prepareCompraNueva() async {
     await _ensureCompraVacia();
 
@@ -262,10 +285,12 @@ class SmxSaldiFyClienteComprasController
     notifyListeners();
   }
 
+  @override
   Future<void> setCompraIndex(int index) async {
     await _setCompraIndex(index, readOnlyData: false);
   }
 
+  @override
   Future<void> setCompraImagesIndex(int index) async {
     await _setCompraIndex(index, readOnlyData: true);
   }
@@ -417,6 +442,7 @@ class SmxSaldiFyClienteComprasController
     rstImages.tabla = TABLE_IMAGES;
   }
 
+  @override
   Future<bool> deleteCompraAt(int index) async {
     final context = data.context;
     if (context == null || getStatusAt(index) != 0) return false;
@@ -430,7 +456,7 @@ class SmxSaldiFyClienteComprasController
     await showDialogWait(context, () async => callDeleteAlt(rstDelete));
     if (jsonSend.getError() != null) {
       if (context.mounted) {
-        showSystemErrorDialog(context, message: jsonSend.error!);
+        showSmxSystemErrorDialog(context, message: jsonSend.error!);
       }
       return false;
     }
@@ -439,6 +465,7 @@ class SmxSaldiFyClienteComprasController
     return true;
   }
 
+  @override
   bool syncEditingImageToList() {
     if (currentCompraId <= 0) return false;
     var uuid = '';
@@ -458,6 +485,7 @@ class SmxSaldiFyClienteComprasController
     return true;
   }
 
+  @override
   SmxRowSet getRstImages() => rstImages;
 
   double _getMetrica(String field) {

@@ -4,7 +4,7 @@ import 'package:venture_core_connect/smxConstants_core.dart';
 import 'package:venture_core_connect/smxDataBase/smxRowSet.dart';
 import 'package:venture_widgets/smxConstants_widgets.dart';
 import '../firebase_options.dart';
-import '../smxLogonMovil/logon/smxLogonMovil_controller.dart';
+import '../smxAuth/smxLogonMovil.dart';
 
 enum SmxServiciosSaldify { CHATBOT_IA_SALDIFY }
 
@@ -13,7 +13,7 @@ abstract class SmxConstants {
       'https://venture.jars.mx/sovimex/Temps/saldify/';
   static const String URL_IMAGES_PRODUCTOS = '${URL_IMAGES_SALDIFY}SYSUSER41';
 
-  static late SmxLogonMovil_controller controllerMain;
+  static late SmxLogonMovil controllerMain;
   static SmxRowSet? rstCompraVacia;
   static SmxRowSet? rstPagoVacio;
   static SmxRowSet? rstProductoVacio;
@@ -21,6 +21,9 @@ abstract class SmxConstants {
   static SmxRowSet? rstDetallesVacios;
 
   static const String codigoInvitacionKey = 'codigo';
+  static const String uuidAnfitrionInvitacionKey = 'uuid_anfitrion';
+  static const String uuidInvitadoInvitacionKey = 'uuid_invitado';
+  static const String correoInvitadoInvitacionKey = 'correo_invitado';
 
   static Map<String, String> startParametersUrl = {};
   static String _uuidAnfitrionInvitacion = '';
@@ -28,15 +31,27 @@ abstract class SmxConstants {
   static String _correoInvitadoInvitacion = '';
 
   static String get correoInvitadoParam {
-    return _correoInvitadoInvitacion;
+    if (_correoInvitadoInvitacion.isNotEmpty) {
+      return _correoInvitadoInvitacion;
+    }
+
+    return startParametersUrl[correoInvitadoInvitacionKey]?.trim() ?? '';
   }
 
   static String get uuidInvitadoParam {
-    return _uuidInvitadoInvitacion;
+    if (_uuidInvitadoInvitacion.isNotEmpty) {
+      return _uuidInvitadoInvitacion;
+    }
+
+    return startParametersUrl[uuidInvitadoInvitacionKey]?.trim() ?? '';
   }
 
   static String get uuidAnfitrionParam {
-    return _uuidAnfitrionInvitacion;
+    if (_uuidAnfitrionInvitacion.isNotEmpty) {
+      return _uuidAnfitrionInvitacion;
+    }
+
+    return startParametersUrl[uuidAnfitrionInvitacionKey]?.trim() ?? '';
   }
 
   static String get codigoInvitacionParam {

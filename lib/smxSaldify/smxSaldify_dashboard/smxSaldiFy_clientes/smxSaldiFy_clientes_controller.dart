@@ -1,4 +1,5 @@
 import 'package:venture_core_connect/smxDataBase/smxRowSet.dart';
+import 'package:venture_saldify/smxLayout/smx_message_dialog.dart';
 import 'package:venture_core_connect/smxJson/SmxJsonUtil.dart';
 import 'package:venture_widgets/smxClassDrivers.dart';
 import 'package:venture_widgets/smxController/smxController.dart';
@@ -36,6 +37,10 @@ class SmxSaldiFyClientesController extends SmxController {
 
   String getClientName() {
     return rstClientes.getValue('SYSUSER10_INVITADO')?.toString() ?? '';
+  }
+
+  String getClientUuid() {
+    return rstClientes.getValue('SYSUSER10_UUID')?.toString().trim() ?? '';
   }
 
   String getClientStatus() {
@@ -121,7 +126,7 @@ class SmxSaldiFyClientesController extends SmxController {
 
     if (jsonSend.getError() != null) {
       if (context.mounted) {
-        showSystemErrorDialog(context, message: jsonSend.error!);
+        showSmxSystemErrorDialog(context, message: jsonSend.error!);
       }
       return false;
     }
@@ -129,7 +134,7 @@ class SmxSaldiFyClientesController extends SmxController {
     final rstUpdate = getRowset(aliasUpdate);
     if (rstUpdate.getRowCount() == 0) {
       if (context.mounted) {
-        showSystemErrorDialog(
+        showSmxSystemErrorDialog(
           context,
           message: 'No se encontro la relacion activa del cliente.',
         );
@@ -149,7 +154,7 @@ class SmxSaldiFyClientesController extends SmxController {
 
     if (jsonSend.getError() != null) {
       if (context.mounted) {
-        showSystemErrorDialog(context, message: jsonSend.error!);
+        showSmxSystemErrorDialog(context, message: jsonSend.error!);
       }
       return false;
     }

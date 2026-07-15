@@ -1,4 +1,5 @@
 import 'package:venture_core_connect/smxDataBase/smxRowSet.dart';
+import 'package:venture_saldify/smxLayout/smx_message_dialog.dart';
 import 'package:venture_widgets/smxClassDrivers.dart';
 import 'package:venture_widgets/smxController/smxController.dart';
 import 'package:venture_widgets/smxController/smxRowSetTrack.dart';
@@ -7,6 +8,9 @@ import 'package:venture_widgets/smxShowDialog/smxShowDialogs.dart';
 import '../../../smxApis/smxConstants.dart';
 
 class SmxSaldiFyHistorialController extends SmxController {
+  static const int rechazoMotivoMinLength = 30;
+  static const int rechazoMotivoMaxLength = 3000;
+
   final int idCliente;
 
   SmxRowSet rstHistorial = SmxRowSet.newRowSet([]);
@@ -53,6 +57,23 @@ class SmxSaldiFyHistorialController extends SmxController {
     return _formatTipo(rstHistorial.getValue('SYSUSER90_TIPO'));
   }
 
+  int getMovimientoIdAt(int index) {
+    rstHistorial.index(index);
+    return _getIntValue('ID_SYSUSER90');
+  }
+
+  String getFolioAt(int index) {
+    final tipo = getTipoAt(index).toLowerCase();
+    final id = getMovimientoIdAt(index);
+    final prefix = tipo == 'pago'
+        ? 'P'
+        : tipo == 'compra'
+        ? 'C'
+        : 'M';
+
+    return '$prefix-${id.toString().padLeft(5, '0')}';
+  }
+
   String getConceptoAt(int index) {
     rstHistorial.index(index);
     return rstHistorial.getValue('SYSUSER90_CONCEPTO')?.toString() ?? '';
@@ -89,6 +110,15 @@ class SmxSaldiFyHistorialController extends SmxController {
     return 'Registrado por ${clean.toLowerCase()}';
   }
 
+  String getMotivoAt(int index) {
+    rstHistorial.index(index);
+    try {
+      return rstHistorial.getValue('SYSUSER90_MOTIVO')?.toString().trim() ?? '';
+    } catch (_) {
+      return '';
+    }
+  }
+
   int getStatusAt(int index) {
     rstHistorial.index(index);
     return _getIntValue('SYSUSER90_STATUS');
@@ -122,6 +152,18 @@ class SmxSaldiFyHistorialController extends SmxController {
         getRelaPagoAt(index) > 0;
   }
 
+  bool canRejectPagoAt(int index) {
+    return getTipoAt(index).toLowerCase() == 'pago' &&
+        getStatusAt(index) == 1 &&
+        getRelaPagoAt(index) > 0;
+  }
+
+  bool canViewRejectedPagoMotivoAt(int index) {
+    return getTipoAt(index).toLowerCase() == 'pago' &&
+        getStatusAt(index) == 2 &&
+        getMotivoAt(index).isNotEmpty;
+  }
+
   Future<bool> updateMovimientoStatusAt(int index, int status) async {
     final context = data.context;
     if (context == null) return false;
@@ -137,7 +179,7 @@ class SmxSaldiFyHistorialController extends SmxController {
 
     if (accion.isEmpty || id <= 0) {
       if (context.mounted) {
-        showSystemErrorDialog(
+        showSmxSystemErrorDialog(
           context,
           message: 'No se pudo identificar el movimiento a actualizar.',
         );
@@ -148,16 +190,69 @@ class SmxSaldiFyHistorialController extends SmxController {
     final aliasUpdate = 'UPDATE_SYSUSER40_SYSUSER50';
     addSTrans(
       aliasUpdate,
-      "select * from UPDATE_SYSUSER40_SYSUSER50('$accion', $id, $status)",
+      "select * from UPDATE_SYSUSER40_SYSUSER50('$accion', $id, $status, '')",
     );
 
+    if (!await _sendMovimientoUpdate(context, aliasUpdate)) return false;
+
+    rstHistorial.index(index);
+    rstHistorial.update('SYSUSER90_STATUS', status);
+    saldo = _sumImportes();
+    hasChanges = true;
+    return true;
+  }
+
+  Future<bool> rejectPagoAt(int index, String motivo) async {
+    final context = data.context;
+    if (context == null) return false;
+
+    rstHistorial.index(index);
+    final id = getRelaPagoAt(index);
+    final cleanMotivo = motivo.trim();
+
+    if (!canRejectPagoAt(index) ||
+        cleanMotivo.length < rechazoMotivoMinLength ||
+        cleanMotivo.length > rechazoMotivoMaxLength) {
+      if (context.mounted) {
+        showSmxSystemErrorDialog(
+          context,
+          message:
+              'No se pudo identificar un pago confirmado o el motivo es insuficiente.',
+        );
+      }
+      return false;
+    }
+
+    final escapedMotivo = _sqlString(cleanMotivo);
+    final aliasUpdate = 'UPDATE_SYSUSER40_SYSUSER50';
+    addSTrans(
+      aliasUpdate,
+      "select * from UPDATE_SYSUSER40_SYSUSER50('PR', $id, 2, '$escapedMotivo')",
+    );
+
+    if (!await _sendMovimientoUpdate(context, aliasUpdate)) return false;
+
+    rstHistorial.index(index);
+    rstHistorial.update('SYSUSER90_STATUS', 2);
+    try {
+      rstHistorial.update('SYSUSER90_MOTIVO', cleanMotivo);
+    } catch (_) {}
+    saldo = _sumImportes();
+    hasChanges = true;
+    return true;
+  }
+
+  Future<bool> _sendMovimientoUpdate(
+    dynamic context,
+    String aliasUpdate,
+  ) async {
     await showDialogWait(context, () async {
       await getCallWS();
     });
 
     if (jsonSend.getError() != null) {
       if (context.mounted) {
-        showSystemErrorDialog(context, message: jsonSend.error!);
+        showSmxSystemErrorDialog(context, message: jsonSend.error!);
       }
       return false;
     }
@@ -165,7 +260,7 @@ class SmxSaldiFyHistorialController extends SmxController {
     final rstUpdate = getRowset(aliasUpdate);
     if (rstUpdate.getRowCount() == 0) {
       if (context.mounted) {
-        showSystemErrorDialog(
+        showSmxSystemErrorDialog(
           context,
           message: 'No se recibio confirmacion del cambio.',
         );
@@ -177,7 +272,7 @@ class SmxSaldiFyHistorialController extends SmxController {
     final result = rstUpdate.getValue('TMPUSER99_STATUS')?.toString() ?? '';
     if (result.toUpperCase() != 'OK') {
       if (context.mounted) {
-        showSystemErrorDialog(
+        showSmxSystemErrorDialog(
           context,
           message: 'No se pudo actualizar el movimiento.',
         );
@@ -185,12 +280,10 @@ class SmxSaldiFyHistorialController extends SmxController {
       return false;
     }
 
-    rstHistorial.index(index);
-    rstHistorial.update('SYSUSER90_STATUS', status);
-    saldo = _sumImportes();
-    hasChanges = true;
     return true;
   }
+
+  String _sqlString(String value) => value.replaceAll("'", "''");
 
   String _formatTipo(dynamic value) {
     final tipo = value?.toString().trim() ?? '';

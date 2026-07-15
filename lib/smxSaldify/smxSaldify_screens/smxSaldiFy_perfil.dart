@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:venture_saldify/smxApis/smxConfig.dart';
 import 'package:venture_saldify/smxLayout/smxColors.dart';
 import 'package:venture_saldify/smxLayout/smxLayout.dart';
-import 'package:venture_saldify/smxLogonMovil/logon/smxPerfil/smxPerfil.dart';
+import 'package:venture_saldify/smxPerfil/smxPerfil.dart';
 
 import '../../smxApis/smxConstants.dart';
-import '../../smxLogonMovil/logon/smxLogonMovil_controller.dart';
+import '../../smxAuth/smxLogonMovil.dart';
 
 class SmxSaldiFyPerfil extends StatelessWidget {
-  final SmxLogonMovil_controller controllerMain = SmxConstants.controllerMain;
+  final SmxLogonMovil controllerMain = SmxConstants.controllerMain;
   final VoidCallback onNavigateToHome;
   final SmxLayoutSize layout;
   final Widget? menuButton;

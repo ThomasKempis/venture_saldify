@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:venture_saldify/smxLayout/smxColors.dart';
+import 'package:venture_saldify/smxLayout/smx_decision_dialog.dart';
 import 'package:venture_saldify/smxLayout/smxLayout.dart';
 import 'package:venture_saldify/smxLayout/smxBackgrounds/invita_cliente_card_bg.dart';
 import 'package:venture_saldify/smxLayout/smxBackgrounds/operacion_bg_panel.dart';
@@ -87,7 +88,13 @@ class _ProductosViewState extends State<_ProductosView> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      _Header(controller: widget.controller),
+                      SmxSaldifyScreenHeader(
+                        title: 'Catálogo de Productos',
+                        sectionLabel: 'Gestiona los servicios que ofreces',
+                        onBackPressed: () => Navigator.of(
+                          context,
+                        ).pop(widget.controller.cambioDisponibilidadCatalogo),
+                      ),
                       const SizedBox(height: 24),
                       _ListHeader(
                         showForm: _showForm,
@@ -140,55 +147,6 @@ class _ProductosViewState extends State<_ProductosView> {
           ),
         ),
       ),
-    );
-  }
-}
-
-class _Header extends StatelessWidget {
-  final SmxSaldiFyProductosController controller;
-
-  const _Header({required this.controller});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        IconButton(
-          onPressed: () => Navigator.of(
-            context,
-          ).pop(controller.cambioDisponibilidadCatalogo),
-          icon: const Icon(Icons.arrow_back_rounded),
-          color: SmxColors.white,
-          style: IconButton.styleFrom(
-            backgroundColor: SmxColors.whiteAlpha(.12),
-            fixedSize: const Size(44, 44),
-          ),
-        ),
-        const SizedBox(width: 14),
-        const Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Catálogo de Productos',
-                style: TextStyle(
-                  color: SmxColors.white,
-                  fontSize: 24,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
-              Text(
-                'Gestiona los servicios que ofreces',
-                style: TextStyle(
-                  color: SmxColors.brandAccent,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
     );
   }
 }
@@ -424,40 +382,31 @@ class _ProductosList extends StatelessWidget {
     );
   }
 
-  void _toggleStatus(BuildContext context, int index) {
+  Future<void> _toggleStatus(BuildContext context, int index) async {
     final status = controller.getStatusAt(index);
     final isArchiving = status == 0;
 
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(isArchiving ? '¿Archivar producto?' : '¿Activar producto?'),
-        content: Text(
-          isArchiving
-              ? 'El producto se marcará como archivado.'
-              : 'El producto volverá a estar activo.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancelar'),
-          ),
-          TextButton(
-            onPressed: () async {
-              Navigator.pop(context);
-              await controller.toggleStatus(index);
-              if (controller.lastStatusOk) {
-                onStatusChanged();
-              }
-            },
-            child: Text(
-              isArchiving ? 'Archivar' : 'Activar',
-              style: TextStyle(color: isArchiving ? Colors.red : Colors.green),
-            ),
-          ),
-        ],
-      ),
+    final confirmed = await showSmxDecisionDialog(
+      context,
+      title: isArchiving ? 'Archivar producto' : 'Activar producto',
+      message: isArchiving
+          ? 'El producto se marcara como archivado.'
+          : 'El producto volvera a estar activo.',
+      acceptText: isArchiving ? 'Archivar' : 'Activar',
+      icon: isArchiving
+          ? Icons.inventory_2_outlined
+          : Icons.check_circle_outline_rounded,
+      variant: isArchiving
+          ? SmxDecisionVariant.warning
+          : SmxDecisionVariant.success,
     );
+
+    if (!confirmed) return;
+
+    await controller.toggleStatus(index);
+    if (controller.lastStatusOk) {
+      onStatusChanged();
+    }
   }
 }
 

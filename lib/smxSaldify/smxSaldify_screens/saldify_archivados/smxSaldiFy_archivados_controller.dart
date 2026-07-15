@@ -1,4 +1,5 @@
 import 'package:venture_core_connect/smxDataBase/smxRowSet.dart';
+import 'package:venture_saldify/smxLayout/smx_message_dialog.dart';
 import 'package:venture_core_connect/smxJson/SmxJsonUtil.dart';
 import 'package:venture_widgets/smxClassDrivers.dart';
 import 'package:venture_widgets/smxController/smxController.dart';
@@ -94,7 +95,7 @@ class SmxSaldiFyArchivadosController extends SmxController {
 
     if (jsonSend.getError() != null) {
       if (context.mounted) {
-        showSystemErrorDialog(context, message: jsonSend.error!);
+        showSmxSystemErrorDialog(context, message: jsonSend.error!);
       }
       return false;
     }
@@ -102,7 +103,7 @@ class SmxSaldiFyArchivadosController extends SmxController {
     final rstUpdate = getRowset(aliasUpdate);
     if (rstUpdate.getRowCount() == 0) {
       if (context.mounted) {
-        showSystemErrorDialog(
+        showSmxSystemErrorDialog(
           context,
           message: 'No se encontro la relacion archivada del cliente.',
         );
@@ -123,7 +124,7 @@ class SmxSaldiFyArchivadosController extends SmxController {
 
     if (jsonSend.getError() != null) {
       if (context.mounted) {
-        showSystemErrorDialog(context, message: jsonSend.error!);
+        showSmxSystemErrorDialog(context, message: jsonSend.error!);
       }
       return false;
     }

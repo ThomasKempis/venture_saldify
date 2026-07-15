@@ -1,22 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:venture_core_connect/smxDataBase/smxRowSet.dart';
 
+import '../../smxLayout/smxScreenTmp.dart';
 import '../smxSaldify_screens/saldify_cliente/smxSaldiFy_cliente.dart';
 import '../smxSaldify_screens/saldify_archivados/smxSaldiFy_archivados.dart';
 import '../smxSaldify_screens/saldify_cobranza/smxSaldiFy_cobranza.dart';
 import '../smxSaldify_screens/saldify_compras/smxSaldiFy_compras.dart';
 import '../smxSaldify_screens/saldify_credito/smxSaldiFy_cliente_credito.dart';
 import '../smxSaldify_screens/saldify_historial/smxSaldiFy_historial.dart';
+import '../smxSaldify_screens/saldify_mired/smxSaldiFy_mired.dart';
 import '../smxSaldify_screens/saldify_pagos/smxSaldiFy_pagos.dart';
 import '../smxSaldify_screens/saldify_productos/smxSaldiFy_productos.dart';
 import 'smxSaldiFy_clientes/smxSaldiFy_clientes.dart';
 import 'smxSaldiFy_dashboard_menu.dart';
-import '../../smxLayout/smxScreenTmp.dart';
 
 class SmxSaldiFyDashboardController {
   final ValueNotifier<SmxRowSet?> clientesActivosNotifier =
-      ValueNotifier<SmxRowSet?>(null);
-  final ValueNotifier<SmxRowSet?> clientesInvitacionNotifier =
       ValueNotifier<SmxRowSet?>(null);
   final ValueNotifier<SmxSaldiFyDashboardContentMode> contentModeNotifier =
       ValueNotifier<SmxSaldiFyDashboardContentMode>(
@@ -34,7 +33,6 @@ class SmxSaldiFyDashboardController {
 
   void dispose() {
     clientesActivosNotifier.dispose();
-    clientesInvitacionNotifier.dispose();
     contentModeNotifier.dispose();
     pendingActionsRevisionNotifier.dispose();
     metricasRevisionNotifier.dispose();
@@ -46,7 +44,6 @@ class SmxSaldiFyDashboardController {
     _clientesActivosLoaded = false;
     _clientesPendientesLoaded = false;
     clientesActivosNotifier.value = null;
-    clientesInvitacionNotifier.value = null;
     contentModeNotifier.value = SmxSaldiFyDashboardContentMode.loading;
     _notifyPendingActionsChanged();
   }
@@ -62,7 +59,6 @@ class SmxSaldiFyDashboardController {
   void onClienteArchivadoRst(SmxRowSet rstClientes) {
     _clientesActivosLoaded = true;
     _setClientesActivos(rstClientes);
-    _mergeClientesActivosVsPendientes();
     _updateContentMode();
     _notifyPendingActionsChanged();
     _notifyMetricasChanged();
@@ -71,7 +67,6 @@ class SmxSaldiFyDashboardController {
   void onClientesPendientesLoadedRst(SmxRowSet rstClientes) {
     _rstClientesPendientes = rstClientes;
     _clientesPendientesLoaded = true;
-    _mergeClientesActivosVsPendientes();
     _updateContentMode();
     _notifyPendingActionsChanged();
   }
@@ -92,7 +87,6 @@ class SmxSaldiFyDashboardController {
     rstActivos.first();
     _rstClientesActivos = rstActivos.copy();
     clientesActivosNotifier.value = _rstClientesActivos;
-    _mergeClientesActivosVsPendientes();
     _updateContentMode();
     _notifyPendingActionsChanged();
   }
@@ -105,23 +99,6 @@ class SmxSaldiFyDashboardController {
   bool get hasGestionPendiente => _hasGestionPendiente();
 
   bool get hasCobranzaPendiente => _hasCobranzaPendiente();
-
-  void _mergeClientesActivosVsPendientes() {
-    final rstActivos = _rstClientesActivos;
-    if (rstActivos == null) return;
-
-    final rstInvitacion = rstActivos.copy();
-    final rstPendientes = _rstClientesPendientes;
-
-    if (rstPendientes != null) {
-      for (final row in rstPendientes.getRowsList()) {
-        rstInvitacion.getRowsList().add(row.clone());
-      }
-    }
-
-    rstInvitacion.first();
-    clientesInvitacionNotifier.value = rstInvitacion;
-  }
 
   void _updateContentMode() {
     final activos = _rstClientesActivos?.getRowCount() ?? 0;
@@ -334,6 +311,20 @@ class SmxSaldiFyDashboardController {
     );
   }
 
+  Future<void> openClienteMiRed(
+    BuildContext context,
+    SmxSaldiFyClientTapData client,
+  ) async {
+    if (client.idSysuser11 <= 0) {
+      openUnderConstruction(context, 'Cliente sin relacion');
+      return;
+    }
+
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute(builder: (_) => SmxSaldiFyMiRed(client: client)),
+    );
+  }
+
   Future<bool?> openClienteActions(
     BuildContext context,
     SmxSaldiFyClientTapData client,
@@ -361,6 +352,11 @@ class SmxSaldiFyDashboardController {
 
     if (action == 'credito') {
       return openClienteCredito(context, client);
+    }
+
+    if (action == 'mired') {
+      await openClienteMiRed(context, client);
+      return false;
     }
 
     return false;

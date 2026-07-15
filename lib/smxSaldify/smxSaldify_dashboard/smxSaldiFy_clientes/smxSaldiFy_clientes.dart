@@ -2,7 +2,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:venture_core_connect/smxDataBase/smxRowSet.dart';
+import 'package:venture_saldify/smxApis/smxDepth.dart';
 import 'package:venture_saldify/smxLayout/smxColors.dart';
+import 'package:venture_saldify/smxLayout/smx_decision_dialog.dart';
 import 'package:venture_saldify/smxLayout/smxBackgrounds/saldify_circles_background.dart';
 import 'package:venture_widgets/smxCallBaseStateful.dart';
 import 'package:venture_widgets/smxController/smxControllerSendData.dart';
@@ -108,27 +110,17 @@ class _SmxSaldiFyClientesState extends State<SmxSaldiFyClientes> {
     int index,
     String name,
   ) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Archivar cliente'),
-        content: Text(
+    final confirmed = await showSmxDecisionDialog(
+      context,
+      title: 'Archivar cliente',
+      message:
           'El cliente saldra de tu lista activa y quedara en Archivados:\n$name',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancelar'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Archivar'),
-          ),
-        ],
-      ),
+      acceptText: 'Archivar',
+      icon: Icons.inventory_2_outlined,
+      variant: SmxDecisionVariant.warning,
     );
 
-    if (confirmed != true) return false;
+    if (!confirmed) return false;
 
     return controller.archiveClienteAt(index);
   }
@@ -283,6 +275,7 @@ class _ClientCards extends StatelessWidget {
         index,
         controller.getClientUserId,
       );
+      final uuidInvitado = _getClientValue(index, controller.getClientUuid);
       final name = _getClientValue(index, controller.getClientName);
       final status = _getClientValue(index, controller.getClientStatus);
       final statusType = _ClientStatusType.fromValue(
@@ -312,6 +305,7 @@ class _ClientCards extends StatelessWidget {
       final clientTapData = SmxSaldiFyClientTapData(
         idSysuser11: idSysuser11,
         relaSysuser10Cliente: relaSysuser10Cliente,
+        uuidInvitado: uuidInvitado,
         conCatalogo: conCatalogo == 1,
         name: name,
         credit: credit,
@@ -453,21 +447,27 @@ class _SlidableClientCard extends StatelessWidget {
         ],
       ),
       child: Padding(
-        padding: const EdgeInsets.only(right: 6),
-        child: _ClientCard(
-          name: name,
-          status: status,
-          statusType: statusType,
-          cutDate: cutDate,
-          credit: credit,
-          availableCredit: availableCredit,
-          purchases: purchases,
-          payments: payments,
-          balance: balance,
-          noveCompras: noveCompras,
-          novePagos: novePagos,
-          onTap: onTap,
-          onNovedadTap: onNovedadTap,
+        padding: EdgeInsets.zero,
+        child: SmxDepth(
+          radius: 20,
+          depth: 3,
+          opacity: .14,
+          blurRadius: 7,
+          child: _ClientCard(
+            name: name,
+            status: status,
+            statusType: statusType,
+            cutDate: cutDate,
+            credit: credit,
+            availableCredit: availableCredit,
+            purchases: purchases,
+            payments: payments,
+            balance: balance,
+            noveCompras: noveCompras,
+            novePagos: novePagos,
+            onTap: onTap,
+            onNovedadTap: onNovedadTap,
+          ),
         ),
       ),
     );
@@ -477,6 +477,7 @@ class _SlidableClientCard extends StatelessWidget {
 class SmxSaldiFyClientTapData {
   final int idSysuser11;
   final int relaSysuser10Cliente;
+  final String uuidInvitado;
   final String name;
   final String credit;
   final String availableCredit;
@@ -487,6 +488,7 @@ class SmxSaldiFyClientTapData {
     required this.idSysuser11,
     required this.relaSysuser10Cliente,
     required this.name,
+    this.uuidInvitado = '',
     this.conCatalogo = false,
     this.credit = '0',
     this.availableCredit = '0',

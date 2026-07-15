@@ -5,6 +5,7 @@ import 'package:universal_html/html.dart' as html;
 import 'package:uuid/uuid.dart';
 import 'package:venture_core_connect/smxDataBase/smxRowSet.dart';
 import 'package:venture_saldify/smxLayout/smxColors.dart';
+import 'package:venture_saldify/smxLayout/smxLayout.dart';
 
 import 'smxComprasCarritoControllerContract.dart';
 import 'smxComprasCarritoModels.dart';
@@ -92,31 +93,35 @@ class _SmxComprasCarritoState extends State<SmxComprasCarrito> {
   }
 
   Widget _productosGrid(List<int> indexes, int columns) {
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: columns,
-        crossAxisSpacing: 12,
-        mainAxisSpacing: 12,
-        childAspectRatio: .72,
-      ),
-      itemCount: indexes.length,
-      itemBuilder: (context, position) {
-        final index = indexes[position];
-        final id = widget.controller.getCatalogoIdAt(index);
-        final existencia = widget.controller.getCatalogoExistenciaAt(index);
-        final cantidad = _cantidad(id);
-        return _ProductoCard(
-          nombre: widget.controller.getCatalogoNombreAt(index),
-          importe: widget.controller.getCatalogoImporteAt(index),
-          imagen: widget.controller.getCatalogoImageUrlAt(index),
-          cantidad: cantidad,
-          existencia: existencia,
-          onLess: () => _cambiarCantidad(index, -1),
-          onMore: cantidad >= existencia
-              ? null
-              : () => _cambiarCantidad(index, 1),
+    const spacing = 12.0;
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final cardWidth =
+            (constraints.maxWidth - (spacing * (columns - 1))) / columns;
+
+        return Wrap(
+          spacing: spacing,
+          runSpacing: spacing,
+          children: [
+            for (final index in indexes)
+              SizedBox(
+                width: cardWidth,
+                child: _ProductoCard(
+                  nombre: widget.controller.getCatalogoNombreAt(index),
+                  importe: widget.controller.getCatalogoImporteAt(index),
+                  imagen: widget.controller.getCatalogoImageUrlAt(index),
+                  cantidad: _cantidad(widget.controller.getCatalogoIdAt(index)),
+                  existencia: widget.controller.getCatalogoExistenciaAt(index),
+                  onLess: () => _cambiarCantidad(index, -1),
+                  onMore:
+                      _cantidad(widget.controller.getCatalogoIdAt(index)) >=
+                          widget.controller.getCatalogoExistenciaAt(index)
+                      ? null
+                      : () => _cambiarCantidad(index, 1),
+                ),
+              ),
+          ],
         );
       },
     );
@@ -220,108 +225,119 @@ class _SmxComprasCarritoState extends State<SmxComprasCarrito> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF3F7F6),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF17643B),
-        foregroundColor: Colors.white,
-        leading: IconButton(
-          tooltip: 'Regresar',
-          onPressed: () => Navigator.of(context).pop(_savedSomething),
-          icon: const Icon(Icons.arrow_back_rounded),
-        ),
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Catalogo',
-              style: TextStyle(fontWeight: FontWeight.w800),
-            ),
-            Text(
-              widget.model.clientName,
-              style: const TextStyle(fontSize: 12, color: Colors.white70),
-            ),
-          ],
-        ),
-        actions: [
-          Badge(
-            isLabelVisible: _carritosGuardados > 0,
-            label: Text('$_carritosGuardados'),
-            child: IconButton(
-              tooltip: 'Carritos guardados',
-              onPressed: _openDrafts,
-              icon: const Icon(Icons.history),
-            ),
-          ),
-          Badge(
-            isLabelVisible: _unidades > 0,
-            label: Text('$_unidades'),
-            child: IconButton(
-              tooltip: 'Ver carrito',
-              onPressed: _openCarrito,
-              icon: const Icon(Icons.shopping_cart_outlined),
-            ),
-          ),
-          const SizedBox(width: 8),
-        ],
-      ),
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          final columns = constraints.maxWidth >= 900
-              ? 4
-              : constraints.maxWidth >= 620
-              ? 3
-              : 2;
-          final solicitados = _catalogoIndexes(solicitados: true);
-          final disponibles = _catalogoIndexes(solicitados: false);
-          return ListView(
-            padding: const EdgeInsets.all(16),
-            children: [
-              if (solicitados.isNotEmpty) ...[
-                const _CatalogoSectionTitle(
-                  title: 'Productos solicitados',
-                  icon: Icons.shopping_cart_checkout,
-                ),
-                const SizedBox(height: 12),
-                _productosGrid(solicitados, columns),
-                const SizedBox(height: 26),
-              ],
-              const _CatalogoSectionTitle(
-                title: 'Catalogo de productos',
-                icon: Icons.storefront_outlined,
+    final layout = SmxLayout.sizeFromWidth(MediaQuery.of(context).size.width);
+    final pagePadding = layout.saldifyPagePadding;
+    final topContentInset = SmxLayout.topContentInset(context);
+    final bottomContentInset = SmxLayout.bottomContentInset(context);
+
+    return SmxSaldifyBackground(
+      child: Scaffold(
+        backgroundColor: SmxColors.transparent,
+        body: SafeArea(
+          top: false,
+          bottom: false,
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxWidth: layout.saldifyMaxContentWidth,
               ),
-              const SizedBox(height: 12),
-              if (disponibles.isEmpty)
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 28),
-                  child: Center(
-                    child: Text('Todos los productos estan solicitados'),
-                  ),
-                )
-              else
-                _productosGrid(disponibles, columns),
-            ],
-          );
-        },
-      ),
-      bottomNavigationBar: _unidades == 0
-          ? null
-          : SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
-                child: FilledButton.icon(
-                  onPressed: _openCarrito,
-                  icon: const Icon(Icons.shopping_cart_checkout),
-                  label: Text(
-                    '$_unidades unidades  ·  ${SmxRowSet.formatAmount(_total)}',
-                  ),
-                  style: FilledButton.styleFrom(
-                    backgroundColor: const Color(0xFF11935A),
-                    minimumSize: const Size.fromHeight(54),
-                  ),
-                ),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final columns = constraints.maxWidth >= 900
+                      ? 4
+                      : constraints.maxWidth >= 620
+                      ? 3
+                      : 2;
+                  final solicitados = _catalogoIndexes(solicitados: true);
+                  final disponibles = _catalogoIndexes(solicitados: false);
+                  return ListView(
+                    padding: EdgeInsets.fromLTRB(
+                      pagePadding.left,
+                      pagePadding.top + topContentInset,
+                      pagePadding.right,
+                      pagePadding.bottom + bottomContentInset,
+                    ),
+                    children: [
+                      SmxSaldifyScreenHeader(
+                        title: widget.model.clientName,
+                        sectionLabel: 'Catalogo',
+                        onBackPressed: () =>
+                            Navigator.of(context).pop(_savedSomething),
+                        actions: [
+                          Badge(
+                            isLabelVisible: _carritosGuardados > 0,
+                            label: Text('$_carritosGuardados'),
+                            child: SmxSaldifyHeaderIconButton(
+                              tooltip: 'Carritos guardados',
+                              icon: Icons.history,
+                              onPressed: _openDrafts,
+                            ),
+                          ),
+                          Badge(
+                            isLabelVisible: _unidades > 0,
+                            label: Text('$_unidades'),
+                            child: SmxSaldifyHeaderIconButton(
+                              tooltip: 'Ver carrito',
+                              icon: Icons.shopping_cart_outlined,
+                              onPressed: _openCarrito,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 18),
+                      if (solicitados.isNotEmpty) ...[
+                        const _CatalogoSectionTitle(
+                          title: 'Productos solicitados',
+                          icon: Icons.shopping_cart_checkout,
+                        ),
+                        const SizedBox(height: 12),
+                        _productosGrid(solicitados, columns),
+                        const SizedBox(height: 26),
+                      ],
+                      const _CatalogoSectionTitle(
+                        title: 'Catalogo de productos',
+                        icon: Icons.storefront_outlined,
+                      ),
+                      const SizedBox(height: 12),
+                      if (disponibles.isEmpty)
+                        const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 28),
+                          child: Center(
+                            child: Text(
+                              'Todos los productos estan solicitados',
+                              style: TextStyle(color: SmxColors.white),
+                            ),
+                          ),
+                        )
+                      else
+                        _productosGrid(disponibles, columns),
+                    ],
+                  );
+                },
               ),
             ),
+          ),
+        ),
+        bottomNavigationBar: _unidades == 0
+            ? null
+            : SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+                  child: FilledButton.icon(
+                    onPressed: _openCarrito,
+                    icon: const Icon(Icons.shopping_cart_checkout),
+                    label: Text(
+                      '$_unidades unidades  ·  ${SmxRowSet.formatAmount(_total)}',
+                    ),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: const Color(0xFF11935A),
+                      minimumSize: const Size.fromHeight(54),
+                    ),
+                  ),
+                ),
+              ),
+      ),
     );
   }
 }
@@ -336,12 +352,12 @@ class _CatalogoSectionTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Icon(icon, color: const Color(0xFF17643B)),
+        Icon(icon, color: SmxColors.white),
         const SizedBox(width: 9),
         Text(
           title,
           style: const TextStyle(
-            color: Color(0xFF17364A),
+            color: SmxColors.white,
             fontSize: 20,
             fontWeight: FontWeight.w900,
           ),
@@ -373,97 +389,59 @@ class _ProductoCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(8),
+      color: Colors.white.withValues(alpha: .86),
+      borderRadius: BorderRadius.circular(12),
       clipBehavior: Clip.antiAlias,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Expanded(
-            child: imagen.isEmpty
-                ? const ColoredBox(
-                    color: Color(0xFFE5F2EC),
-                    child: Icon(
-                      Icons.inventory_2_outlined,
-                      size: 46,
-                      color: Color(0xFF17643B),
-                    ),
-                  )
-                : Image.network(
-                    imagen,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) =>
-                        const Icon(Icons.inventory_2_outlined, size: 46),
+          AspectRatio(
+            aspectRatio: 1.10,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                _ProductImage(imagen: imagen),
+                Positioned(
+                  left: 8,
+                  right: 8,
+                  top: 8,
+                  child: Row(
+                    children: [
+                      _ImagePricePill(importe: importe),
+                      const Spacer(),
+                      _StockPill(
+                        existencia: existencia,
+                        color: _existenciaColor,
+                        elevated: true,
+                      ),
+                    ],
                   ),
+                ),
+                Positioned(
+                  left: 8,
+                  right: 8,
+                  bottom: 8,
+                  child: _QuantityStepper(
+                    cantidad: cantidad,
+                    onLess: cantidad == 0 ? null : onLess,
+                    onMore: onMore,
+                  ),
+                ),
+              ],
+            ),
           ),
           Padding(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   nombre,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontWeight: FontWeight.w800),
-                ),
-                const SizedBox(height: 5),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        SmxRowSet.formatAmount(importe),
-                        style: const TextStyle(
-                          color: Color(0xFF17643B),
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                    ),
-                    Tooltip(
-                      message: 'Existencia disponible',
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.inventory_2_outlined,
-                            size: 17,
-                            color: _existenciaColor,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            '$existencia',
-                            style: TextStyle(
-                              color: _existenciaColor,
-                              fontWeight: FontWeight.w900,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 10),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    IconButton.filledTonal(
-                      tooltip: 'Quitar',
-                      onPressed: cantidad == 0 ? null : onLess,
-                      icon: const Icon(Icons.remove),
-                    ),
-                    Text(
-                      '$cantidad',
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                    IconButton.filled(
-                      tooltip: 'Agregar',
-                      onPressed: onMore,
-                      icon: const Icon(Icons.add),
-                    ),
-                  ],
+                  softWrap: true,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w800,
+                    height: 1.15,
+                  ),
                 ),
               ],
             ),
@@ -477,6 +455,223 @@ class _ProductoCard extends StatelessWidget {
     if (existencia <= 0) return const Color(0xFFD63C32);
     if (existencia <= 5) return const Color(0xFFC47A08);
     return const Color(0xFF168653);
+  }
+}
+
+class _ProductImage extends StatelessWidget {
+  final String imagen;
+
+  const _ProductImage({required this.imagen});
+
+  @override
+  Widget build(BuildContext context) {
+    final imageUrl = imagen.trim();
+
+    if (imageUrl.isEmpty) {
+      return const Icon(
+        Icons.inventory_2_outlined,
+        size: 42,
+        color: Color(0xFF17643B),
+      );
+    }
+
+    return Image.network(
+      imageUrl,
+      fit: BoxFit.cover,
+      errorBuilder: (_, _, _) =>
+          const Icon(Icons.inventory_2_outlined, size: 42),
+    );
+  }
+}
+
+class _ImagePricePill extends StatelessWidget {
+  final double importe;
+
+  const _ImagePricePill({required this.importe});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: .92),
+        borderRadius: BorderRadius.circular(999),
+        boxShadow: [
+          BoxShadow(
+            color: SmxColors.blackAlpha(.12),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Text(
+        SmxRowSet.formatAmount(importe),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: const TextStyle(
+          color: Color(0xFF17643B),
+          fontSize: 12,
+          fontWeight: FontWeight.w900,
+        ),
+      ),
+    );
+  }
+}
+
+class _QuantityStepper extends StatelessWidget {
+  final int cantidad;
+  final VoidCallback? onLess;
+  final VoidCallback? onMore;
+
+  const _QuantityStepper({
+    required this.cantidad,
+    required this.onLess,
+    required this.onMore,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 38,
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: .92),
+        borderRadius: BorderRadius.circular(999),
+        boxShadow: [
+          BoxShadow(
+            color: SmxColors.blackAlpha(.14),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          _QuantityButton(
+            tooltip: 'Quitar',
+            icon: Icons.remove_rounded,
+            onPressed: onLess,
+            backgroundColor: onLess == null
+                ? const Color(0xFFE4E6E7)
+                : const Color(0xFFE7E7EA),
+            foregroundColor: onLess == null
+                ? const Color(0xFFB2B6BA)
+                : const Color(0xFF6B6F76),
+          ),
+          Expanded(
+            child: Text(
+              '$cantidad',
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                color: Color(0xFF23242A),
+                fontSize: 15,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ),
+          _QuantityButton(
+            tooltip: 'Agregar',
+            icon: Icons.add_rounded,
+            onPressed: onMore,
+            backgroundColor: onMore == null
+                ? const Color(0xFFE4E6E7)
+                : const Color(0xFF168653),
+            foregroundColor: onMore == null
+                ? const Color(0xFF8F9499)
+                : Colors.white,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _StockPill extends StatelessWidget {
+  final int existencia;
+  final Color color;
+  final bool elevated;
+
+  const _StockPill({
+    required this.existencia,
+    required this.color,
+    this.elevated = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: 'Existencia disponible',
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+        decoration: BoxDecoration(
+          color: elevated
+              ? Colors.white.withValues(alpha: .92)
+              : color.withValues(alpha: .10),
+          borderRadius: BorderRadius.circular(999),
+          boxShadow: elevated
+              ? [
+                  BoxShadow(
+                    color: SmxColors.blackAlpha(.12),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ]
+              : null,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.inventory_2_outlined, size: 14, color: color),
+            const SizedBox(width: 4),
+            Text(
+              '$existencia',
+              style: TextStyle(
+                color: color,
+                fontSize: 12,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _QuantityButton extends StatelessWidget {
+  final String tooltip;
+  final IconData icon;
+  final VoidCallback? onPressed;
+  final Color backgroundColor;
+  final Color foregroundColor;
+
+  const _QuantityButton({
+    required this.tooltip,
+    required this.icon,
+    required this.onPressed,
+    required this.backgroundColor,
+    required this.foregroundColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: tooltip,
+      child: Material(
+        color: backgroundColor,
+        shape: const CircleBorder(),
+        child: InkWell(
+          customBorder: const CircleBorder(),
+          onTap: onPressed,
+          child: SizedBox.square(
+            dimension: 30,
+            child: Icon(icon, size: 20, color: foregroundColor),
+          ),
+        ),
+      ),
+    );
   }
 }
 

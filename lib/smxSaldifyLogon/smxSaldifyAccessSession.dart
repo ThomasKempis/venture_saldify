@@ -1,4 +1,3 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:universal_html/html.dart' as html;
 
 enum SmxSaldifyAccessMode {
@@ -35,23 +34,6 @@ class SmxSaldifyAccessSession {
     return html.window.localStorage[_invitadoCorreoKey]?.trim() ?? '';
   }
 
-  static Future<void> prepareAccess(SmxSaldifyAccessMode mode) async {
-    final lastMode = ultimoModo;
-    final currentCorreo = _currentCorreo;
-    final expectedCorreo = _expectedCorreo(mode);
-
-    if (lastMode == null) return;
-
-    if (lastMode == mode &&
-        (expectedCorreo.isEmpty ||
-            currentCorreo.isEmpty ||
-            expectedCorreo == currentCorreo)) {
-      return;
-    }
-
-    await clearGoogleLogin();
-  }
-
   static void markActive(SmxSaldifyAccessMode mode, String correo) {
     final cleanCorreo = correo.trim().toLowerCase();
 
@@ -62,24 +44,5 @@ class SmxSaldifyAccessSession {
     } else {
       html.window.localStorage[_invitadoCorreoKey] = cleanCorreo;
     }
-  }
-
-  static Future<void> clearGoogleLogin() async {
-    await FirebaseAuth.instance.signOut();
-
-    html.window.localStorage.remove('correo');
-    html.window.localStorage.remove('nombres');
-    html.window.localStorage.remove('imagen');
-  }
-
-  static String get _currentCorreo {
-    return html.window.localStorage['correo']?.trim().toLowerCase() ?? '';
-  }
-
-  static String _expectedCorreo(SmxSaldifyAccessMode mode) {
-    return switch (mode) {
-      SmxSaldifyAccessMode.anfitrion => anfitrionCorreo,
-      SmxSaldifyAccessMode.invitado => invitadoCorreo,
-    };
   }
 }

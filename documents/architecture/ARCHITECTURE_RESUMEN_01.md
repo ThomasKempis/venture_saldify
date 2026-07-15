@@ -19,11 +19,46 @@ Existen dos modalidades funcionales:
 
 Ambas modalidades deben convivir. No se debe asumir que todo cliente invitado entrara a la app. Tampoco se debe asumir que todo anfitrion quiere usar invitaciones.
 
+### Red Distribuida
+
+Saldify no debe entenderse solo como una relacion plana:
+
+```text
+Anfitrion -> Cliente
+```
+
+El modelo real puede crecer como una red distribuida de vendedores, distribuidores, mayoristas, minoristas y clientes.
+
+Una misma persona puede ser:
+
+- Cliente/invitado dentro de la red de un anfitrion superior.
+- Anfitrion de su propia red de clientes.
+
+Ejemplo:
+
+```text
+Mayorista
+  -> Distribuidor
+       -> Minorista
+            -> Cliente final
+```
+
+En terminos de datos, el usuario sigue siendo un `SYSUSER10`. Lo que cambia es el rol que ocupa en cada relacion `SYSUSER11_DET_CONTACTOS`.
+
+Regla conceptual:
+
+```text
+El rol no vive fijo en el usuario.
+El rol se interpreta segun la relacion.
+```
+
+Por eso no se debe asumir que un cliente no puede ser anfitrion. Un usuario puede entrar como invitado para ver su relacion con un anfitrion y tambien entrar como anfitrion para administrar su propia red.
+
 ## 2. Actores Principales
 
 ### Anfitrion
 
-Es el usuario principal que administra su red financiera. Puede:
+Es el usuario que, dentro de una relacion o contexto de pantalla, administra una red financiera. Puede:
 
 - Crear clientes.
 - Invitar clientes.
@@ -36,12 +71,79 @@ Es el usuario principal que administra su red financiera. Puede:
 
 ### Cliente
 
-Es el usuario que puede estar relacionado a un anfitrion. Puede existir de varias formas:
+Es el usuario que, dentro de una relacion especifica, esta asociado a un anfitrion. Puede existir de varias formas:
 
 - Creado por logon propio.
 - Creado por el anfitrion como cliente pendiente.
 - Relacionado con un anfitrion mediante `SYSUSER11_DET_CONTACTOS`.
 - Pendiente, activo o archivado segun `SYSUSER11_STATUS`.
+
+Importante:
+
+- Cliente no significa usuario final permanente.
+- Anfitrion no significa usuario raiz permanente.
+- Ambos son roles funcionales segun la relacion activa.
+
+## 2.1. Formas de Llegar a Saldify
+
+Desde el logon existen dos puertas conceptuales:
+
+### Entrada como Anfitrion
+
+El anfitrion no necesita invitacion.
+
+Flujo:
+
+```text
+Google login
+  -> SmxLogonMovil crea/actualiza SYSUSER10
+  -> entra como anfitrion
+  -> puede administrar clientes, credito, compras, pagos e invitaciones
+```
+
+La identidad del anfitrion queda asociada a `SYSUSER10_UUID`. Ese uuid se usa para generar invitaciones.
+
+### Entrada como Invitado
+
+El invitado siempre entra mediante una estructura de invitacion.
+
+Flujo:
+
+```text
+Codigo/link de invitacion
+  -> Google login
+  -> SmxLogonMovil crea/actualiza SYSUSER10
+  -> se valida/consolida la invitacion
+  -> se crea o recupera la relacion SYSUSER11 con el anfitrion
+  -> entra como cliente invitado si la relacion corresponde
+```
+
+En esta etapa ya se conoce minimo:
+
+- Correo Google autenticado.
+- `SYSUSER10_UUID` del usuario autenticado.
+
+Por eso las invitaciones abiertas pueden consolidarse despues del login, tomando los datos reales del usuario que tomo el codigo.
+
+### Cliente Pendiente
+
+En Saldify, un cliente pendiente no es una solicitud externa ni una invitacion sin aceptar.
+
+Concepto correcto:
+
+```text
+Cliente pendiente = cliente ya vinculado/activo en la red del anfitrion,
+pero pendiente de asignarle credito/configuracion comercial.
+```
+
+Puede nacer por:
+
+- Alta manual del anfitrion.
+- Invitacion anonima tomada por un invitado autenticado.
+- Invitacion por correo Gmail.
+- Reenvio de acceso a un usuario existente, si aun no tiene credito.
+
+Una vez asignado credito/plan/corte, pasa al flujo normal de clientes activos.
 
 ## 3. Tablas Principales
 
@@ -501,25 +603,229 @@ Importante:
 
 ## 9. Invitacion de Clientes
 
-La tarjeta de invitacion permite copiar link o WhatsApp.
+La invitacion es una regla de acceso/vinculo. El canal de envio no define la invitacion.
 
-El link usa parametros:
+Regla clave:
 
-- `uuid_anfitrion`
-- `uuid_invitado`
-- `correo_invitado`
+```text
+WhatsApp, telefono, copiar link y QR son canales de transporte.
+No forman parte de la regla de invitacion.
+```
 
-Se renombraron internamente como keys, no como "param" si asi esta en `SmxConstants`.
+El telefono solo sirve para abrir WhatsApp hacia un numero y pegar el mensaje con el link/codigo. No debe incidir en la validacion de la invitacion.
+
+### Tabla de codigos
+
+La invitacion se registra en:
+
+```text
+SYSUSER90_TBL_SALDIFY
+```
+
+Campos conceptuales:
+
+```text
+SYSUSER90_CODIGO
+SYSUSER90_ANFITRION_UUID
+SYSUSER90_INVITADO_CORREO
+SYSUSER90_INVITADO_UUID
+SYSUSER90_FAPL
+```
+
+El codigo visible mantiene el formato:
+
+```text
+SF 1234 5678 9012
+```
+
+Internamente se normaliza como:
+
+```text
+SF123456789012
+```
+
+El codigo debe tratarse como llave publica corta. El tipo de invitacion se deduce por los campos guardados en base, no por "descifrar" el numero.
+
+### Tipos de invitacion
+
+#### 1. Invitacion anonima / abierta
+
+Se usa cuando el anfitrion quiere compartir su acceso sin saber todavia quien se conectara.
+
+Guarda:
+
+```text
+SYSUSER90_CODIGO
+SYSUSER90_ANFITRION_UUID
+SYSUSER90_INVITADO_CORREO = ''
+SYSUSER90_INVITADO_UUID = ''
+```
+
+Flujo:
+
+```text
+Anfitrion genera codigo/link/QR
+  -> Invitado abre link o ingresa codigo
+  -> Google login
+  -> SmxLogonMovil crea/actualiza SYSUSER10
+  -> se consolida SYSUSER90 con correo + uuid del invitado autenticado
+  -> se crea/recupera relacion SYSUSER11
+  -> queda como cliente pendiente de credito si aun no tiene credito
+```
+
+Consolidacion esperada:
+
+```sql
+update SYSUSER90_TBL_SALDIFY
+set
+  SYSUSER90_INVITADO_CORREO = :correo_invitado,
+  SYSUSER90_INVITADO_UUID = :uuid_invitado
+where SYSUSER90_CODIGO = :codigo
+  and coalesce(SYSUSER90_INVITADO_CORREO, '') = ''
+  and coalesce(SYSUSER90_INVITADO_UUID, '') = '';
+```
+
+Debe hacerse desde base/stored procedure para controlar concurrencia. Una vez consolidado, ese codigo queda tomado por ese usuario y ya valida como invitacion especifica.
+
+La validacion/consolidacion no debe depender del `uuid_anfitrion` recibido por URL. El `codigo` es la llave publica corta; el `uuid_anfitrion` confiable se recupera desde `SYSUSER90_TBL_SALDIFY`.
+
+#### 2. Invitacion a usuario existente
+
+Se usa para reenviar acceso a clientes que ya estan en la red del anfitrion, sean clientes activos o pendientes de credito.
+
+Guarda:
+
+```text
+SYSUSER90_CODIGO
+SYSUSER90_ANFITRION_UUID
+SYSUSER90_INVITADO_UUID
+SYSUSER90_INVITADO_CORREO = ''
+```
+
+El codigo solo debe validar para el usuario autenticado cuyo `SYSUSER10_UUID` coincide con `SYSUSER90_INVITADO_UUID`.
+
+Regla:
+
+- Si se invita desde lista de clientes existentes, debe tomar datos desde el rowset real cargado.
+- No debe depender de mock.
+- Debe poder incluir clientes activos y clientes pendientes de credito.
+
+#### 3. Invitacion especial por correo Gmail
+
+Se usa cuando el anfitrion no tiene aun el uuid del invitado, pero quiere restringir la invitacion a un correo Google/Gmail especifico.
+
+Guarda inicialmente:
+
+```text
+SYSUSER90_CODIGO
+SYSUSER90_ANFITRION_UUID
+SYSUSER90_INVITADO_CORREO
+SYSUSER90_INVITADO_UUID = ''
+```
+
+Al validar:
+
+- El correo Google autenticado debe coincidir con `SYSUSER90_INVITADO_CORREO`.
+- Despues del login ya existe/queda actualizado `SYSUSER10`.
+- Puede consolidarse `SYSUSER90_INVITADO_UUID` con el uuid real del usuario.
+
+### Validacion de invitacion desde logon
+
+La validacion del codigo sucede despues de Google login, por lo que ya se conoce:
+
+```text
+correoGoogle
+uuidUsuario
+```
 
 Reglas:
 
-- `uuid_anfitrion` es del anfitrion.
-- `uuid_invitado` es del cliente invitado.
-- Si se invita desde lista de clientes existentes, debe tomar datos desde el rowset cargado, no desde mock.
+```text
+codigo no existe -> error
+anfitrion_uuid vacio -> error
+correo vacio + uuid vacio -> invitacion anonima; consolidar con usuario autenticado
+correo lleno + uuid vacio -> validar correo Google; consolidar uuid
+correo vacio + uuid lleno -> validar uuid del usuario
+correo lleno + uuid lleno -> invitacion ya consolidada; validar ambos cuando aplique
+```
 
-Se hizo merge de clientes activos + pendientes para poder invitar tambien a pendientes.
+Luego se setea el contexto funcional:
 
-Dashboard usa `ValueNotifier`/`ValueListenableBuilder` para no refrescar todo y para habilitar invitacion solo cuando el merge esta listo.
+```dart
+SmxConstants.setClienteInvitado(
+  uuidAnfitrion: uuidAnfitrion,
+  correoInvitado: correoGoogle,
+  uuidInvitado: uuidUsuario,
+);
+```
+
+Implementacion actual:
+
+```text
+SmxSaldifyLogonController.isValidaIntoDataBase
+  -> SELECT * FROM UPDATE_SYSUSER90(codigo, uuidUsuario, correoGoogle)
+  -> addSTrans(...)
+  -> getCallWS()
+```
+
+`UPDATE_SYSUSER90` devuelve los campos finales de la invitacion. Si el codigo era anonimo, el SP puede actualizar `SYSUSER90_INVITADO_CORREO` y `SYSUSER90_INVITADO_UUID` usando los datos reales del usuario autenticado.
+
+La app ya no necesita que la URL traiga `uuid_anfitrion`, `uuid_invitado` o `correo_invitado` para validar el acceso. La URL puede traer solo:
+
+```text
+?codigo=SF...
+```
+
+### Organizacion actual de invitaciones en dashboard
+
+La tarjeta de `Invitar clientes` del dashboard debe seguir siendo visible e importante porque impulsa el crecimiento de la red del anfitrion.
+
+Al tocar el QR simulado de la tarjeta se abre una hoja inferior enfocada solo en generar/copiar invitaciones:
+
+```text
+1. Invitacion anonima abierta
+   QR grande + codigo + boton de link.
+
+2. Invitacion por correo Gmail
+   Campo donde el anfitrion escribe solo el nombre del correo.
+   El sufijo `@gmail.com` se muestra fijo.
+
+3. Mensaje
+   Area de estado donde se muestran validaciones y confirmaciones de copiado.
+```
+
+Los mensajes de la hoja no usan modal para validaciones simples. Se muestran en el area `Mensaje`, por ejemplo:
+
+```text
+Se copio el link anonimo
+Se copio link por correo
+Ingrese solo el nombre, sin @gmail.com.
+```
+
+La generacion y armado de links se centraliza en:
+
+```text
+lib/smxSaldify/smxSaldify_dashboard/smxSaldiFy_invita_clientes/smxSaldiFy_invita_service.dart
+```
+
+Clases principales:
+
+```text
+SmxSaldifyInvitacionTipo
+SmxSaldifyInvitacionParametros
+SmxSaldifyInvitacionLink
+SmxSaldifyInvitaService
+SmxCodeInvitado
+```
+
+Links por cliente existente:
+
+- En clientes activos, el menu inferior del cliente incluye un boton circular de link en el encabezado.
+- En clientes pendientes, se agrega una accion `Invitar` junto a `Activar cliente`.
+- Ambos usan el uuid real del cliente desde `QRY_SYSUSER11`/rowset de clientes.
+- La copia se centraliza en `smxSaldiFy_invita_copy.dart`.
+
+WhatsApp y telefono quedan fuera de la regla de invitacion. El usuario puede copiar el link y pegarlo donde prefiera.
 
 ## 10. Alta/Edicion de Cliente
 

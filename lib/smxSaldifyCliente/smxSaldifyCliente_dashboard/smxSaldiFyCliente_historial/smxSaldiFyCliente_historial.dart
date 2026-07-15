@@ -169,6 +169,7 @@ class _MovimientoCards extends StatelessWidget {
       for (var index = 0; index < visibleCount; index++)
         _MovimientoCard(
           movimientoId: _getMovimientoId(index),
+          folio: _getMovimientoValue(index, controller.getMovimientoFolio),
           tipo: _getMovimientoValue(index, controller.getMovimientoTipo),
           concepto: _getMovimientoValue(
             index,
@@ -177,6 +178,7 @@ class _MovimientoCards extends StatelessWidget {
           importe: _getMovimientoValue(index, controller.getMovimientoImporte),
           calculo: _getMovimientoValue(index, controller.getMovimientoCalculo),
           fecha: _getMovimientoValue(index, controller.getMovimientoFecha),
+          motivo: _getMovimientoValue(index, controller.getMovimientoMotivo),
           status: _getMovimientoStatus(index),
         ),
     ];
@@ -221,20 +223,24 @@ class _MovimientoCards extends StatelessWidget {
 
 class _MovimientoCard extends StatelessWidget {
   final int movimientoId;
+  final String folio;
   final String tipo;
   final String concepto;
   final String importe;
   final String calculo;
   final String fecha;
+  final String motivo;
   final int status;
 
   const _MovimientoCard({
     required this.movimientoId,
+    required this.folio,
     required this.tipo,
     required this.concepto,
     required this.importe,
     required this.calculo,
     required this.fecha,
+    required this.motivo,
     required this.status,
   });
 
@@ -298,7 +304,13 @@ class _MovimientoCard extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(width: 8),
-                          _MovimientoStatusBadge(data: data),
+                          _MovimientoStatusBadge(
+                            data: data,
+                            motivo: data.isRejectedPayment ? motivo : '',
+                            folio: folio,
+                            importe: importe,
+                            fecha: fecha,
+                          ),
                         ],
                       ),
                       if (calculo.isNotEmpty) ...[
@@ -336,7 +348,7 @@ class _MovimientoCard extends StatelessWidget {
                           const SizedBox(width: 10),
                           Expanded(
                             child: Text(
-                              data.typeLabel,
+                              folio,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
@@ -379,24 +391,256 @@ class _MovimientoCard extends StatelessWidget {
 
 class _MovimientoStatusBadge extends StatelessWidget {
   final _MovimientoStatusData data;
+  final String motivo;
+  final String folio;
+  final String importe;
+  final String fecha;
 
-  const _MovimientoStatusBadge({required this.data});
+  const _MovimientoStatusBadge({
+    required this.data,
+    required this.motivo,
+    required this.folio,
+    required this.importe,
+    required this.fecha,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    final canShowMotivo = data.isRejectedPayment && motivo.trim().isNotEmpty;
+    final child = Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
         color: data.badgeBackground,
         borderRadius: BorderRadius.circular(999),
+        border: canShowMotivo
+            ? Border.all(color: data.badgeForeground.withValues(alpha: .18))
+            : null,
       ),
-      child: Text(
-        data.statusLabel,
-        style: TextStyle(
-          color: data.badgeForeground,
-          fontSize: 11,
-          fontWeight: FontWeight.w900,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            data.statusLabel,
+            style: TextStyle(
+              color: data.badgeForeground,
+              fontSize: 11,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+          if (canShowMotivo) ...[
+            const SizedBox(width: 3),
+            Icon(
+              Icons.keyboard_arrow_down_rounded,
+              size: 13,
+              color: data.badgeForeground,
+            ),
+          ],
+        ],
+      ),
+    );
+
+    if (!canShowMotivo) return child;
+
+    return Material(
+      color: SmxColors.transparent,
+      borderRadius: BorderRadius.circular(999),
+      child: InkWell(
+        onTap: () => _showRejectedPagoMotivoSheet(
+          context,
+          motivo: motivo,
+          folio: folio,
+          importe: importe,
+          fecha: fecha,
         ),
+        borderRadius: BorderRadius.circular(999),
+        child: child,
+      ),
+    );
+  }
+
+  Future<void> _showRejectedPagoMotivoSheet(
+    BuildContext context, {
+    required String motivo,
+    required String folio,
+    required String importe,
+    required String fecha,
+  }) {
+    return showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: SmxColors.transparent,
+      builder: (context) => _RejectedPagoMotivoSheet(
+        motivo: motivo,
+        folio: folio,
+        importe: importe,
+        fecha: fecha,
+      ),
+    );
+  }
+}
+
+class _RejectedPagoMotivoSheet extends StatelessWidget {
+  final String motivo;
+  final String folio;
+  final String importe;
+  final String fecha;
+
+  const _RejectedPagoMotivoSheet({
+    required this.motivo,
+    required this.folio,
+    required this.importe,
+    required this.fecha,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
+      decoration: const BoxDecoration(
+        color: SmxColors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      child: SafeArea(
+        top: false,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Center(
+              child: Container(
+                width: 42,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: SmxColors.blackAlpha(.18),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+              ),
+            ),
+            const SizedBox(height: 18),
+            const Text(
+              'Pago rechazado',
+              style: TextStyle(
+                color: SmxColors.textDark,
+                fontSize: 22,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+            const SizedBox(height: 12),
+            _RejectedPagoSummary(folio: folio, importe: importe, fecha: fecha),
+            const SizedBox(height: 12),
+            const Text(
+              'Motivo',
+              style: TextStyle(
+                color: SmxColors.textMuted,
+                fontSize: 12,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Container(
+              constraints: const BoxConstraints(maxHeight: 220),
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: SmxColors.blackAlpha(.04),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: SmxColors.blackAlpha(.10)),
+              ),
+              child: SingleChildScrollView(
+                child: Text(
+                  motivo,
+                  style: const TextStyle(
+                    color: SmxColors.textDark,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    height: 1.35,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            FilledButton(
+              onPressed: () => Navigator.of(context).pop(),
+              style: FilledButton.styleFrom(
+                backgroundColor: SmxColors.brandPrimary,
+                foregroundColor: SmxColors.white,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+              ),
+              child: const Text('Cerrar'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _RejectedPagoSummary extends StatelessWidget {
+  final String folio;
+  final String importe;
+  final String fecha;
+
+  const _RejectedPagoSummary({
+    required this.folio,
+    required this.importe,
+    required this.fecha,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: SmxColors.dangerBackground.withValues(alpha: .70),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: SmxColors.dangerForeground.withValues(alpha: .12),
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            decoration: BoxDecoration(
+              color: SmxColors.whiteAlpha(.72),
+              borderRadius: BorderRadius.circular(999),
+            ),
+            child: Text(
+              folio,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                color: SmxColors.dangerForeground,
+                fontSize: 12,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              importe,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: SmxColors.textDark,
+                fontSize: 14,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Text(
+            fecha,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.right,
+            style: const TextStyle(
+              color: SmxColors.textMuted,
+              fontSize: 12,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -435,6 +679,7 @@ class _MovimientoStatusData {
   final Color typeColor;
   final Color cardBackground;
   final Color borderColor;
+  final bool isRejectedPayment;
 
   const _MovimientoStatusData({
     required this.typeLabel,
@@ -445,6 +690,7 @@ class _MovimientoStatusData {
     required this.typeColor,
     required this.cardBackground,
     required this.borderColor,
+    this.isRejectedPayment = false,
   });
 
   factory _MovimientoStatusData.from({
@@ -460,6 +706,17 @@ class _MovimientoStatusData {
 
     if (isPago) {
       return switch (status) {
+        2 => _MovimientoStatusData(
+          typeLabel: 'Pago',
+          statusLabel: 'Rechazado',
+          badgeBackground: SmxColors.dangerBackground,
+          badgeForeground: SmxColors.dangerForeground,
+          barColor: barColor,
+          typeColor: SmxColors.dangerForeground,
+          cardBackground: const Color(0xFFFFF1F1),
+          borderColor: const Color(0xFFFFD8D8),
+          isRejectedPayment: true,
+        ),
         1 => _MovimientoStatusData(
           typeLabel: 'Pago',
           statusLabel: 'Confirmado',

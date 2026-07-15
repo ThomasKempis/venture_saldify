@@ -1,5 +1,3 @@
-enum SmxSaldiFyInvitaAction { copiarLink, whatsApp }
-
 class SmxSaldiFyInvitacionGenerada {
   final String codigo;
   final String codigoFormato;

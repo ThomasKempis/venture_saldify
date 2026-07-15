@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:venture_saldify/smxLayout/smxColors.dart';
+import 'package:venture_saldify/smxLayout/smx_decision_dialog.dart';
 import 'package:venture_saldify/smxLayout/smxLayout.dart';
 import 'package:venture_saldify/smxLayout/smxBackgrounds/saldify_circles_background.dart';
 import 'package:venture_widgets/smxCallBaseStateful.dart';
@@ -67,7 +68,12 @@ class _ArchivadosViewState extends State<_ArchivadosView> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      _Header(changed: _changed),
+                      SmxSaldifyScreenHeader(
+                        title: 'Clientes archivados',
+                        sectionLabel: 'Reactivar clientes',
+                        onBackPressed: () =>
+                            Navigator.of(context).pop(_changed),
+                      ),
                       const SizedBox(height: 22),
                       if (!controller.hasArchivados)
                         const _EmptyState()
@@ -93,79 +99,18 @@ class _ArchivadosViewState extends State<_ArchivadosView> {
   }
 
   Future<bool> _reactivateArchivado(int index, String name) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Reactivar cliente'),
-        content: Text('Este cliente volvera a tu lista activa:\n$name'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancelar'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Reactivar'),
-          ),
-        ],
-      ),
+    final confirmed = await showSmxDecisionDialog(
+      context,
+      title: 'Reactivar cliente',
+      message: 'Este cliente volvera a tu lista activa:\n$name',
+      acceptText: 'Reactivar',
+      icon: Icons.unarchive_outlined,
+      variant: SmxDecisionVariant.success,
     );
 
-    if (confirmed != true) return false;
+    if (!confirmed) return false;
 
     return controller.reactivateArchivadoAt(index);
-  }
-}
-
-class _Header extends StatelessWidget {
-  final bool changed;
-
-  const _Header({required this.changed});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        IconButton(
-          onPressed: () => Navigator.of(context).pop(changed),
-          icon: const Icon(Icons.arrow_back_rounded),
-          color: SmxColors.white,
-          style: IconButton.styleFrom(
-            backgroundColor: SmxColors.whiteAlpha(.12),
-            fixedSize: const Size(44, 44),
-          ),
-        ),
-        const SizedBox(width: 14),
-        const Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Clientes archivados',
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  color: SmxColors.white,
-                  fontSize: 24,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
-              SizedBox(height: 3),
-              Text(
-                'Reactivar clientes',
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  color: SmxColors.brandAccent,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
   }
 }
 
