@@ -1,14 +1,23 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:universal_html/html.dart' as html;
 import 'package:uuid/uuid.dart';
-import 'package:venture_core_connect/smxDataBase/smxRowSet.dart';
+import 'package:venture_saldify/smxLayout/smxBackgrounds/saldify_circles_background.dart';
 import 'package:venture_saldify/smxLayout/smxColors.dart';
 import 'package:venture_saldify/smxLayout/smxLayout.dart';
 
 import 'smxComprasCarritoControllerContract.dart';
 import 'smxComprasCarritoModels.dart';
+
+final _cartAmountFormat = NumberFormat.currency(
+  locale: 'en_US',
+  symbol: r'$',
+  decimalDigits: 2,
+);
+
+String _formatCartAmount(num value) => _cartAmountFormat.format(value);
 
 class SmxComprasCarrito extends StatefulWidget {
   final SmxComprasCarritoControllerContract controller;
@@ -48,29 +57,39 @@ class _SmxComprasCarritoState extends State<SmxComprasCarrito> {
     return widget.model.disponible;
   }
 
-  void _cambiarCantidad(int index, int delta) {
+  _ProductoCatalogo _productoAt(int index) {
     final id = widget.controller.getCatalogoIdAt(index);
-    final existing = _carrito.indexOf(id);
-    final existencia = widget.controller.getCatalogoExistenciaAt(index);
-    final cantidadActual = existing < 0 ? 0 : _carrito.items[existing].cantidad;
+    return _ProductoCatalogo(
+      id: id,
+      nombre: widget.controller.getCatalogoNombreAt(index),
+      importe: widget.controller.getCatalogoImporteAt(index),
+      imagen: widget.controller.getCatalogoImageUrlAt(index),
+      existencia: widget.controller.getCatalogoExistenciaAt(index),
+      cantidad: _cantidad(id),
+    );
+  }
 
-    if (delta > 0 && cantidadActual >= existencia) return;
+  void _setCantidad(int index, int cantidad) {
+    final producto = _productoAt(index);
+    final id = producto.id;
+    final existing = _carrito.indexOf(id);
+    final cantidadFinal = cantidad.clamp(0, producto.existencia).toInt();
 
     setState(() {
-      if (existing < 0 && delta > 0) {
+      if (cantidadFinal <= 0) {
+        if (existing >= 0) _carrito.items.removeAt(existing);
+      } else if (existing < 0) {
         _carrito.items.add(
           _CarritoItem(
             idProducto: id,
-            producto: widget.controller.getCatalogoNombreAt(index),
-            importe: widget.controller.getCatalogoImporteAt(index),
-            imagen: widget.controller.getCatalogoImageUrlAt(index),
-            cantidad: 1,
+            producto: producto.nombre,
+            importe: producto.importe,
+            imagen: producto.imagen,
+            cantidad: cantidadFinal,
           ),
         );
       } else if (existing >= 0) {
-        final item = _carrito.items[existing];
-        item.cantidad += delta;
-        if (item.cantidad <= 0) _carrito.items.removeAt(existing);
+        _carrito.items[existing].cantidad = cantidadFinal;
       }
       _carrito.actualizado = DateTime.now();
       _storage.saveDraft(_carrito);
@@ -82,14 +101,13 @@ class _SmxComprasCarritoState extends State<SmxComprasCarrito> {
     return index < 0 ? 0 : _carrito.items[index].cantidad;
   }
 
-  List<int> _catalogoIndexes({required bool solicitados}) {
-    final indexes = <int>[];
+  int _existenciaById(int idProducto) {
     for (var index = 0; index < widget.controller.catalogoCount; index++) {
-      final id = widget.controller.getCatalogoIdAt(index);
-      final seleccionado = _cantidad(id) > 0;
-      if (seleccionado == solicitados) indexes.add(index);
+      if (widget.controller.getCatalogoIdAt(index) == idProducto) {
+        return widget.controller.getCatalogoExistenciaAt(index);
+      }
     }
-    return indexes;
+    return 0;
   }
 
   Widget _productosGrid(List<int> indexes, int columns) {
@@ -108,20 +126,47 @@ class _SmxComprasCarritoState extends State<SmxComprasCarrito> {
               SizedBox(
                 width: cardWidth,
                 child: _ProductoCard(
-                  nombre: widget.controller.getCatalogoNombreAt(index),
-                  importe: widget.controller.getCatalogoImporteAt(index),
-                  imagen: widget.controller.getCatalogoImageUrlAt(index),
-                  cantidad: _cantidad(widget.controller.getCatalogoIdAt(index)),
-                  existencia: widget.controller.getCatalogoExistenciaAt(index),
-                  onLess: () => _cambiarCantidad(index, -1),
-                  onMore:
-                      _cantidad(widget.controller.getCatalogoIdAt(index)) >=
-                          widget.controller.getCatalogoExistenciaAt(index)
-                      ? null
-                      : () => _cambiarCantidad(index, 1),
+                  producto: _productoAt(index),
+                  onTap: () => _openProducto(index),
                 ),
               ),
           ],
+        );
+      },
+    );
+  }
+
+  List<int> _catalogoIndexesOrdenados() {
+    final seleccionados = <int>[];
+    final disponibles = <int>[];
+
+    for (var index = 0; index < widget.controller.catalogoCount; index++) {
+      final id = widget.controller.getCatalogoIdAt(index);
+      if (_cantidad(id) > 0) {
+        seleccionados.add(index);
+      } else {
+        disponibles.add(index);
+      }
+    }
+
+    return [...seleccionados, ...disponibles];
+  }
+
+  Future<void> _openProducto(int index) async {
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      isDismissible: true,
+      enableDrag: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) {
+        final producto = _productoAt(index);
+        return _ProductoSheet(
+          producto: producto,
+          onAdd: (cantidad) {
+            _setCantidad(index, cantidad);
+            Navigator.pop(sheetContext);
+          },
         );
       },
     );
@@ -138,9 +183,16 @@ class _SmxComprasCarritoState extends State<SmxComprasCarrito> {
         builder: (context, refreshSheet) => _CarritoSheet(
           carrito: _carrito,
           total: _total,
-          onRemove: (item) {
+          existenciaForItem: (item) => _existenciaById(item.idProducto),
+          onQuantityChanged: (item, cantidad) {
             setState(() {
-              _carrito.items.remove(item);
+              final existencia = _existenciaById(item.idProducto);
+              final cantidadFinal = cantidad.clamp(0, existencia).toInt();
+              if (cantidadFinal <= 0) {
+                _carrito.items.remove(item);
+              } else {
+                item.cantidad = cantidadFinal;
+              }
               _storage.saveDraft(_carrito);
             });
             refreshSheet(() {});
@@ -180,45 +232,43 @@ class _SmxComprasCarritoState extends State<SmxComprasCarrito> {
       context: context,
       isDismissible: true,
       enableDrag: true,
-      backgroundColor: SmxColors.white,
-      builder: (sheetContext) => ListView(
-        padding: const EdgeInsets.all(20),
-        children: [
-          const Text(
-            'Carritos guardados',
-            style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800),
-          ),
-          const SizedBox(height: 12),
-          if (drafts.isEmpty)
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 30),
-              child: Center(child: Text('No hay carritos pendientes')),
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) => _CartSheetBackground(
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(20, 18, 20, 24),
+          children: [
+            Center(
+              child: Container(
+                width: 44,
+                height: 5,
+                decoration: BoxDecoration(
+                  color: SmxColors.blackAlpha(.14),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+              ),
             ),
-          for (final draft in drafts)
-            ListTile(
-              leading: const Icon(Icons.shopping_bag_outlined),
-              title: Text('${draft.items.length} productos'),
-              subtitle: Text(SmxRowSet.formatAmount(draft.total)),
-              trailing: IconButton(
-                tooltip: 'Eliminar carrito',
-                icon: const Icon(Icons.delete_outline),
-                onPressed: () {
-                  _storage.delete(draft.uuid);
-                  setState(() {
-                    if (_carrito.uuid == draft.uuid) {
-                      _carrito = _CarritoLocal.nuevo();
-                    }
-                  });
+            const SizedBox(height: 18),
+            const Text(
+              'Carritos guardados',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900),
+            ),
+            const SizedBox(height: 14),
+            if (drafts.isEmpty)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 30),
+                child: Center(child: Text('No hay carritos pendientes')),
+              ),
+            for (final draft in drafts)
+              _DraftCartCard(
+                draft: draft,
+                onTap: () {
+                  setState(() => _carrito = draft);
                   Navigator.pop(sheetContext);
-                  _openDrafts();
+                  _openCarrito();
                 },
               ),
-              onTap: () {
-                setState(() => _carrito = draft);
-                Navigator.pop(sheetContext);
-              },
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -249,8 +299,7 @@ class _SmxComprasCarritoState extends State<SmxComprasCarrito> {
                       : constraints.maxWidth >= 620
                       ? 3
                       : 2;
-                  final solicitados = _catalogoIndexes(solicitados: true);
-                  final disponibles = _catalogoIndexes(solicitados: false);
+                  final productos = _catalogoIndexesOrdenados();
                   return ListView(
                     padding: EdgeInsets.fromLTRB(
                       pagePadding.left,
@@ -286,32 +335,23 @@ class _SmxComprasCarritoState extends State<SmxComprasCarrito> {
                         ],
                       ),
                       const SizedBox(height: 18),
-                      if (solicitados.isNotEmpty) ...[
-                        const _CatalogoSectionTitle(
-                          title: 'Productos solicitados',
-                          icon: Icons.shopping_cart_checkout,
-                        ),
-                        const SizedBox(height: 12),
-                        _productosGrid(solicitados, columns),
-                        const SizedBox(height: 26),
-                      ],
                       const _CatalogoSectionTitle(
                         title: 'Catalogo de productos',
                         icon: Icons.storefront_outlined,
                       ),
                       const SizedBox(height: 12),
-                      if (disponibles.isEmpty)
+                      if (productos.isEmpty)
                         const Padding(
                           padding: EdgeInsets.symmetric(vertical: 28),
                           child: Center(
                             child: Text(
-                              'Todos los productos estan solicitados',
+                              'No hay productos disponibles',
                               style: TextStyle(color: SmxColors.white),
                             ),
                           ),
                         )
                       else
-                        _productosGrid(disponibles, columns),
+                        _productosGrid(productos, columns),
                     ],
                   );
                 },
@@ -328,7 +368,7 @@ class _SmxComprasCarritoState extends State<SmxComprasCarrito> {
                     onPressed: _openCarrito,
                     icon: const Icon(Icons.shopping_cart_checkout),
                     label: Text(
-                      '$_unidades unidades  ·  ${SmxRowSet.formatAmount(_total)}',
+                      '$_unidades unidades  ·  ${_formatCartAmount(_total)}',
                     ),
                     style: FilledButton.styleFrom(
                       backgroundColor: const Color(0xFF11935A),
@@ -368,23 +408,10 @@ class _CatalogoSectionTitle extends StatelessWidget {
 }
 
 class _ProductoCard extends StatelessWidget {
-  final String nombre;
-  final double importe;
-  final String imagen;
-  final int cantidad;
-  final int existencia;
-  final VoidCallback onLess;
-  final VoidCallback? onMore;
+  final _ProductoCatalogo producto;
+  final VoidCallback onTap;
 
-  const _ProductoCard({
-    required this.nombre,
-    required this.importe,
-    required this.imagen,
-    required this.cantidad,
-    required this.existencia,
-    required this.onLess,
-    required this.onMore,
-  });
+  const _ProductoCard({required this.producto, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -392,66 +419,230 @@ class _ProductoCard extends StatelessWidget {
       color: Colors.white.withValues(alpha: .86),
       borderRadius: BorderRadius.circular(12),
       clipBehavior: Clip.antiAlias,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          AspectRatio(
-            aspectRatio: 1.10,
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                _ProductImage(imagen: imagen),
-                Positioned(
-                  left: 8,
-                  right: 8,
-                  top: 8,
-                  child: Row(
-                    children: [
-                      _ImagePricePill(importe: importe),
-                      const Spacer(),
-                      _StockPill(
-                        existencia: existencia,
-                        color: _existenciaColor,
-                        elevated: true,
-                      ),
-                    ],
-                  ),
-                ),
-                Positioned(
-                  left: 8,
-                  right: 8,
-                  bottom: 8,
-                  child: _QuantityStepper(
-                    cantidad: cantidad,
-                    onLess: cantidad == 0 ? null : onLess,
-                    onMore: onMore,
-                  ),
-                ),
-              ],
+      child: InkWell(
+        onTap: onTap,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            AspectRatio(
+              aspectRatio: .96,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  _ProductImage(imagen: producto.imagen),
+                  if (producto.cantidad > 0)
+                    Positioned(
+                      top: 8,
+                      right: 8,
+                      child: _SelectedPill(cantidad: producto.cantidad),
+                    ),
+                ],
+              ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  nombre,
-                  softWrap: true,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w800,
-                    height: 1.15,
-                  ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(10, 9, 10, 4),
+              child: Text(
+                producto.nombre,
+                softWrap: true,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  color: Color(0xFF202229),
+                  fontSize: 13,
+                  fontWeight: FontWeight.w900,
+                  height: 1.12,
                 ),
-              ],
+              ),
             ),
-          ),
-        ],
+            Padding(
+              padding: const EdgeInsets.fromLTRB(10, 0, 10, 11),
+              child: Row(
+                children: [
+                  Text(
+                    _formatCartAmount(producto.importe),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: Color(0xFF17643B),
+                      fontSize: 15,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                  const Spacer(),
+                  _StockPill(
+                    existencia: producto.existencia,
+                    color: _existenciaColor,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
   Color get _existenciaColor {
+    if (producto.existencia <= 0) return const Color(0xFFD63C32);
+    if (producto.existencia <= 5) return const Color(0xFFC47A08);
+    return const Color(0xFF168653);
+  }
+}
+
+class _ProductoSheet extends StatefulWidget {
+  final _ProductoCatalogo producto;
+  final ValueChanged<int> onAdd;
+
+  const _ProductoSheet({required this.producto, required this.onAdd});
+
+  @override
+  State<_ProductoSheet> createState() => _ProductoSheetState();
+}
+
+class _ProductoSheetState extends State<_ProductoSheet> {
+  late int _cantidad;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.producto.existencia <= 0) {
+      _cantidad = 0;
+    } else if (widget.producto.cantidad > 0) {
+      _cantidad = widget.producto.cantidad
+          .clamp(1, widget.producto.existencia)
+          .toInt();
+    } else {
+      _cantidad = 1;
+    }
+  }
+
+  void _change(int delta) {
+    final next = (_cantidad + delta)
+        .clamp(1, widget.producto.existencia)
+        .toInt();
+    setState(() => _cantidad = next);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final producto = widget.producto;
+    final canAdd = producto.existencia > 0 && _cantidad > 0;
+
+    return _CartSheetBackground(
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(
+          20,
+          16,
+          20,
+          20 + MediaQuery.paddingOf(context).bottom,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Center(
+              child: Container(
+                width: 44,
+                height: 5,
+                decoration: BoxDecoration(
+                  color: SmxColors.blackAlpha(.14),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+              ),
+            ),
+            const SizedBox(height: 18),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: SizedBox.square(
+                    dimension: 88,
+                    child: _ProductImage(imagen: producto.imagen),
+                  ),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        producto.nombre,
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: Color(0xFF152D3F),
+                          fontSize: 18,
+                          fontWeight: FontWeight.w900,
+                          height: 1.08,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        _formatCartAmount(producto.importe),
+                        style: const TextStyle(
+                          color: Color(0xFF168653),
+                          fontSize: 24,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                      const SizedBox(height: 7),
+                      _StockPill(
+                        existencia: producto.existencia,
+                        color: _stockColor(producto.existencia),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+            Row(
+              children: [
+                const Text(
+                  'Cantidad',
+                  style: TextStyle(
+                    color: Color(0xFF152D3F),
+                    fontSize: 17,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                const Spacer(),
+                _QuantityStepper(
+                  cantidad: _cantidad,
+                  compact: true,
+                  onLess: canAdd && _cantidad > 1 ? () => _change(-1) : null,
+                  onMore: canAdd && _cantidad < producto.existencia
+                      ? () => _change(1)
+                      : null,
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+            FilledButton.icon(
+              onPressed: canAdd ? () => widget.onAdd(_cantidad) : null,
+              icon: const Icon(Icons.add_shopping_cart_rounded),
+              label: Text(
+                producto.cantidad > 0
+                    ? 'Actualizar carrito'
+                    : 'Agregar al carrito',
+              ),
+              style: FilledButton.styleFrom(
+                backgroundColor: const Color(0xFF168653),
+                minimumSize: const Size.fromHeight(54),
+                textStyle: const TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Color _stockColor(int existencia) {
     if (existencia <= 0) return const Color(0xFFD63C32);
     if (existencia <= 5) return const Color(0xFFC47A08);
     return const Color(0xFF168653);
@@ -484,35 +675,44 @@ class _ProductImage extends StatelessWidget {
   }
 }
 
-class _ImagePricePill extends StatelessWidget {
-  final double importe;
+class _SelectedPill extends StatelessWidget {
+  final int cantidad;
 
-  const _ImagePricePill({required this.importe});
+  const _SelectedPill({required this.cantidad});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: .92),
+        color: const Color(0xFF168653).withValues(alpha: .72),
         borderRadius: BorderRadius.circular(999),
         boxShadow: [
           BoxShadow(
-            color: SmxColors.blackAlpha(.12),
+            color: SmxColors.blackAlpha(.16),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
         ],
       ),
-      child: Text(
-        SmxRowSet.formatAmount(importe),
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: const TextStyle(
-          color: Color(0xFF17643B),
-          fontSize: 12,
-          fontWeight: FontWeight.w900,
-        ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(
+            Icons.shopping_cart_checkout_rounded,
+            size: 13,
+            color: Colors.white,
+          ),
+          const SizedBox(width: 4),
+          Text(
+            '$cantidad',
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 12,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -522,17 +722,26 @@ class _QuantityStepper extends StatelessWidget {
   final int cantidad;
   final VoidCallback? onLess;
   final VoidCallback? onMore;
+  final bool compact;
+  final bool dense;
 
   const _QuantityStepper({
     required this.cantidad,
     required this.onLess,
     required this.onMore,
+    this.compact = false,
+    this.dense = false,
   });
 
   @override
   Widget build(BuildContext context) {
+    final stepperWidth = dense ? 96.0 : 126.0;
+    final stepperHeight = dense ? 34.0 : 44.0;
+    final buttonDimension = dense ? 26.0 : 34.0;
+
     return Container(
-      height: 38,
+      width: compact ? stepperWidth : null,
+      height: compact ? stepperHeight : 38,
       padding: const EdgeInsets.symmetric(horizontal: 4),
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: .92),
@@ -551,6 +760,7 @@ class _QuantityStepper extends StatelessWidget {
             tooltip: 'Quitar',
             icon: Icons.remove_rounded,
             onPressed: onLess,
+            dimension: compact ? buttonDimension : 30,
             backgroundColor: onLess == null
                 ? const Color(0xFFE4E6E7)
                 : const Color(0xFFE7E7EA),
@@ -575,6 +785,7 @@ class _QuantityStepper extends StatelessWidget {
             tooltip: 'Agregar',
             icon: Icons.add_rounded,
             onPressed: onMore,
+            dimension: compact ? buttonDimension : 30,
             backgroundColor: onMore == null
                 ? const Color(0xFFE4E6E7)
                 : const Color(0xFF168653),
@@ -591,13 +802,8 @@ class _QuantityStepper extends StatelessWidget {
 class _StockPill extends StatelessWidget {
   final int existencia;
   final Color color;
-  final bool elevated;
 
-  const _StockPill({
-    required this.existencia,
-    required this.color,
-    this.elevated = false,
-  });
+  const _StockPill({required this.existencia, required this.color});
 
   @override
   Widget build(BuildContext context) {
@@ -606,19 +812,8 @@ class _StockPill extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
         decoration: BoxDecoration(
-          color: elevated
-              ? Colors.white.withValues(alpha: .92)
-              : color.withValues(alpha: .10),
+          color: color.withValues(alpha: .10),
           borderRadius: BorderRadius.circular(999),
-          boxShadow: elevated
-              ? [
-                  BoxShadow(
-                    color: SmxColors.blackAlpha(.12),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ]
-              : null,
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -646,6 +841,7 @@ class _QuantityButton extends StatelessWidget {
   final VoidCallback? onPressed;
   final Color backgroundColor;
   final Color foregroundColor;
+  final double dimension;
 
   const _QuantityButton({
     required this.tooltip,
@@ -653,6 +849,7 @@ class _QuantityButton extends StatelessWidget {
     required this.onPressed,
     required this.backgroundColor,
     required this.foregroundColor,
+    this.dimension = 30,
   });
 
   @override
@@ -666,9 +863,187 @@ class _QuantityButton extends StatelessWidget {
           customBorder: const CircleBorder(),
           onTap: onPressed,
           child: SizedBox.square(
-            dimension: 30,
+            dimension: dimension,
             child: Icon(icon, size: 20, color: foregroundColor),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CartSheetBackground extends StatelessWidget {
+  final Widget child;
+
+  const _CartSheetBackground({required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      top: false,
+      child: Container(
+        clipBehavior: Clip.antiAlias,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Color(0xFFFBFEFE), Color(0xFFF3FAF9), Color(0xFFEEF7F6)],
+          ),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(26)),
+        ),
+        child: Stack(
+          children: [
+            const Positioned.fill(
+              child: CustomPaint(
+                painter: SaldifyCirclesBackgroundPainter(
+                  accentColor: SmxColors.brandSecondary,
+                ),
+              ),
+            ),
+            child,
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _DraftCartCard extends StatelessWidget {
+  final _CarritoLocal draft;
+  final VoidCallback onTap;
+
+  const _DraftCartCard({required this.draft, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Material(
+        color: const Color(0xFFF3F7F6),
+        borderRadius: BorderRadius.circular(14),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.all(10),
+            child: Row(
+              children: [
+                _DraftImageGrid(items: draft.items),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '${draft.items.length} productos',
+                        style: const TextStyle(
+                          color: Color(0xFF23242A),
+                          fontSize: 18,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                      const SizedBox(height: 5),
+                      Text(
+                        _formatCartAmount(draft.total),
+                        style: const TextStyle(
+                          color: Color(0xFF17643B),
+                          fontSize: 17,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                      const SizedBox(height: 7),
+                      const Text(
+                        'Continuar compra',
+                        style: TextStyle(
+                          color: Color(0xFF6A7780),
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Icon(
+                  Icons.chevron_right_rounded,
+                  color: Color(0xFF6A7780),
+                  size: 30,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _DraftImageGrid extends StatelessWidget {
+  final List<_CarritoItem> items;
+
+  const _DraftImageGrid({required this.items});
+
+  @override
+  Widget build(BuildContext context) {
+    final visible = items.take(4).toList();
+
+    return SizedBox.square(
+      dimension: 72,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(10),
+        child: visible.length == 1
+            ? _DraftImageTile(item: visible.first, iconSize: 28)
+            : GridView.builder(
+                padding: EdgeInsets.zero,
+                physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  mainAxisSpacing: 2,
+                  crossAxisSpacing: 2,
+                ),
+                itemCount: 4,
+                itemBuilder: (context, index) {
+                  if (index >= visible.length) {
+                    return Container(
+                      color: Colors.white.withValues(alpha: .72),
+                    );
+                  }
+
+                  return _DraftImageTile(item: visible[index]);
+                },
+              ),
+      ),
+    );
+  }
+}
+
+class _DraftImageTile extends StatelessWidget {
+  final _CarritoItem item;
+  final double iconSize;
+
+  const _DraftImageTile({required this.item, this.iconSize = 18});
+
+  @override
+  Widget build(BuildContext context) {
+    if (item.imagen.isEmpty) {
+      return Container(
+        color: Colors.white.withValues(alpha: .82),
+        child: Icon(
+          Icons.inventory_2_outlined,
+          size: iconSize,
+          color: const Color(0xFF17643B),
+        ),
+      );
+    }
+
+    return Image.network(
+      item.imagen,
+      fit: BoxFit.cover,
+      errorBuilder: (_, _, _) => Container(
+        color: Colors.white.withValues(alpha: .82),
+        child: Icon(
+          Icons.inventory_2_outlined,
+          size: iconSize,
+          color: const Color(0xFF17643B),
         ),
       ),
     );
@@ -678,13 +1053,15 @@ class _QuantityButton extends StatelessWidget {
 class _CarritoSheet extends StatelessWidget {
   final _CarritoLocal carrito;
   final double total;
-  final ValueChanged<_CarritoItem> onRemove;
+  final int Function(_CarritoItem item) existenciaForItem;
+  final void Function(_CarritoItem item, int cantidad) onQuantityChanged;
   final VoidCallback? onConfirm;
 
   const _CarritoSheet({
     required this.carrito,
     required this.total,
-    required this.onRemove,
+    required this.existenciaForItem,
+    required this.onQuantityChanged,
     required this.onConfirm,
   });
 
@@ -695,9 +1072,7 @@ class _CarritoSheet extends StatelessWidget {
       initialChildSize: .72,
       minChildSize: .45,
       maxChildSize: .92,
-      builder: (context, scrollController) => Material(
-        color: Colors.white,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
+      builder: (context, scrollController) => _CartSheetBackground(
         child: ListView(
           controller: scrollController,
           padding: const EdgeInsets.all(20),
@@ -713,31 +1088,11 @@ class _CarritoSheet extends StatelessWidget {
                 child: Center(child: Text('Aun no agregas productos')),
               ),
             for (final item in carrito.items)
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: item.imagen.isEmpty
-                    ? const Icon(Icons.inventory_2_outlined)
-                    : ClipRRect(
-                        borderRadius: BorderRadius.circular(6),
-                        child: Image.network(
-                          item.imagen,
-                          width: 52,
-                          height: 52,
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                title: Text(
-                  item.producto,
-                  style: const TextStyle(fontWeight: FontWeight.w700),
-                ),
-                subtitle: Text(
-                  '${item.cantidad} × ${SmxRowSet.formatAmount(item.importe)}',
-                ),
-                trailing: IconButton(
-                  tooltip: 'Quitar producto',
-                  onPressed: () => onRemove(item),
-                  icon: const Icon(Icons.delete_outline),
-                ),
+              _CarritoItemTile(
+                item: item,
+                existencia: existenciaForItem(item),
+                onQuantityChanged: (cantidad) =>
+                    onQuantityChanged(item, cantidad),
               ),
             const Divider(height: 28),
             Row(
@@ -748,7 +1103,7 @@ class _CarritoSheet extends StatelessWidget {
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
                 ),
                 Text(
-                  SmxRowSet.formatAmount(total),
+                  _formatCartAmount(total),
                   style: const TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.w900,
@@ -770,6 +1125,110 @@ class _CarritoSheet extends StatelessWidget {
       ),
     );
   }
+}
+
+class _CarritoItemTile extends StatelessWidget {
+  final _CarritoItem item;
+  final int existencia;
+  final ValueChanged<int> onQuantityChanged;
+
+  const _CarritoItemTile({
+    required this.item,
+    required this.existencia,
+    required this.onQuantityChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: SizedBox.square(
+              dimension: 54,
+              child: item.imagen.isEmpty
+                  ? const Icon(Icons.inventory_2_outlined)
+                  : Image.network(item.imagen, fit: BoxFit.cover),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  item.producto,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: Color(0xFF23242A),
+                    fontSize: 16,
+                    fontWeight: FontWeight.w900,
+                    height: 1.08,
+                  ),
+                ),
+                const SizedBox(height: 5),
+                Text(
+                  _formatCartAmount(item.importe),
+                  style: const TextStyle(
+                    color: Color(0xFF5D6067),
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 10),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              _QuantityStepper(
+                cantidad: item.cantidad,
+                compact: true,
+                dense: true,
+                onLess: () => onQuantityChanged(item.cantidad - 1),
+                onMore: item.cantidad < existencia
+                    ? () => onQuantityChanged(item.cantidad + 1)
+                    : null,
+              ),
+              const SizedBox(height: 5),
+              Text(
+                _formatCartAmount(item.importe * item.cantidad),
+                textAlign: TextAlign.right,
+                style: const TextStyle(
+                  color: Color(0xFF23242A),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ProductoCatalogo {
+  final int id;
+  final String nombre;
+  final double importe;
+  final String imagen;
+  final int existencia;
+  final int cantidad;
+
+  const _ProductoCatalogo({
+    required this.id,
+    required this.nombre,
+    required this.importe,
+    required this.imagen,
+    required this.existencia,
+    required this.cantidad,
+  });
 }
 
 class _CarritoStorage {

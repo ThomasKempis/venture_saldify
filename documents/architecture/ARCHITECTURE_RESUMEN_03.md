@@ -988,15 +988,125 @@ Pantalla creada:
 lib/smxSaldify/smxSaldify_screens/saldify_mired/smxSaldiFy_mired.dart
 ```
 
+Controller creado:
+
+```text
+lib/smxSaldify/smxSaldify_screens/saldify_mired/smxSaldiFy_mired_controller.dart
+```
+
 Estado actual:
 
-- Pantalla vacia.
+- Pantalla funcional.
 - Usa el fondo estandar de Saldify.
 - Usa `SmxSaldifyScreenHeader`.
 - Titulo: `Mi red de Venta`.
 - `sectionLabel`: nombre del cliente seleccionado.
+- Carga los datos con `SmxCallBaseStateful<SmxSaldiFyMiRedController>`.
+- Recibe como raiz el `idSysuser11` del cliente seleccionado.
+- Dibuja el arbol con `InteractiveViewer`, `CustomPaint` y tarjetas posicionadas en un `Stack`.
+- El nodo raiz queda centrado inicialmente en el visor.
+- El usuario puede hacer pan y zoom sobre la red.
 
-Objetivo futuro:
+SP usado:
+
+```sql
+select * from QRY_SYSUSER11_MI_RED(:id_sysuser11_raiz)
+```
+
+El SP devuelve:
+
+```text
+NIVEL
+PATH
+ID_SYSUSER11
+RELA_SYSUSER10_PADRE
+RELA_SYSUSER10_HIJO
+SYSUSER11_STATUS
+SYSUSER10_NOMBRES
+SYSUSER10_APELLIDOS
+SYSUSER10_CORREO
+SYSUSER10_TELEFONO
+```
+
+La fila visible siempre representa al usuario de `RELA_SYSUSER10_HIJO`.
+
+`RELA_SYSUSER10_PADRE` sirve para conectar el arbol, pero los datos que se pintan en la tarjeta se leen desde el hijo.
+
+### Consulta recursiva
+
+La red se resuelve desde `SYSUSER11_DET_CONTACTOS` usando un CTE recursivo.
+
+La relacion que abre el siguiente nivel es:
+
+```sql
+join red r on c.rela_sysuser10_anfitrion = r.rela_sysuser10_hijo
+```
+
+Esto significa:
+
+```text
+El hijo del nivel actual pasa a ser anfitrion del siguiente nivel.
+```
+
+Por eso el arbol permite ver:
+
+```text
+Anfitrion -> Cliente -> Cliente como anfitrion -> Clientes de ese cliente
+```
+
+Se mantiene un limite tecnico:
+
+```sql
+r.nivel < 20
+```
+
+Ese limite no es una regla de negocio. Es un guard de seguridad para evitar recorridos infinitos por datos inconsistentes.
+
+### Corte por relacion consigo mismo
+
+Existe un caso especial: un anfitrion puede aparecer como cliente de si mismo.
+
+Ejemplo:
+
+```text
+RELA_SYSUSER10_PADRE = 7
+RELA_SYSUSER10_HIJO = 7
+```
+
+La regla definida:
+
+- Esa fila se muestra.
+- No se expande recursivamente.
+
+Condicion en la parte recursiva:
+
+```sql
+and r.rela_sysuser10_padre <> r.rela_sysuser10_hijo
+```
+
+La condicion se aplica sobre `r` porque corta la expansion del nodo actual. Asi el nodo self-loop puede verse una vez, pero no vuelve a traer toda la red debajo de si mismo.
+
+### Render en Flutter
+
+La pantalla transforma las filas del SP en `SmxMiRedNode`.
+
+El layout visual se calcula a partir de `PATH`:
+
+- `PATH` define jerarquia y orden.
+- Los nodos hoja se acomodan horizontalmente.
+- Cada padre se centra sobre sus hijos.
+- `NIVEL` define la posicion vertical.
+
+Componentes internos:
+
+- `_TreeLayout`: calcula posiciones.
+- `_TreeConnectionsPainter`: dibuja lineas y puntos de conexion.
+- `_TreeNodeCard`: dibuja cada usuario.
+- `_MiRedTree`: contiene el visor interactivo.
+
+La tarjeta grande funciona como una lupa/contenedor visual de la red. El contenido puede ser mas grande que el viewport y se explora con `InteractiveViewer`.
+
+Objetivo funcional:
 
 Mostrar la red descendente del cliente seleccionado cuando ese cliente tambien actua como anfitrion dentro de `SYSUSER11_DET_CONTACTOS`.
 
