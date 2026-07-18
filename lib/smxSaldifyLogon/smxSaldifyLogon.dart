@@ -295,7 +295,8 @@ class _SmxSaldifyLogonBodyState extends State<_SmxSaldifyLogonBody> {
                                             Transform.translate(
                                               offset: Offset(
                                                 0,
-                                                compact ? -32 : -24,
+                                                ///compact ? -32 : -24,
+                                                  compact ? -54 : -44
                                               ),
                                               child: _WelcomeCard(
                                                 compact: compact,

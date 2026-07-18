@@ -122,9 +122,107 @@ lib/smxAuth/
 - Recibe un `SmxAuthUser` neutral.
 - Busca o crea `SYSUSER10_CAB_MOVIL`.
 - Sube la imagen inicial si corresponde.
+- Resuelve las credenciales individuales de base de datos del usuario.
 - Reporta localizacion/login.
 - Marca el modo activo.
 - Navega al dashboard de anfitrion o invitado.
+
+### Resolucion de SYSUSER10 y usuario de base de datos
+
+`SmxLogonMovil.prepareUser(...)` ya no realiza desde Flutter una secuencia separada de consulta, alta manual, guardado troncal y segunda consulta.
+
+La resolucion se centraliza en:
+
+```sql
+select * from ADD_SYSUSER10(
+  :nombres,
+  :correo,
+  :geolocalizacion
+)
+```
+
+El procedimiento tiene tres responsabilidades relacionadas:
+
+1. Buscar el usuario movil por correo en `SYSUSER10_CAB_MOVIL`.
+2. Si no existe, crear `SYSUSER10` y regresar inmediatamente el registro definitivo.
+3. Crear o recuperar en `SYSUSER99` el usuario y clave de base de datos asociados al `SYSUSER10`.
+
+El rowset regresado incluye los campos de `SYSUSER10_CAB_MOVIL` y:
+
+```text
+SYSUSER99_USUARIO
+SYSUSER99_PASSWORD
+```
+
+El flujo de conexion queda:
+
+```text
+Proveedor externo
+  -> SmxAuthUser
+  -> conexion inicial con usuario tecnico
+  -> ADD_SYSUSER10
+  -> busca o crea SYSUSER10
+  -> crea o recupera SYSUSER99
+  -> devuelve usuario y clave individuales
+  -> futuras llamadas usan el usuario individual
+```
+
+Despues de recuperar el rowset, Flutter configura:
+
+```dart
+SmxConstants_core.instancia = 'SALDIFY';
+SmxConstants_core.usuario =
+    rstSysUser10.getValue('SYSUSER99_USUARIO');
+SmxConstants_core.clave =
+    rstSysUser10.getValue('SYSUSER99_PASSWORD');
+resetJsonSend();
+```
+
+`resetJsonSend()` es importante en este punto porque los nuevos objetos de comunicacion deben construirse con las credenciales individuales ya resueltas.
+
+La conexion tecnica se utiliza solamente para completar el ingreso inicial. A partir de `prepareUser(...)`, las operaciones de la sesion se realizan con el usuario de base de datos reservado para ese usuario movil.
+
+Esto permite:
+
+- identificar tecnicamente al usuario conectado;
+- auditar quien realiza cada operacion;
+- evitar que toda la actividad quede registrada bajo un unico usuario tecnico;
+- mantener una relacion estable entre `SYSUSER10` y su identidad de seguridad en `SYSUSER99`.
+
+### Carga inicial de foto
+
+La imagen no debe subirse antes de ejecutar `ADD_SYSUSER10`, porque eso provocaria una carga nueva en cada logon sin saber si el usuario ya tiene foto.
+
+El orden correcto es:
+
+```text
+ADD_SYSUSER10
+  -> recuperar RELA_SYSJSON02
+  -> si RELA_SYSJSON02 > 0, no subir imagen
+  -> si RELA_SYSJSON02 esta vacio o es 0, subir imagen
+  -> actualizar solamente RELA_SYSJSON02 en SYSUSER10_CAB_MOVIL
+```
+
+Cuando hace falta la imagen:
+
+```dart
+data.tablaTroncalRst = rstSysUser10;
+final idImage = await _callWSImageLoad();
+
+if (idImage > 0) {
+  rstSysUser10.update('RELA_SYSJSON02', idImage);
+  await callTroncalSave(rstSysUser10);
+}
+```
+
+`_callWSImageLoad()` solamente carga el archivo y devuelve el identificador creado en `SYSJSON02`. La relacion con el usuario se completa despues mediante `RELA_SYSJSON02`.
+
+Regla:
+
+- usuario existente con imagen: no se vuelve a subir;
+- usuario existente sin imagen: se carga una vez y se actualiza;
+- usuario nuevo: se crea primero, luego se carga y relaciona su imagen inicial;
+- si el servicio de archivos no devuelve un id valido, no se ejecuta una modificacion troncal.
 
 ### SmxAuthUser
 

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:venture_saldify/smxLayout/smxScreens/smxComprasCarrito/smxComprasCarrito.dart';
-import 'package:venture_saldify/smxLayout/smxScreens/smxComprasCarrito/smxComprasCarritoModels.dart';
+import 'package:venture_saldify/smxLayout/smxScreens/smxComprasCarrito/models/smxComprasCarritoModels.dart';
 import 'package:venture_widgets/smxCallBaseStateful.dart';
 import 'package:venture_widgets/smxController/smxControllerSendData.dart';
 

@@ -1,15 +1,13 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:universal_html/html.dart' as html;
-import 'package:uuid/uuid.dart';
-import 'package:venture_saldify/smxLayout/smxBackgrounds/saldify_circles_background.dart';
+import 'package:venture_saldify/smxLayout/smxBackgrounds/smx_saldify_sheet_bg.dart';
 import 'package:venture_saldify/smxLayout/smxColors.dart';
 import 'package:venture_saldify/smxLayout/smxLayout.dart';
 
 import 'smxComprasCarritoControllerContract.dart';
-import 'smxComprasCarritoModels.dart';
+import 'smxComprasCarritoStorage.dart';
+import 'models/smxComprasCarritoLocalModels.dart';
+import 'models/smxComprasCarritoModels.dart';
 
 final _cartAmountFormat = NumberFormat.currency(
   locale: 'en_US',
@@ -34,15 +32,15 @@ class SmxComprasCarrito extends StatefulWidget {
 }
 
 class _SmxComprasCarritoState extends State<SmxComprasCarrito> {
-  late final _CarritoStorage _storage;
-  late _CarritoLocal _carrito;
+  late final SmxCarritoStorage _storage;
+  late SmxCarritoLocal _carrito;
   bool _savedSomething = false;
 
   @override
   void initState() {
     super.initState();
-    _storage = _CarritoStorage(widget.model.idSysuser11);
-    _carrito = _CarritoLocal.nuevo();
+    _storage = SmxCarritoStorage(widget.model.idSysuser11);
+    _carrito = SmxCarritoLocal.nuevo();
   }
 
   int get _unidades =>
@@ -57,9 +55,9 @@ class _SmxComprasCarritoState extends State<SmxComprasCarrito> {
     return widget.model.disponible;
   }
 
-  _ProductoCatalogo _productoAt(int index) {
+  SmxProductoCatalogo _productoAt(int index) {
     final id = widget.controller.getCatalogoIdAt(index);
-    return _ProductoCatalogo(
+    return SmxProductoCatalogo(
       id: id,
       nombre: widget.controller.getCatalogoNombreAt(index),
       importe: widget.controller.getCatalogoImporteAt(index),
@@ -80,7 +78,7 @@ class _SmxComprasCarritoState extends State<SmxComprasCarrito> {
         if (existing >= 0) _carrito.items.removeAt(existing);
       } else if (existing < 0) {
         _carrito.items.add(
-          _CarritoItem(
+          SmxCarritoItem(
             idProducto: id,
             producto: producto.nombre,
             importe: producto.importe,
@@ -209,7 +207,7 @@ class _SmxComprasCarritoState extends State<SmxComprasCarrito> {
 
                   _storage.delete(_carrito.uuid);
                   setState(() {
-                    _carrito = _CarritoLocal.nuevo();
+                    _carrito = SmxCarritoLocal.nuevo();
                     _savedSomething = true;
                   });
                   if (sheetContext.mounted) Navigator.pop(sheetContext);
@@ -233,7 +231,7 @@ class _SmxComprasCarritoState extends State<SmxComprasCarrito> {
       isDismissible: true,
       enableDrag: true,
       backgroundColor: Colors.transparent,
-      builder: (sheetContext) => _CartSheetBackground(
+      builder: (sheetContext) => SmxSaldifySheetBackground(
         child: ListView(
           padding: const EdgeInsets.fromLTRB(20, 18, 20, 24),
           children: [
@@ -408,7 +406,7 @@ class _CatalogoSectionTitle extends StatelessWidget {
 }
 
 class _ProductoCard extends StatelessWidget {
-  final _ProductoCatalogo producto;
+  final SmxProductoCatalogo producto;
   final VoidCallback onTap;
 
   const _ProductoCard({required this.producto, required this.onTap});
@@ -490,7 +488,7 @@ class _ProductoCard extends StatelessWidget {
 }
 
 class _ProductoSheet extends StatefulWidget {
-  final _ProductoCatalogo producto;
+  final SmxProductoCatalogo producto;
   final ValueChanged<int> onAdd;
 
   const _ProductoSheet({required this.producto, required this.onAdd});
@@ -528,7 +526,7 @@ class _ProductoSheetState extends State<_ProductoSheet> {
     final producto = widget.producto;
     final canAdd = producto.existencia > 0 && _cantidad > 0;
 
-    return _CartSheetBackground(
+    return SmxSaldifySheetBackground(
       child: Padding(
         padding: EdgeInsets.fromLTRB(
           20,
@@ -872,44 +870,8 @@ class _QuantityButton extends StatelessWidget {
   }
 }
 
-class _CartSheetBackground extends StatelessWidget {
-  final Widget child;
-
-  const _CartSheetBackground({required this.child});
-
-  @override
-  Widget build(BuildContext context) {
-    return SafeArea(
-      top: false,
-      child: Container(
-        clipBehavior: Clip.antiAlias,
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0xFFFBFEFE), Color(0xFFF3FAF9), Color(0xFFEEF7F6)],
-          ),
-          borderRadius: BorderRadius.vertical(top: Radius.circular(26)),
-        ),
-        child: Stack(
-          children: [
-            const Positioned.fill(
-              child: CustomPaint(
-                painter: SaldifyCirclesBackgroundPainter(
-                  accentColor: SmxColors.brandSecondary,
-                ),
-              ),
-            ),
-            child,
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 class _DraftCartCard extends StatelessWidget {
-  final _CarritoLocal draft;
+  final SmxCarritoLocal draft;
   final VoidCallback onTap;
 
   const _DraftCartCard({required this.draft, required this.onTap});
@@ -978,7 +940,7 @@ class _DraftCartCard extends StatelessWidget {
 }
 
 class _DraftImageGrid extends StatelessWidget {
-  final List<_CarritoItem> items;
+  final List<SmxCarritoItem> items;
 
   const _DraftImageGrid({required this.items});
 
@@ -1017,7 +979,7 @@ class _DraftImageGrid extends StatelessWidget {
 }
 
 class _DraftImageTile extends StatelessWidget {
-  final _CarritoItem item;
+  final SmxCarritoItem item;
   final double iconSize;
 
   const _DraftImageTile({required this.item, this.iconSize = 18});
@@ -1051,10 +1013,10 @@ class _DraftImageTile extends StatelessWidget {
 }
 
 class _CarritoSheet extends StatelessWidget {
-  final _CarritoLocal carrito;
+  final SmxCarritoLocal carrito;
   final double total;
-  final int Function(_CarritoItem item) existenciaForItem;
-  final void Function(_CarritoItem item, int cantidad) onQuantityChanged;
+  final int Function(SmxCarritoItem item) existenciaForItem;
+  final void Function(SmxCarritoItem item, int cantidad) onQuantityChanged;
   final VoidCallback? onConfirm;
 
   const _CarritoSheet({
@@ -1072,7 +1034,7 @@ class _CarritoSheet extends StatelessWidget {
       initialChildSize: .72,
       minChildSize: .45,
       maxChildSize: .92,
-      builder: (context, scrollController) => _CartSheetBackground(
+      builder: (context, scrollController) => SmxSaldifySheetBackground(
         child: ListView(
           controller: scrollController,
           padding: const EdgeInsets.all(20),
@@ -1128,7 +1090,7 @@ class _CarritoSheet extends StatelessWidget {
 }
 
 class _CarritoItemTile extends StatelessWidget {
-  final _CarritoItem item;
+  final SmxCarritoItem item;
   final int existencia;
   final ValueChanged<int> onQuantityChanged;
 
@@ -1211,132 +1173,4 @@ class _CarritoItemTile extends StatelessWidget {
       ),
     );
   }
-}
-
-class _ProductoCatalogo {
-  final int id;
-  final String nombre;
-  final double importe;
-  final String imagen;
-  final int existencia;
-  final int cantidad;
-
-  const _ProductoCatalogo({
-    required this.id,
-    required this.nombre,
-    required this.importe,
-    required this.imagen,
-    required this.existencia,
-    required this.cantidad,
-  });
-}
-
-class _CarritoStorage {
-  final int idSysuser11;
-
-  const _CarritoStorage(this.idSysuser11);
-
-  String get _key => 'saldify_carritos_$idSysuser11';
-
-  List<_CarritoLocal> loadDrafts() {
-    final raw = html.window.localStorage[_key];
-    if (raw == null || raw.isEmpty) return [];
-    try {
-      final list = jsonDecode(raw) as List<dynamic>;
-      final result = list
-          .map((value) => _CarritoLocal.fromJson(value as Map<String, dynamic>))
-          .toList();
-      result.sort((a, b) => b.actualizado.compareTo(a.actualizado));
-      return result;
-    } catch (_) {
-      return [];
-    }
-  }
-
-  void saveDraft(_CarritoLocal cart) {
-    final drafts = loadDrafts();
-    drafts.removeWhere((item) => item.uuid == cart.uuid);
-    if (cart.items.isNotEmpty) drafts.add(cart);
-    html.window.localStorage[_key] = jsonEncode(
-      drafts.map((item) => item.toJson()).toList(),
-    );
-  }
-
-  void delete(String uuid) {
-    final drafts = loadDrafts()..removeWhere((item) => item.uuid == uuid);
-    html.window.localStorage[_key] = jsonEncode(
-      drafts.map((item) => item.toJson()).toList(),
-    );
-  }
-}
-
-class _CarritoLocal {
-  final String uuid;
-  DateTime actualizado;
-  final List<_CarritoItem> items;
-
-  _CarritoLocal({
-    required this.uuid,
-    required this.actualizado,
-    required this.items,
-  });
-
-  factory _CarritoLocal.nuevo() => _CarritoLocal(
-    uuid: const Uuid().v4(),
-    actualizado: DateTime.now(),
-    items: [],
-  );
-
-  factory _CarritoLocal.fromJson(Map<String, dynamic> json) => _CarritoLocal(
-    uuid: json['uuid']?.toString() ?? const Uuid().v4(),
-    actualizado:
-        DateTime.tryParse(json['actualizado']?.toString() ?? '') ??
-        DateTime.now(),
-    items: (json['items'] as List<dynamic>? ?? [])
-        .map((value) => _CarritoItem.fromJson(value as Map<String, dynamic>))
-        .toList(),
-  );
-
-  int indexOf(int idProducto) =>
-      items.indexWhere((item) => item.idProducto == idProducto);
-  double get total =>
-      items.fold(0, (sum, item) => sum + item.importe * item.cantidad);
-
-  Map<String, dynamic> toJson() => {
-    'uuid': uuid,
-    'actualizado': actualizado.toIso8601String(),
-    'items': items.map((item) => item.toJson()).toList(),
-  };
-}
-
-class _CarritoItem {
-  final int idProducto;
-  final String producto;
-  final double importe;
-  final String imagen;
-  int cantidad;
-
-  _CarritoItem({
-    required this.idProducto,
-    required this.producto,
-    required this.importe,
-    required this.imagen,
-    required this.cantidad,
-  });
-
-  factory _CarritoItem.fromJson(Map<String, dynamic> json) => _CarritoItem(
-    idProducto: (json['idProducto'] as num?)?.toInt() ?? -1,
-    producto: json['producto']?.toString() ?? '',
-    importe: (json['importe'] as num?)?.toDouble() ?? 0,
-    imagen: json['imagen']?.toString() ?? '',
-    cantidad: (json['cantidad'] as num?)?.toInt() ?? 0,
-  );
-
-  Map<String, dynamic> toJson() => {
-    'idProducto': idProducto,
-    'producto': producto,
-    'importe': importe,
-    'imagen': imagen,
-    'cantidad': cantidad,
-  };
 }

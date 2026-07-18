@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 
-import '../smxAuth.dart';
+import '../models/smxAuthUser.dart';
 import '../storage/smxAuthStorage.dart';
 import 'AuthRepository.dart';
 import 'AuthService.dart';

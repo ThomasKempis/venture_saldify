@@ -34,7 +34,6 @@ class SmxSaldiFyClienteCompras extends StatelessWidget {
     return SmxSaldiFyClienteComprasManual(
       clientName: clientName,
       idSysuser11: idSysuser11,
-      relaSysuser10Anfitrion: relaSysuser10Anfitrion,
       metricasIniciales: metricasIniciales,
     );
   }

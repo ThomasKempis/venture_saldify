@@ -10,14 +10,12 @@ import 'smxSaldiFyCliente_pagos_controller.dart';
 class SmxSaldiFyClientePagos extends StatelessWidget {
   final String clientName;
   final int idSysuser11;
-  final int relaSysuser10Anfitrion;
   final SmxSaldiFyClienteMetricasSnapshot? metricasIniciales;
 
   const SmxSaldiFyClientePagos({
     super.key,
     required this.clientName,
     required this.idSysuser11,
-    required this.relaSysuser10Anfitrion,
     this.metricasIniciales,
   });
 
@@ -28,16 +26,14 @@ class SmxSaldiFyClientePagos extends StatelessWidget {
         alias: 'SMXSALDIFY_CLIENTE_PAGOS',
         data: SmxControllerSendData(context: context),
         idSysuser11: idSysuser11,
-        relaSysuser10Anfitrion: relaSysuser10Anfitrion,
-        metricasIniciales: metricasIniciales,
       ),
       builder: (context, controller) => SmxPagos(
         controller: controller,
         model: SmxPagosViewModel(
           clientName: clientName,
-          credito: controller.credito,
-          disponible: controller.disponible,
-          saldo: controller.saldo,
+          credito: metricasIniciales?.credito ?? 0,
+          disponible: metricasIniciales?.disponible ?? 0,
+          saldo: metricasIniciales?.saldo ?? 0,
           formSubtitle:
               'Captura el deposito para que tu anfitrion lo confirme.',
           keyPrefix: 'cliente_pago',

@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:universal_html/html.dart' as html;
 
-import '../smxAuth.dart';
+import '../models/smxAuthUser.dart';
 
 class SmxAuthStorage {
   static const _providerKey = 'smx_auth_provider';

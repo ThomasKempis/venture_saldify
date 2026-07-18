@@ -1246,3 +1246,331 @@ Tambien se dejan fuera de esta limpieza los paneles especificos:
 - Centro de acciones pendientes que entra desde la derecha.
 
 Esos componentes son superficies funcionales de UI, no dialogos genericos de mensaje o decision.
+
+## 19. Consolidacion Tecnica de Auth, Compras, Pagos y Bottom Sheets
+
+Se realizo una revision tecnica de las implementaciones compartidas entre anfitrion e invitado. El objetivo fue eliminar duplicacion real sin mezclar responsabilidades funcionales distintas.
+
+### Auth y modelo de usuario
+
+El modelo autenticado se extrajo a:
+
+```text
+lib/smxAuth/models/smxAuthUser.dart
+```
+
+El almacenamiento de identidad del proveedor quedo centralizado en:
+
+```text
+lib/smxAuth/storage/smxAuthStorage.dart
+```
+
+`SmxAuthStorage` administra exclusivamente:
+
+- proveedor;
+- id del usuario en el proveedor;
+- correo;
+- nombre;
+- fotografia autenticada.
+
+La logica general de autenticacion de `SmxAuth` no cambio. La modificacion separa el modelo y evita tener dos implementaciones diferentes para guardar la misma identidad.
+
+No se creo un storage global para toda la aplicacion. Cada persistencia conserva su responsabilidad:
+
+- `SmxAuthStorage`: identidad autenticada.
+- `SmxSaldifyAccessSession`: ultimo modo de acceso como anfitrion o invitado.
+- `SmxCarritoStorage`: borradores locales del carrito por relacion de cliente.
+- `SmxSaldifyLogonController`: actualmente conserva la invitacion validada.
+
+### Background compartido para bottom sheets
+
+Se creo:
+
+```text
+lib/smxLayout/smxBackgrounds/smx_saldify_sheet_bg.dart
+```
+
+Widget:
+
+```dart
+SmxSaldifySheetBackground
+```
+
+Centraliza el fondo claro, los circulos decorativos, el radio superior y el `SafeArea` de los bottom sheets de Saldify.
+
+Uso actual:
+
+- detalle de producto;
+- carrito actual;
+- carritos guardados;
+- invitacion por codigo QR y correo.
+
+Los backgrounds de tarjetas o paneles con composiciones particulares pueden seguir siendo locales, pero deben reutilizar `SaldifyCirclesBackgroundPainter` cuando compartan el mismo lenguaje visual.
+
+### Carrito compartido
+
+La experiencia del carrito se concentra en:
+
+```text
+lib/smxLayout/smxScreens/smxComprasCarrito/
+```
+
+Separaciones realizadas:
+
+```text
+models/smxComprasCarritoModels.dart
+models/smxComprasCarritoLocalModels.dart
+smxComprasCarritoStorage.dart
+smxComprasCarritoControllerContract.dart
+smxComprasCarrito.dart
+```
+
+La UI, los modelos locales y el storage son compartidos. Los wrappers de anfitrion e invitado solo construyen el controller y entregan los datos iniciales correspondientes.
+
+El controller del invitado hereda del controller del anfitrion:
+
+```dart
+class SmxSaldiFyClienteComprasCarritoController
+    extends SmxSaldiFyComprasCarritoController
+```
+
+Si en el futuro el invitado requiere una regla especial, puede sobrescribir solamente ese comportamiento sin duplicar el controller completo.
+
+### Compra manual compartida
+
+La UI y su contrato se concentran en:
+
+```text
+lib/smxLayout/smxScreens/smxComprasManual/
+```
+
+El controller del invitado hereda de:
+
+```dart
+SmxSaldiFyComprasManualController
+```
+
+Los aliases internos permanecen dentro del controller base. No se parametrizan porque anfitrion e invitado no ejecutan simultaneamente dos instancias del mismo controller dentro del mismo flujo.
+
+La diferencia entre ambos roles queda en el origen de las metricas:
+
+- anfitrion: metricas tomadas de `SmxSaldiFyClientTapData`;
+- invitado: metricas tomadas del snapshot de su dashboard.
+
+### Pagos compartidos
+
+La misma consolidacion se aplico a pagos:
+
+```text
+lib/smxLayout/smxScreens/smxPagos/
+```
+
+El controller del invitado hereda de:
+
+```dart
+SmxSaldiFyPagosController
+```
+
+El invitado ya no mantiene una segunda implementacion de consultas, imagenes, altas, modificaciones y bajas de pagos.
+
+`relaSysuser10Anfitrion` dejo de ser necesario dentro del modulo de pagos del invitado. La relacion operativa queda identificada por `idSysuser11`, mientras que las metricas iniciales llegan desde el dashboard del invitado.
+
+La consulta:
+
+```text
+QRY_SYSUSER11_SALDOS_INVITADO
+```
+
+permanece concentrada en el controller de metricas del dashboard. Compras y pagos reciben el snapshot ya cargado y no repiten esa consulta.
+
+### Resultado de la consolidacion
+
+Los tres procesos principales siguen el mismo patron:
+
+```text
+Wrapper de rol
+  -> controller de dominio
+  -> contrato compartido
+  -> UI compartida en smxLayout
+```
+
+Para el invitado:
+
+```text
+controller invitado
+  -> hereda controller anfitrion
+```
+
+Esto redujo codigo duplicado y mantiene un solo comportamiento para:
+
+- carrito;
+- compra manual;
+- pagos;
+- validaciones;
+- carga de imagenes;
+- persistencia;
+- actualizacion de estados.
+
+## 20. Revision de Calidad y Trabajo Tecnico Pendiente
+
+Se realizo una revision general sobre aproximadamente 28,500 lineas Dart.
+
+Verificaciones:
+
+- `flutter analyze`: sin errores ni warnings de compilacion.
+- Se reportan avisos de nivel `info`, principalmente por la convencion historica de nombres de archivos y constantes.
+- `git diff --check`: sin errores de espacios o formato del diff.
+- No existen pruebas automatizadas dentro de `test/`.
+
+### 20.1 Contextos despues de operaciones asincronas
+
+Existen navegaciones y dialogos que usan `BuildContext` despues de uno o varios `await`.
+
+Archivos observados:
+
+```text
+lib/smxAuth/smxLogonMovil.dart
+lib/smxPerfil/smxPerfil_controller.dart
+lib/smxSaldify/smxSaldify_dashboard/smxSaldiFy_clientes/
+lib/smxSaldify/smxSaldify_dashboard/smxSaldiFy_clientes_pendientes/
+lib/smxSaldify/smxSaldify_screens/saldify_cliente/
+```
+
+Pendiente:
+
+- comprobar `context.mounted` antes de navegar o mostrar dialogos;
+- evitar continuar si la pantalla se cerro durante una operacion asincrona.
+
+### 20.2 Pruebas automatizadas
+
+`flutter_test` esta configurado, pero no hay pruebas.
+
+Primer alcance recomendado:
+
+- normalizacion y validacion de codigos de invitacion;
+- lectura/escritura de auth storage;
+- serializacion de carritos guardados;
+- limites de cantidad y existencia;
+- validacion de saldo disponible;
+- transiciones de estados de compras y pagos;
+- wrappers de anfitrion e invitado sobre controllers compartidos.
+
+### 20.3 Menus laterales duplicados
+
+Los archivos:
+
+```text
+lib/smxSaldify/smxSaldify_menu_lateral.dart
+lib/smxSaldifyCliente/smxSaldiFyCliente_menu_lateral.dart
+```
+
+tienen aproximadamente 442 lineas cada uno y solo cambian nombres de clases y algunas opciones.
+
+Refactor recomendado:
+
+- crear un menu lateral compartido;
+- recibir las opciones como configuracion;
+- reutilizar boton, navigation panel, drawer, marca, version e items;
+- conservar en anfitrion e invitado solamente la lista de opciones correspondiente.
+
+### 20.4 Metricas tipadas en SmxSaldiFyClientTapData
+
+Actualmente:
+
+```dart
+credit
+availableCredit
+balance
+```
+
+se transportan como `String` formateado.
+
+Esto obliga a pagos, compra manual y carrito a limpiar simbolos y convertir nuevamente a `double`.
+
+Refactor recomendado:
+
+- mover `SmxSaldiFyClientTapData` a un archivo de modelos;
+- almacenar las metricas como `double`;
+- aplicar formato monetario solamente en la UI;
+- eliminar `_toDouble` y `_parseAmount` repetidos.
+
+### 20.5 Historial compartido
+
+El historial de anfitrion e invitado consulta la misma fuente y repite:
+
+- tipo;
+- folio;
+- concepto;
+- importe;
+- cantidad por importe;
+- fecha;
+- status;
+- motivo de rechazo.
+
+Refactor recomendado:
+
+- crear modelo y contrato comun de movimiento;
+- compartir lectura y presentacion de movimientos;
+- mantener en el anfitrion las acciones exclusivas de confirmar, entregar y rechazar;
+- mantener el historial del invitado en modo lectura.
+
+### 20.6 Storage de invitacion
+
+La persistencia de:
+
+```text
+codigo
+uuid anfitrion
+correo invitado
+uuid invitado
+```
+
+continua dentro de `SmxSaldifyLogonController`.
+
+No esta duplicada y funciona correctamente, pero puede extraerse en una futura clase:
+
+```text
+SmxSaldifyInvitationSession
+```
+
+Esto dejaria el controller enfocado en validacion, autenticacion y navegacion.
+
+### 20.7 Division fisica de archivos grandes
+
+Los archivos mas grandes concentran varias piezas privadas de UI:
+
+```text
+smxComprasCarrito.dart
+smxSaldiFy_historial.dart
+smxSaldifyLogon.dart
+smxSaldiFy_cobranza.dart
+smxComprasManual.dart
+smxSaldiFy_clientes.dart
+smxPagos.dart
+```
+
+No significa que su logica este duplicada. Es una mejora de mantenimiento:
+
+- separar bottom sheets;
+- separar formularios;
+- separar tarjetas y filas;
+- separar estados vacios y skeletons;
+- conservar en la pantalla principal solamente composicion y coordinacion.
+
+### Estado general
+
+La arquitectura ya tiene estandarizados:
+
+- auth y su storage;
+- fondos principales y fondos de sheets;
+- cabeceras;
+- dialogos;
+- carrito;
+- compra manual;
+- pagos;
+- contratos UI/controller;
+- herencia anfitrion/invitado.
+
+No se recomienda centralizar todos los storages en una sola clase. La separacion por dominio actual es correcta.
+
+Mi evaluación general: **la arquitectura ya está en buen estado, aproximadamente 7.5/10**. El siguiente refactor con mayor beneficio y menor riesgo sería consolidar primero los menús laterales, luego tipar numéricamente SmxSaldiFyClientTapData y después abordar el historial compartido. No modifiqué archivos durante esta revisión.

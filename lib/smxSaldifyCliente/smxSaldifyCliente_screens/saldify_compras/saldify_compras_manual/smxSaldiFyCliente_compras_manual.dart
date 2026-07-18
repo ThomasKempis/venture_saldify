@@ -10,14 +10,12 @@ import 'smxSaldiFyCliente_compras_manual_controller.dart';
 class SmxSaldiFyClienteComprasManual extends StatelessWidget {
   final String clientName;
   final int idSysuser11;
-  final int relaSysuser10Anfitrion;
   final SmxSaldiFyClienteMetricasSnapshot? metricasIniciales;
 
   const SmxSaldiFyClienteComprasManual({
     super.key,
     required this.clientName,
     required this.idSysuser11,
-    required this.relaSysuser10Anfitrion,
     this.metricasIniciales,
   });
 
@@ -28,16 +26,14 @@ class SmxSaldiFyClienteComprasManual extends StatelessWidget {
         alias: 'SMXSALDIFY_CLIENTE_COMPRAS',
         data: SmxControllerSendData(context: context),
         idSysuser11: idSysuser11,
-        relaSysuser10Anfitrion: relaSysuser10Anfitrion,
-        metricasIniciales: metricasIniciales,
       ),
       builder: (context, controller) => SmxComprasManual(
         controller: controller,
         model: SmxComprasManualViewModel(
           clientName: clientName,
-          credito: controller.credito,
-          disponible: controller.disponible,
-          saldo: controller.saldo,
+          credito: metricasIniciales?.credito ?? 0,
+          disponible: metricasIniciales?.disponible ?? 0,
+          saldo: metricasIniciales?.saldo ?? 0,
           headerLabel: 'Compras',
           formTitle: 'Solicitar compra',
           formSubtitle: 'Captura la compra para enviarla a tu anfitrion.',

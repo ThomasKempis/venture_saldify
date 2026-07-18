@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:uuid/uuid.dart';
 import 'package:universal_html/html.dart' as html;
+import 'package:uuid/uuid.dart';
 import 'package:venture_saldify/smxApis/smxConstants.dart';
 import 'package:venture_core_connect/smxConstants_core.dart';
 import 'package:venture_core_connect/smxJson/SmxJsonUtil.dart';
@@ -46,57 +46,52 @@ class SmxLogonMovil extends SmxTmpCtl {
   }
 
   Future<void> prepareUser(BuildContext context) async {
-    addSql(
+    final nombresSql = _sql(authUser.displayName.toUpperCase());
+    final correoSql = _sql(getCorreo());
+    final geolocalizacionSql = SmxConstants_core.geoLocalizacion;
+
+
+    removeSql('SYSUSER10');
+    addSTrans(
       'SYSUSER10',
-      "Select * from SYSUSER10_CAB_MOVIL where SYSUSER10_CORREO = '${getCorreo()}'",
+      "select * from ADD_SYSUSER10("
+          "'$nombresSql', "
+          "'$correoSql', "
+          "'$geolocalizacionSql')",
     );
 
-    await showDialogWait(context, () async {
-      await getRowSetFuture('SYSUSER10');
-      rstSysUser10 = getRowset('SYSUSER10');
+    await getCallWS();
 
-      if (rstSysUser10.getRowCount() == 0) {
-        int idImage = await _callWSImageLoad();
+    if (jsonSend.getError() != null) {
+      throw StateError(jsonSend.error!);
+    }
 
-        rstSysUser10.insert();
-        rstSysUser10.tabla = 'SYSUSER10_CAB_MOVIL';
+    rstSysUser10 = getRowset('SYSUSER10');
 
-        if (idImage > 0) {
-          rstSysUser10.update('RELA_SYSJSON02', idImage);
-        }
-
-        rstSysUser10.update('SYSUSER10_NOMBRES', getNombres());
-        rstSysUser10.update('SYSUSER10_APELLIDOS', '');
-        rstSysUser10.update('SYSUSER10_TELEFONO', '');
-        rstSysUser10.update('SYSUSER10_CORREO', getCorreo());
-        rstSysUser10.update('SYSUSER10_CORREO_01', getCorreo());
-        rstSysUser10.update('SYSUSER10_FECHA', DateTime.now());
-        rstSysUser10.update(
-          'SYSUSER10_GEOLOC_ULT',
-          SmxConstants_core.geoLocalizacion,
-        );
-        rstSysUser10.update('SYSUSER10_UUID', const Uuid().v4());
-
-        await callTroncalSave(rstSysUser10);
-
-        removeSql('SYSUSER10');
-        addSql(
-          'SYSUSER10',
-          "Select * from SYSUSER10_CAB_MOVIL where SYSUSER10_CORREO = '${getCorreo()}'",
-        );
-
-        await getRowSetFuture('SYSUSER10');
-        rstSysUser10 = getRowset('SYSUSER10');
-      }
-    });
+    if (rstSysUser10.getRowCount() == 0) {
+      throw StateError('ADD_SYSUSER10 no regresó datos del usuario.');
+    }
 
     rstSysUser10.first();
-    data.tablaTroncalRst = rstSysUser10;
+
+    SmxConstants_core.instancia = "SALDIFY";
+    SmxConstants_core.usuario = rstSysUser10.getValue('SYSUSER99_USUARIO');
+    SmxConstants_core.clave = rstSysUser10.getValue('SYSUSER99_PASSWORD');
+
+    resetJsonSend();
+
+    rstSysUser10.first();
+    rstSysUser10.tabla = 'SYSUSER10_CAB_MOVIL';
 
     if (rstSysUser10.getValue('RELA_SYSJSON02') <= 0) {
-      int idImage = await _callWSImageLoad();
-      rstSysUser10.update('RELA_SYSJSON02', idImage);
-      await callTroncalSave(rstSysUser10);
+      data.tablaTroncalRst = rstSysUser10;
+
+      final idImage = await _callWSImageLoad();
+
+      if (idImage > 0) {
+        rstSysUser10.update('RELA_SYSJSON02', idImage);
+        await callTroncalSave(rstSysUser10);
+      }
     }
   }
 
@@ -190,5 +185,9 @@ class SmxLogonMovil extends SmxTmpCtl {
 
     //jsonSend.files!.values.first.uuidFile!;
     return jsonSend.files!.values.first.idSysJson02;
+  }
+
+  static String _sql(String value) {
+    return value.trim().replaceAll("'", "''");
   }
 }

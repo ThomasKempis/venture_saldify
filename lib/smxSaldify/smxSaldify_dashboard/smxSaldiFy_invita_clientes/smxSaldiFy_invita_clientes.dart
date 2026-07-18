@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:venture_saldify/smxApis/smxConstants.dart';
 import 'package:venture_saldify/smxApis/smxDepth.dart';
+import 'package:venture_saldify/smxLayout/smxBackgrounds/smx_saldify_sheet_bg.dart';
 import 'package:venture_saldify/smxLayout/smxColors.dart';
 import 'package:venture_saldify/smxLayout/smxBackgrounds/saldify_circles_background.dart';
 
@@ -163,87 +164,60 @@ class _InvitaClientesSheetState extends State<_InvitaClientesSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      top: false,
-      child: Container(
-        clipBehavior: Clip.antiAlias,
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0xFFFBFEFE), Color(0xFFF3FAF9), Color(0xFFEEF7F6)],
-          ),
-          borderRadius: BorderRadius.vertical(top: Radius.circular(26)),
+    return SmxSaldifySheetBackground(
+      child: SingleChildScrollView(
+        padding: EdgeInsets.fromLTRB(
+          22,
+          20,
+          22,
+          20 + MediaQuery.paddingOf(context).bottom,
         ),
-        child: Stack(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Positioned.fill(
-              child: CustomPaint(
-                painter: SaldifyCirclesBackgroundPainter(
-                  accentColor: SmxColors.brandSecondary,
+            Row(
+              children: [
+                const Icon(
+                  Icons.qr_code_2_rounded,
+                  color: SmxColors.brandPrimary,
+                  size: 28,
                 ),
-              ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    widget.anfitrionNombre,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: SmxColors.textDark,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ),
+              ],
             ),
-            SingleChildScrollView(
-              padding: EdgeInsets.fromLTRB(
-                22,
-                20,
-                22,
-                20 + MediaQuery.paddingOf(context).bottom,
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Row(
-                    children: [
-                      const Icon(
-                        Icons.qr_code_2_rounded,
-                        color: SmxColors.brandPrimary,
-                        size: 28,
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Text(
-                          widget.anfitrionNombre,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            color: SmxColors.textDark,
-                            fontSize: 18,
-                            fontWeight: FontWeight.w900,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 18),
-                  const _SectionDivider(
-                    label: 'Si esta presente puede leer el QR',
-                  ),
-                  const SizedBox(height: 14),
-                  _QrInvitePanel(
-                    invitacion: _invitacionAbierta,
-                    loading: _loadingQr,
-                    onCopy: _copyInvitacionAbierta,
-                  ),
-                  const SizedBox(height: 18),
-                  const _SectionDivider(
-                    label: 'Puede invitar por correo Gmail',
-                  ),
-                  const SizedBox(height: 14),
-                  _GmailInviteRow(
-                    controller: _correoController,
-                    loading: _loadingCorreo,
-                    onCopy: _copyInvitacionCorreo,
-                  ),
-                  const SizedBox(height: 18),
-                  const _SectionDivider(label: 'Mensaje'),
-                  const SizedBox(height: 10),
-                  _InviteMessage(mensaje: _mensaje),
-                ],
-              ),
+            const SizedBox(height: 18),
+            const _SectionDivider(label: 'Si esta presente puede leer el QR'),
+            const SizedBox(height: 14),
+            _QrInvitePanel(
+              invitacion: _invitacionAbierta,
+              loading: _loadingQr,
+              onCopy: _copyInvitacionAbierta,
             ),
+            const SizedBox(height: 18),
+            const _SectionDivider(label: 'Puede invitar por correo Gmail'),
+            const SizedBox(height: 14),
+            _GmailInviteRow(
+              controller: _correoController,
+              loading: _loadingCorreo,
+              onCopy: _copyInvitacionCorreo,
+            ),
+            const SizedBox(height: 18),
+            const _SectionDivider(label: 'Mensaje'),
+            const SizedBox(height: 10),
+            _InviteMessage(mensaje: _mensaje),
           ],
         ),
       ),

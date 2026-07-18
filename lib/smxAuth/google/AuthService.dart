@@ -1,4 +1,4 @@
-import '../smxAuth.dart';
+import '../models/smxAuthUser.dart';
 import 'AuthRepository.dart';
 
 abstract class AuthService {

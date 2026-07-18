@@ -34,7 +34,7 @@ class SmxSaldifyLogonController extends SmxController {
     required super.data,
     String codigoInicial = '',
   }) {
-    SmxConstants_core.instancia = SmxConfig.titulo.toUpperCase();
+    SmxConstants_core.instancia = "SALDIFY";
     resetJsonSend();
 
     hasCodigoInicialValido = SmxCodeInvitado.isValid(codigoInicial);
