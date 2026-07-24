@@ -4,19 +4,17 @@ import 'package:venture_saldify/smxLayout/smxScreens/smxPagos/smxPagosModels.dar
 import 'package:venture_widgets/smxCallBaseStateful.dart';
 import 'package:venture_widgets/smxController/smxControllerSendData.dart';
 
-import '../../smxSaldifyCliente_dashboard/smxSaldiFyCliente_metricas/smxSaldiFyCliente_metricas_snapshot.dart';
+import '../../../smxApis/smxConstants.dart';
 import 'smxSaldiFyCliente_pagos_controller.dart';
 
 class SmxSaldiFyClientePagos extends StatelessWidget {
   final String clientName;
   final int idSysuser11;
-  final SmxSaldiFyClienteMetricasSnapshot? metricasIniciales;
 
   const SmxSaldiFyClientePagos({
     super.key,
     required this.clientName,
     required this.idSysuser11,
-    this.metricasIniciales,
   });
 
   @override
@@ -31,9 +29,13 @@ class SmxSaldiFyClientePagos extends StatelessWidget {
         controller: controller,
         model: SmxPagosViewModel(
           clientName: clientName,
-          credito: metricasIniciales?.credito ?? 0,
-          disponible: metricasIniciales?.disponible ?? 0,
-          saldo: metricasIniciales?.saldo ?? 0,
+          credito: SmxConstants.rstMetricasCliente.getValue(
+            'SYSUSER12_CREDITO',
+          ),
+          disponible: SmxConstants.rstMetricasCliente.getValue(
+            'SYSUSER12_DISPONIBLE',
+          ),
+          saldo: SmxConstants.rstMetricasCliente.getValue('SYSUSER12_BALANCE'),
           formSubtitle:
               'Captura el deposito para que tu anfitrion lo confirme.',
           keyPrefix: 'cliente_pago',

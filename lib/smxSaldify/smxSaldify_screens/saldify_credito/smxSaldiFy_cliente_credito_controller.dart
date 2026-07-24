@@ -186,6 +186,7 @@ class SmxSaldiFyClienteCreditoController extends SmxController {
   void _setDefaults() {
     rstSysuser12.update('RELA_SYSUSER11', idSysuser11);
     rstSysuser12.update('SYSUSER12_CREDITO', 0.0);
+    rstSysuser12.update('SYSUSER12_COMISION', 0.0);
     rstSysuser12.update('SYSUSER12_PLAN', 1);
     rstSysuser12.update('SYSUSER12_PORCENTAJE', 0.0);
     rstSysuser12.update('SYSUSER12_CORTE_TIPO', 1);

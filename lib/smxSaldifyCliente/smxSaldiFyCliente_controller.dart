@@ -17,6 +17,7 @@ class SmxSaldiFyClienteController extends SmxController {
   final SmxLogonMovil controllerMain = SmxConstants.controllerMain;
   late SmxRowSet rstClienteCredito;
   SmxSaldiFyClienteStatus status = SmxSaldiFyClienteStatus.invalido;
+  String? _mensajeInvitacion;
 
   SmxSaldiFyClienteController({required super.alias, required super.data});
 
@@ -36,34 +37,33 @@ class SmxSaldiFyClienteController extends SmxController {
       return;
     }
 
-    String aliasSql = 'QRY_SYSUSER10_SYSUSER11';
+    const aliasSql = 'ADD_SYSUSER10_SYSUSER11';
 
     removeSql(aliasSql);
 
-    addSql(
+    addSTrans(
       aliasSql,
-      "select * from QRY_SYSUSER10_SYSUSER11 "
-      "where UUID_ANFITRION = '${SmxConstants.uuidAnfitrionParam}' "
-      "and ${_getInvitadoSqlCondition()}",
+      "select * from ADD_SYSUSER10_SYSUSER11("
+      "'${SmxConstants.uuidAnfitrionParam}', "
+      "'${controllerMain.getCorreo()}')",
     );
 
-    await getRowSetFuture(aliasSql);
+    await getCallWS();
 
     rstClienteCredito = getRowset(aliasSql);
 
-    if (rstClienteCredito.getRowCount() == 0 &&
-        SmxConstants.hasCorreoInvitado &&
-        controllerMain.getCorreo() == SmxConstants.correoInvitadoParam) {
-      addSTrans(
-        'ADD_SYSUSER10_SYSUSER11',
-        "select * from ADD_SYSUSER10_SYSUSER11("
-            "'${SmxConstants.uuidAnfitrionParam}', "
-            "'${SmxConstants.correoInvitadoParam}')",
-      );
+    if (rstClienteCredito.getRowCount() == 0) {
+      status = SmxSaldiFyClienteStatus.invalido;
+      return;
+    }
 
-      await getCallWS();
+    rstClienteCredito.first();
 
-      rstClienteCredito = getRowset('ADD_SYSUSER10_SYSUSER11');
+    final mensaje = rstClienteCredito.getValue('MENSAJE').trim();
+    if (mensaje.isNotEmpty && mensaje.toUpperCase() != 'OK') {
+      _mensajeInvitacion = mensaje;
+      status = _getStatusInvitacion();
+      return;
     }
 
     status = _getStatusInvitacion();
@@ -90,6 +90,10 @@ class SmxSaldiFyClienteController extends SmxController {
   }
 
   String? get mensajeValidacion {
+    if (_mensajeInvitacion != null) {
+      return _mensajeInvitacion;
+    }
+
     return switch (status) {
       SmxSaldiFyClienteStatus.aceptado => null,
       SmxSaldiFyClienteStatus.pendiente =>
@@ -103,6 +107,12 @@ class SmxSaldiFyClienteController extends SmxController {
   }
 
   String get tituloValidacion {
+    if (_mensajeInvitacion != null) {
+      return status == SmxSaldiFyClienteStatus.archivado
+          ? 'Vinculo archivado'
+          : 'Estado de la invitación';
+    }
+
     return switch (status) {
       SmxSaldiFyClienteStatus.pendiente => 'Invitacion pendiente',
       SmxSaldiFyClienteStatus.archivado => 'Vinculo archivado',
@@ -123,14 +133,6 @@ class SmxSaldiFyClienteController extends SmxController {
     }
 
     return false;
-  }
-
-  String _getInvitadoSqlCondition() {
-    if (SmxConstants.hasUuidInvitado) {
-      return "UUID_INVITADO = '${SmxConstants.uuidInvitadoParam}'";
-    }
-
-    return "upper(INVITADO_CORREO) = upper('${SmxConstants.correoInvitadoParam}')";
   }
 
   String get uuidUsuarioLogueado {

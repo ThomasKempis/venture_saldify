@@ -2,6 +2,13 @@
 
 Este documento resume la arquitectura actual del proyecto y la filosofia de la plataforma SMX/Venture. Debe leerse antes de crear pantallas, controllers, mocks o conexiones nuevas, especialmente si se trabaja con Codex, IA u otro desarrollador que no conoce el framework interno.
 
+Para la red comercial, invitaciones, clientes administrados, metricas globales y
+catalogo heredado consultar tambien:
+
+```text
+ARCHITECTURE_RED_INVITACIONES_CATALOGO.md
+```
+
 ## Vision general
 
 Venture Saldify no debe tratarse como una app Flutter comun basada solamente en modelos Dart, listas hardcodeadas y widgets que consumen objetos manuales.

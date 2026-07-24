@@ -10,11 +10,15 @@ import 'smxSaldiFyCliente_anfitrion_controller.dart';
 import 'smxSaldiFyCliente_anfitrion_skeleton.dart';
 
 class SmxSaldiFyClienteAnfitrion extends StatelessWidget {
-  final SmxSaldiFyClienteDashboardController dashboardController;
+  final SmxSaldiFyClienteDashboardController? dashboardController;
+  final bool desdeDashboardAnfitrion;
+  final int relaSysuser11;
 
   const SmxSaldiFyClienteAnfitrion({
     super.key,
-    required this.dashboardController,
+    this.dashboardController,
+    this.desdeDashboardAnfitrion = false,
+    this.relaSysuser11 = -1,
   });
 
   @override
@@ -24,6 +28,8 @@ class SmxSaldiFyClienteAnfitrion extends StatelessWidget {
         alias: 'SMXSALDIFY_CLIENTE_ANFITRION',
         data: SmxControllerSendData(context: context),
         dashboardController: dashboardController,
+        desdeDashboardAnfitrion: desdeDashboardAnfitrion,
+        relaSysuser11: relaSysuser11,
       ),
       loadingBuilder: (_) => const SmxSaldiFyClienteAnfitrionSkeleton(),
       builder: (context, controller) =>

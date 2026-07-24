@@ -7,9 +7,14 @@ import '../../../smxApis/smxConstants.dart';
 
 class SmxSaldiFyMetricasController extends SmxController {
   final ValueNotifier<SmxRowSet?> rstMetricas = ValueNotifier<SmxRowSet?>(null);
+  final VoidCallback? onMetricasLoaded;
   bool _refreshingMetricas = false;
 
-  SmxSaldiFyMetricasController({required super.alias, required super.data});
+  SmxSaldiFyMetricasController({
+    required super.alias,
+    required super.data,
+    this.onMetricasLoaded,
+  });
 
   @override
   Future<void> init() async {
@@ -20,6 +25,7 @@ class SmxSaldiFyMetricasController extends SmxController {
     _prepareMetricasSql();
 
     await SmxRowSetTrack.run(controller: this, call: () => _loadMetricas());
+    onMetricasLoaded?.call();
   }
 
   Future<void> refreshMetricasBackground() async {
@@ -29,6 +35,7 @@ class SmxSaldiFyMetricasController extends SmxController {
     try {
       _prepareMetricasSql();
       await _loadMetricas();
+      onMetricasLoaded?.call();
     } catch (_) {
       return;
     } finally {
@@ -48,8 +55,10 @@ class SmxSaldiFyMetricasController extends SmxController {
   Future<void> _loadMetricas() async {
     await getRowSetFuture('QRY_SYSUSER11_SALDOS_ANFITRION');
 
-    rstMetricas.value = getRowset('QRY_SYSUSER11_SALDOS_ANFITRION');
-    rstMetricas.value!.first();
+    final rst = getRowset('QRY_SYSUSER11_SALDOS_ANFITRION');
+    rst.first();
+    SmxConstants.rstMetricasAnfitrion = rst;
+    rstMetricas.value = rst;
   }
 
   @override

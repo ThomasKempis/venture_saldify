@@ -33,10 +33,7 @@ class SmxSaldiFyComprasCarritoController
 
     addSql(
       aliasCatalogo,
-      'SELECT * FROM QRY_SYSUSER41 '
-      'WHERE RELA_SYSUSER10 = $catalogOwnerId '
-      'AND SYSUSER41_STATUS = 0 '
-      'ORDER BY SYSUSER41_PRODUCTO',
+      'SELECT * FROM QRY_SYSUSER41_CARRITO($catalogOwnerId)',
     );
 
     final cargarVacios =

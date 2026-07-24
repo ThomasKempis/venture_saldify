@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:venture_core_connect/smxDataBase/smxRowSet.dart';
 import 'package:venture_saldify/smxApis/smxDepth.dart';
 import 'package:venture_saldify/smxLayout/smxColors.dart';
@@ -39,6 +40,7 @@ class SmxSaldiFyClientes extends StatefulWidget {
 class _SmxSaldiFyClientesState extends State<SmxSaldiFyClientes> {
   bool _showAllClients = false;
   bool _loadedNotified = false;
+  int? _expandedClientId;
 
   @override
   Widget build(BuildContext context) {
@@ -69,9 +71,17 @@ class _SmxSaldiFyClientesState extends State<SmxSaldiFyClientes> {
             controller: controller,
             clientes: rstClientes,
             showAllClients: _showAllClients,
+            expandedClientId: _expandedClientId,
             onClientArchive: (index, name) =>
                 _archiveCliente(controller, index, name),
             onClientArchived: () => _notifyArchived(controller),
+            onClientExpansionChanged: (idSysuser11) {
+              setState(() {
+                _expandedClientId = _expandedClientId == idSysuser11
+                    ? null
+                    : idSysuser11;
+              });
+            },
             onShowAllClientsChanged: (value) {
               setState(() {
                 _showAllClients = value;
@@ -145,8 +155,10 @@ class _SmxSaldiFyClientesView extends StatelessWidget {
   final SmxSaldiFyClientesController controller;
   final SmxRowSet clientes;
   final bool showAllClients;
+  final int? expandedClientId;
   final Future<bool> Function(int index, String name) onClientArchive;
   final VoidCallback onClientArchived;
+  final ValueChanged<int> onClientExpansionChanged;
   final ValueChanged<bool> onShowAllClientsChanged;
 
   const _SmxSaldiFyClientesView({
@@ -157,8 +169,10 @@ class _SmxSaldiFyClientesView extends StatelessWidget {
     required this.controller,
     required this.clientes,
     required this.showAllClients,
+    required this.expandedClientId,
     required this.onClientArchive,
     required this.onClientArchived,
+    required this.onClientExpansionChanged,
     required this.onShowAllClientsChanged,
   });
 
@@ -181,10 +195,12 @@ class _SmxSaldiFyClientesView extends StatelessWidget {
           clientes: clientes,
           controller: controller,
           showAll: showAllClients,
+          expandedClientId: expandedClientId,
           onClientTap: onClientTap,
           onClientNovedadTap: onClientNovedadTap,
           onClientArchive: onClientArchive,
           onClientArchived: onClientArchived,
+          onClientExpansionChanged: onClientExpansionChanged,
         ),
       ],
     );
@@ -242,10 +258,12 @@ class _ClientCards extends StatelessWidget {
   final SmxRowSet clientes;
   final SmxSaldiFyClientesController controller;
   final bool showAll;
+  final int? expandedClientId;
   final ValueChanged<SmxSaldiFyClientTapData> onClientTap;
   final ValueChanged<SmxSaldiFyClientTapData>? onClientNovedadTap;
   final Future<bool> Function(int index, String name) onClientArchive;
   final VoidCallback onClientArchived;
+  final ValueChanged<int> onClientExpansionChanged;
 
   const _ClientCards({
     required this.isMobile,
@@ -253,10 +271,12 @@ class _ClientCards extends StatelessWidget {
     required this.clientes,
     required this.controller,
     required this.showAll,
+    required this.expandedClientId,
     required this.onClientTap,
     required this.onClientNovedadTap,
     required this.onClientArchive,
     required this.onClientArchived,
+    required this.onClientExpansionChanged,
   });
 
   @override
@@ -277,6 +297,8 @@ class _ClientCards extends StatelessWidget {
       );
       final uuidInvitado = _getClientValue(index, controller.getClientUuid);
       final name = _getClientValue(index, controller.getClientName);
+      final email = _getClientValue(index, controller.getClientEmail);
+      final phone = _getClientValue(index, controller.getClientPhone);
       final status = _getClientValue(index, controller.getClientStatus);
       final statusType = _ClientStatusType.fromValue(
         _getClientValue(index, controller.getClientStatusType),
@@ -317,6 +339,8 @@ class _ClientCards extends StatelessWidget {
         _SlidableClientCard(
           key: ValueKey('cliente_activo_$idSysuser11'),
           name: name,
+          email: email,
+          phone: phone,
           status: status,
           statusType: statusType,
           cutDate: cutDate,
@@ -327,6 +351,8 @@ class _ClientCards extends StatelessWidget {
           balance: balance,
           noveCompras: noveCompras,
           novePagos: novePagos,
+          expanded: expandedClientId == idSysuser11,
+          onExpansionTap: () => onClientExpansionChanged(idSysuser11),
           onTap: () => onClientTap(clientTapData),
           onNovedadTap: onClientNovedadTap == null
               ? null
@@ -386,6 +412,8 @@ class _ClientCards extends StatelessWidget {
 
 class _SlidableClientCard extends StatelessWidget {
   final String name;
+  final String email;
+  final String phone;
   final String status;
   final _ClientStatusType statusType;
   final String cutDate;
@@ -396,6 +424,8 @@ class _SlidableClientCard extends StatelessWidget {
   final String balance;
   final int noveCompras;
   final int novePagos;
+  final bool expanded;
+  final VoidCallback onExpansionTap;
   final VoidCallback onTap;
   final VoidCallback? onNovedadTap;
   final Future<bool> Function() confirmArchive;
@@ -404,6 +434,8 @@ class _SlidableClientCard extends StatelessWidget {
   const _SlidableClientCard({
     super.key,
     required this.name,
+    required this.email,
+    required this.phone,
     required this.status,
     required this.statusType,
     required this.cutDate,
@@ -414,6 +446,8 @@ class _SlidableClientCard extends StatelessWidget {
     required this.balance,
     required this.noveCompras,
     required this.novePagos,
+    required this.expanded,
+    required this.onExpansionTap,
     required this.onTap,
     this.onNovedadTap,
     required this.confirmArchive,
@@ -455,6 +489,8 @@ class _SlidableClientCard extends StatelessWidget {
           blurRadius: 7,
           child: _ClientCard(
             name: name,
+            email: email,
+            phone: phone,
             status: status,
             statusType: statusType,
             cutDate: cutDate,
@@ -465,6 +501,8 @@ class _SlidableClientCard extends StatelessWidget {
             balance: balance,
             noveCompras: noveCompras,
             novePagos: novePagos,
+            expanded: expanded,
+            onExpansionTap: onExpansionTap,
             onTap: onTap,
             onNovedadTap: onNovedadTap,
           ),
@@ -514,6 +552,8 @@ enum _ClientStatusType {
 
 class _ClientCard extends StatelessWidget {
   final String name;
+  final String email;
+  final String phone;
   final String status;
   final _ClientStatusType statusType;
   final String cutDate;
@@ -524,11 +564,15 @@ class _ClientCard extends StatelessWidget {
   final String balance;
   final int noveCompras;
   final int novePagos;
+  final bool expanded;
+  final VoidCallback onExpansionTap;
   final VoidCallback onTap;
   final VoidCallback? onNovedadTap;
 
   const _ClientCard({
     required this.name,
+    required this.email,
+    required this.phone,
     required this.status,
     required this.statusType,
     required this.cutDate,
@@ -539,6 +583,8 @@ class _ClientCard extends StatelessWidget {
     required this.balance,
     required this.noveCompras,
     required this.novePagos,
+    required this.expanded,
+    required this.onExpansionTap,
     required this.onTap,
     this.onNovedadTap,
   });
@@ -580,89 +626,113 @@ class _ClientCard extends StatelessWidget {
                   ),
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Padding(
+                    padding: EdgeInsets.fromLTRB(
+                      16,
+                      16,
+                      16,
+                      hasNovedades ? 14 : 16,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Expanded(
-                          child: Text(
-                            name,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              color: SmxColors.textDark,
-                              fontSize: 18,
-                              fontWeight: FontWeight.w900,
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                name,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  color: SmxColors.textDark,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w900,
+                                ),
+                              ),
                             ),
-                          ),
+                            const SizedBox(width: 8),
+                            _StatusBadge(
+                              label: status,
+                              statusType: statusType,
+                              expanded: expanded,
+                              onTap: onExpansionTap,
+                            ),
+                          ],
                         ),
-                        const SizedBox(width: 8),
-                        _StatusBadge(label: status, statusType: statusType),
+                        const SizedBox(height: 14),
+                        _ClientContactLine(
+                          label: 'Correo',
+                          value: email,
+                          onTap: email.isEmpty
+                              ? null
+                              : () => _launchContact(
+                                  context,
+                                  Uri(scheme: 'mailto', path: email),
+                                  'No se pudo abrir el correo.',
+                                ),
+                        ),
+                        const SizedBox(height: 8),
+                        _ClientContactLine(
+                          label: 'Telefono',
+                          value: phone,
+                          onTap: phone.isEmpty
+                              ? null
+                              : () => _launchContact(
+                                  context,
+                                  Uri(scheme: 'tel', path: phone),
+                                  'No se pudo abrir el telefono.',
+                                ),
+                        ),
+                        const SizedBox(height: 14),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _ClientSummaryMetric(
+                                label: 'Saldo',
+                                value: SmxRowSet.formatAmount(balance),
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: _ClientSummaryMetric(
+                                label: 'Disponible',
+                                value: SmxRowSet.formatAmount(availableCredit),
+                                emphasis: true,
+                              ),
+                            ),
+                          ],
+                        ),
+                        AnimatedSize(
+                          duration: const Duration(milliseconds: 220),
+                          curve: Curves.easeOutCubic,
+                          alignment: Alignment.topCenter,
+                          child: expanded
+                              ? Padding(
+                                  padding: const EdgeInsets.only(top: 14),
+                                  child: _ClientDetails(
+                                    cutDate: cutDate,
+                                    credit: credit,
+                                    purchases: purchases,
+                                    payments: payments,
+                                  ),
+                                )
+                              : const SizedBox.shrink(),
+                        ),
                       ],
                     ),
-                    const SizedBox(height: 16),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _ClientData(label: 'Corte', value: cutDate),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: _ClientData(
-                            label: 'Credito',
-                            value: SmxRowSet.formatAmount(credit),
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: _ClientData(
-                            label: 'Disponible',
-                            value: SmxRowSet.formatAmount(availableCredit),
-                            emphasis: true,
-                          ),
-                        ),
-                      ],
+                  ),
+                  if (hasNovedades) ...[
+                    Divider(height: 1, color: SmxColors.blackAlpha(.12)),
+                    _NovedadesLine(
+                      compras: noveCompras,
+                      pagos: novePagos,
+                      onTap: onNovedadTap,
                     ),
-                    const SizedBox(height: 10),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _ClientData(
-                            label: 'Compras',
-                            value: SmxRowSet.formatAmount(purchases),
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: _ClientData(
-                            label: 'Pagos',
-                            value: SmxRowSet.formatAmount(payments),
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: _ClientData(
-                            label: 'Saldo',
-                            value: SmxRowSet.formatAmount(balance),
-                          ),
-                        ),
-                      ],
-                    ),
-                    if (hasNovedades) ...[
-                      const SizedBox(height: 16),
-                      Divider(height: 1, color: SmxColors.blackAlpha(.12)),
-                      const SizedBox(height: 12),
-                      _NovedadesLine(
-                        compras: noveCompras,
-                        pagos: novePagos,
-                        onTap: onNovedadTap,
-                      ),
-                    ],
                   ],
-                ),
+                ],
               ),
             ],
           ),
@@ -670,13 +740,33 @@ class _ClientCard extends StatelessWidget {
       ),
     );
   }
+
+  Future<void> _launchContact(
+    BuildContext context,
+    Uri uri,
+    String errorMessage,
+  ) async {
+    if (await launchUrl(uri)) return;
+    if (!context.mounted) return;
+
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(errorMessage)));
+  }
 }
 
 class _StatusBadge extends StatelessWidget {
   final String label;
   final _ClientStatusType statusType;
+  final bool expanded;
+  final VoidCallback onTap;
 
-  const _StatusBadge({required this.label, required this.statusType});
+  const _StatusBadge({
+    required this.label,
+    required this.statusType,
+    required this.expanded,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -699,18 +789,41 @@ class _StatusBadge extends StatelessWidget {
       ),
     };
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
+    return Semantics(
+      button: true,
+      label: '$label. ${expanded ? 'Ocultar' : 'Mostrar'} detalles',
+      child: Material(
         color: colors.bg,
         borderRadius: BorderRadius.circular(999),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          color: colors.fg,
-          fontSize: 11,
-          fontWeight: FontWeight.w900,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(999),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(10, 6, 6, 6),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(
+                    color: colors.fg,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                const SizedBox(width: 2),
+                AnimatedRotation(
+                  turns: expanded ? .5 : 0,
+                  duration: const Duration(milliseconds: 180),
+                  child: Icon(
+                    Icons.keyboard_arrow_down_rounded,
+                    color: colors.fg,
+                    size: 17,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -730,78 +843,46 @@ class _NovedadesLine extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final total = compras + pagos;
     final detalle = [
       if (compras > 0) '$compras ${compras == 1 ? 'compra' : 'compras'}',
       if (pagos > 0) '$pagos ${pagos == 1 ? 'pago' : 'pagos'}',
-    ].join('  •  ');
+    ].join(' · ');
 
     return Material(
       color: SmxColors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
-          child: Align(
-            alignment: Alignment.centerRight,
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 360),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 46,
-                    height: 46,
-                    decoration: BoxDecoration(
-                      color: SmxColors.whiteAlpha(.78),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.notifications_none_rounded,
-                      color: SmxColors.dangerForeground,
-                      size: 26,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Flexible(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          '$total ${total == 1 ? 'gestion pendiente' : 'gestiones pendientes'}',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            color: SmxColors.dangerForeground,
-                            fontSize: 15,
-                            fontWeight: FontWeight.w900,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          detalle,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            color: SmxColors.textMuted,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w900,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  const Icon(
-                    Icons.chevron_right_rounded,
-                    color: SmxColors.textDark,
-                    size: 32,
-                  ),
-                ],
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          child: Row(
+            children: [
+              const SizedBox(
+                width: 28,
+                height: 28,
+                child: Center(
+                  child: Text('🔔', style: TextStyle(fontSize: 20)),
+                ),
               ),
-            ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  detalle,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: SmxColors.dangerForeground,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              const Icon(
+                Icons.chevron_right_rounded,
+                color: SmxColors.textDark,
+                size: 24,
+              ),
+            ],
           ),
         ),
       ),
@@ -809,12 +890,74 @@ class _NovedadesLine extends StatelessWidget {
   }
 }
 
-class _ClientData extends StatelessWidget {
+class _ClientContactLine extends StatelessWidget {
+  final String label;
+  final String value;
+  final VoidCallback? onTap;
+
+  const _ClientContactLine({
+    required this.label,
+    required this.value,
+    this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        SizedBox(
+          width: 62,
+          child: Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              color: SmxColors.textMuted,
+              fontSize: 11,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Material(
+            color: SmxColors.transparent,
+            child: InkWell(
+              onTap: onTap,
+              borderRadius: BorderRadius.circular(4),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 2),
+                child: Text(
+                  value.isEmpty ? 'Sin registro' : value,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: onTap == null
+                        ? SmxColors.textMuted
+                        : SmxColors.brandPrimary,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w800,
+                    decoration: onTap == null
+                        ? TextDecoration.none
+                        : TextDecoration.underline,
+                    decorationColor: SmxColors.brandPrimary,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ClientSummaryMetric extends StatelessWidget {
   final String label;
   final String value;
   final bool emphasis;
 
-  const _ClientData({
+  const _ClientSummaryMetric({
     required this.label,
     required this.value,
     this.emphasis = false,
@@ -823,39 +966,135 @@ class _ClientData extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 9),
       decoration: BoxDecoration(
         color: emphasis ? SmxColors.accentAlpha(.16) : SmxColors.surfaceData,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(8),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
-          Text(
-            label,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              color: SmxColors.textMuted,
-              fontSize: 10,
-              fontWeight: FontWeight.w900,
+          Expanded(
+            child: Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                color: SmxColors.textMuted,
+                fontSize: 10,
+                fontWeight: FontWeight.w900,
+              ),
             ),
           ),
-          const SizedBox(height: 8),
-          FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: Alignment.centerLeft,
-            child: Text(
-              value,
-              style: const TextStyle(
-                color: SmxColors.textDark,
-                fontSize: 14,
-                fontWeight: FontWeight.w900,
+          const SizedBox(width: 6),
+          Flexible(
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerRight,
+              child: Text(
+                value,
+                style: const TextStyle(
+                  color: SmxColors.textDark,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w900,
+                ),
               ),
             ),
           ),
         ],
       ),
+    );
+  }
+}
+
+class _ClientDetails extends StatelessWidget {
+  final String cutDate;
+  final String credit;
+  final String purchases;
+  final String payments;
+
+  const _ClientDetails({
+    required this.cutDate,
+    required this.credit,
+    required this.purchases,
+    required this.payments,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Divider(height: 1, color: SmxColors.blackAlpha(.12)),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: _ClientDetailValue(label: 'Corte', value: cutDate),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _ClientDetailValue(
+                label: 'Credito',
+                value: SmxRowSet.formatAmount(credit),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        Row(
+          children: [
+            Expanded(
+              child: _ClientDetailValue(
+                label: 'Compras',
+                value: SmxRowSet.formatAmount(purchases),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _ClientDetailValue(
+                label: 'Pagos',
+                value: SmxRowSet.formatAmount(payments),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _ClientDetailValue extends StatelessWidget {
+  final String label;
+  final String value;
+
+  const _ClientDetailValue({required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            color: SmxColors.textMuted,
+            fontSize: 11,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            value,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.right,
+            style: const TextStyle(
+              color: SmxColors.textDark,
+              fontSize: 12,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

@@ -49,6 +49,6 @@ abstract class SmxConfig {
   static String get descripcion {
     return _appMode == 'redcontrol'
         ? 'CONTROL TOTAL DE TU RED'
-        : 'SMART BALANCE & CREDITS CONTROL';
+        : 'RE DE VENTAS Y CRÉDITOS EN LÍNEA';
   }
 }

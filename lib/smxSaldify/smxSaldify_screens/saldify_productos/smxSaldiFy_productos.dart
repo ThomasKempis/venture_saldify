@@ -96,8 +96,23 @@ class _ProductosViewState extends State<_ProductosView> {
                         ).pop(widget.controller.cambioDisponibilidadCatalogo),
                       ),
                       const SizedBox(height: 24),
+                      if (widget.controller.puedeHeredarCatalogo) ...[
+                        _CatalogSourceSelector(
+                          inherited: widget.controller.usaCatalogoAnfitrion,
+                          enabled: !widget.controller.isChangingCatalogMode,
+                          onChanged: (inherited) async {
+                            setState(() => _showForm = false);
+                            final changed = await widget.controller
+                                .setUsaCatalogoAnfitrion(inherited);
+                            if (!mounted || !changed) return;
+                            setState(() => _savedSomething = true);
+                          },
+                        ),
+                        const SizedBox(height: 20),
+                      ],
                       _ListHeader(
                         showForm: _showForm,
+                        readOnly: widget.controller.usaCatalogoAnfitrion,
                         onAddTap: () async {
                           if (!_showForm) {
                             await widget.controller.prepareNuevo();
@@ -130,6 +145,7 @@ class _ProductosViewState extends State<_ProductosView> {
                       ],
                       _ProductosList(
                         controller: widget.controller,
+                        readOnly: widget.controller.usaCatalogoAnfitrion,
                         onStatusChanged: () =>
                             setState(() => _savedSomething = true),
                         onEdit: (index) async {
@@ -153,44 +169,143 @@ class _ProductosViewState extends State<_ProductosView> {
 
 class _ListHeader extends StatelessWidget {
   final bool showForm;
+  final bool readOnly;
   final VoidCallback onAddTap;
 
-  const _ListHeader({required this.showForm, required this.onAddTap});
+  const _ListHeader({
+    required this.showForm,
+    required this.readOnly,
+    required this.onAddTap,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        const Expanded(
+        Expanded(
           child: Text(
-            'Tus productos',
-            style: TextStyle(
+            readOnly ? 'Productos de tu anfitrión' : 'Tus productos',
+            style: const TextStyle(
               color: SmxColors.white,
               fontSize: 22,
               fontWeight: FontWeight.w900,
             ),
           ),
         ),
-        Material(
-          color: SmxColors.brandAccent,
-          borderRadius: BorderRadius.circular(999),
-          clipBehavior: Clip.antiAlias,
-          child: InkWell(
-            onTap: onAddTap,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
-              child: Text(
-                showForm ? 'Cerrar' : '+ Agregar',
-                style: const TextStyle(
-                  color: SmxColors.textDark,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w900,
+        if (!readOnly)
+          Material(
+            color: SmxColors.brandAccent,
+            borderRadius: BorderRadius.circular(999),
+            clipBehavior: Clip.antiAlias,
+            child: InkWell(
+              onTap: onAddTap,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 9,
+                ),
+                child: Text(
+                  showForm ? 'Cerrar' : '+ Agregar',
+                  style: const TextStyle(
+                    color: SmxColors.textDark,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w900,
+                  ),
                 ),
               ),
             ),
           ),
-        ),
       ],
+    );
+  }
+}
+
+class _CatalogSourceSelector extends StatelessWidget {
+  final bool inherited;
+  final bool enabled;
+  final ValueChanged<bool> onChanged;
+
+  const _CatalogSourceSelector({
+    required this.inherited,
+    required this.enabled,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: SmxColors.transparent,
+      borderRadius: BorderRadius.circular(20),
+      clipBehavior: Clip.antiAlias,
+      child: Ink(
+        decoration: BoxDecoration(
+          color: SmxColors.whiteAlpha(.95),
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: SmxColors.blackAlpha(.22),
+              blurRadius: 34,
+              offset: const Offset(0, 16),
+            ),
+          ],
+        ),
+        child: Stack(
+          children: [
+            const Positioned.fill(child: InvitaClienteCardBg()),
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    'Catálogo que utilizarás',
+                    style: const TextStyle(
+                      color: SmxColors.textDark,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    inherited
+                        ? 'Los productos de tu anfitrión se muestran en modo de consulta.'
+                        : 'Puedes administrar tus propios productos.',
+                    style: const TextStyle(
+                      color: SmxColors.textMuted,
+                      fontSize: 12,
+                      height: 1.35,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  SegmentedButton<bool>(
+                    segments: const [
+                      ButtonSegment<bool>(
+                        value: false,
+                        icon: Icon(Icons.inventory_2_outlined),
+                        label: Text('Mi catálogo'),
+                      ),
+                      ButtonSegment<bool>(
+                        value: true,
+                        icon: Icon(Icons.storefront_outlined),
+                        label: Text('De mi anfitrión'),
+                      ),
+                    ],
+                    selected: {inherited},
+                    onSelectionChanged: enabled
+                        ? (selection) => onChanged(selection.first)
+                        : null,
+                    showSelectedIcon: true,
+                    style: const ButtonStyle(
+                      visualDensity: VisualDensity.compact,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -342,11 +457,13 @@ class _ProductoImagenPanel extends StatelessWidget {
 
 class _ProductosList extends StatelessWidget {
   final SmxSaldiFyProductosController controller;
+  final bool readOnly;
   final ValueChanged<int> onEdit;
   final VoidCallback onStatusChanged;
 
   const _ProductosList({
     required this.controller,
+    required this.readOnly,
     required this.onEdit,
     required this.onStatusChanged,
   });
@@ -364,16 +481,18 @@ class _ProductosList extends StatelessWidget {
           emptyText: 'No tienes productos activos.',
           indexes: activos,
           controller: controller,
+          readOnly: readOnly,
           onEdit: onEdit,
           onToggleStatus: (index) => _toggleStatus(context, index),
         ),
-        if (archivados.isNotEmpty) ...[
+        if (!readOnly && archivados.isNotEmpty) ...[
           const SizedBox(height: 22),
           _ProductosSection(
             title: 'Archivados',
             emptyText: 'No tienes productos archivados.',
             indexes: archivados,
             controller: controller,
+            readOnly: false,
             onEdit: onEdit,
             onToggleStatus: (index) => _toggleStatus(context, index),
           ),
@@ -415,6 +534,7 @@ class _ProductosSection extends StatelessWidget {
   final String emptyText;
   final List<int> indexes;
   final SmxSaldiFyProductosController controller;
+  final bool readOnly;
   final ValueChanged<int> onEdit;
   final ValueChanged<int> onToggleStatus;
 
@@ -423,6 +543,7 @@ class _ProductosSection extends StatelessWidget {
     required this.emptyText,
     required this.indexes,
     required this.controller,
+    required this.readOnly,
     required this.onEdit,
     required this.onToggleStatus,
   });
@@ -454,8 +575,10 @@ class _ProductosSection extends StatelessWidget {
               existencia: controller.getExistenciaAt(indexes[position]),
               imageUrl: controller.getProductoImageUrlAt(indexes[position]),
               status: controller.getStatusAt(indexes[position]),
-              onTap: () => onEdit(indexes[position]),
-              onToggleStatus: () => onToggleStatus(indexes[position]),
+              onTap: readOnly ? null : () => onEdit(indexes[position]),
+              onToggleStatus: readOnly
+                  ? null
+                  : () => onToggleStatus(indexes[position]),
             ),
           ],
       ],
@@ -494,8 +617,8 @@ class _ProductoTile extends StatelessWidget {
   final int existencia;
   final String imageUrl;
   final int status;
-  final VoidCallback onTap;
-  final VoidCallback onToggleStatus;
+  final VoidCallback? onTap;
+  final VoidCallback? onToggleStatus;
 
   const _ProductoTile({
     required this.nombre,
@@ -587,16 +710,17 @@ class _ProductoTile extends StatelessWidget {
                       ],
                     ),
                   ),
-                  IconButton(
-                    onPressed: onToggleStatus,
-                    icon: Icon(
-                      isArchived
-                          ? Icons.unarchive_rounded
-                          : Icons.archive_outlined,
-                      color: isArchived ? Colors.red : SmxColors.textMuted,
-                      size: 22,
+                  if (onToggleStatus != null)
+                    IconButton(
+                      onPressed: onToggleStatus,
+                      icon: Icon(
+                        isArchived
+                            ? Icons.unarchive_rounded
+                            : Icons.archive_outlined,
+                        color: isArchived ? Colors.red : SmxColors.textMuted,
+                        size: 22,
+                      ),
                     ),
-                  ),
                 ],
               ),
             ),

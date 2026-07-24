@@ -18,9 +18,8 @@ class SmxSaldiFyClienteController extends SmxController {
   bool lastSaveOk = false;
   bool isCorreoResolved = false;
   bool datosEditable = true;
-  bool existingSysuser10 = false;
+  bool usuarioAdministraCuenta = false;
   int resolveVersion = 0;
-  int editaFind = -1;
 
   String correoBusqueda = '';
   String correoResolved = '';
@@ -54,28 +53,49 @@ class SmxSaldiFyClienteController extends SmxController {
           : 'select * from SYSUSER10_CAB_MOVIL where 1 = 0',
     );
 
-    if (!isUpdate) {
-      addSql('SYSUSER11', 'select * from SYSUSER11_DET_CONTACTOS where 1 = 0');
-    }
+    addSql(
+      'SYSUSER11',
+      isUpdate
+          ? 'select * from SYSUSER11_DET_CONTACTOS '
+                'where RELA_SYSUSER10 = $relaSysuser10Cliente '
+                'and RELA_SYSUSER10_ANFITRION = '
+                '${SmxConstants.controllerMain.rstSysUser10.getId()}'
+          : 'select * from SYSUSER11_DET_CONTACTOS where 1 = 0',
+    );
 
     await getRowSetFuture('SYSUSER10');
 
     rstSysuser10 = getRowset('SYSUSER10');
     rstSysuser10.tabla = 'SYSUSER10_CAB_MOVIL';
+    rstSysuser11 = getRowset('SYSUSER11');
+    rstSysuser11.tabla = 'SYSUSER11_DET_CONTACTOS';
 
     if (isUpdate) {
-      data.accion = AccionNN.W;
       rstSysuser10.first();
-      rstSysuser10.setAccion(AccionNN.W);
+
+      if (rstSysuser11.getRowCount() > 0) {
+        rstSysuser11.first();
+        final statusAccion = rstSysuser11
+            .getValue('SYSUSER11_STATUS_ACCION')
+            .toString()
+            .trim()
+            .toUpperCase();
+        datosEditable = statusAccion == 'A';
+        usuarioAdministraCuenta = statusAccion == 'I';
+      } else {
+        datosEditable = false;
+      }
+
+      data.accion = datosEditable ? AccionNN.W : AccionNN.N;
+      rstSysuser10.setAccion(datosEditable ? AccionNN.W : AccionNN.N);
+
       final correo =
           rstSysuser10.getValue('SYSUSER10_CORREO')?.toString() ?? '';
       correoBusqueda = _getGmailUser(correo);
       correoResolved = _buildGmailAddress(correo);
       _setCorreoLocalPart();
+      _markResolved();
     } else {
-      rstSysuser11 = getRowset('SYSUSER11');
-      rstSysuser11.tabla = 'SYSUSER11_DET_CONTACTOS';
-
       data.accion = AccionNN.I;
       rstSysuser10.insert();
       _setDefaults();
@@ -88,11 +108,10 @@ class SmxSaldiFyClienteController extends SmxController {
   Future<bool> resolveCorreo(String value) async {
     final context = data.context;
     if (context == null) return false;
+    if (isUpdate) return isCorreoResolved;
 
     isCorreoResolved = false;
-    existingSysuser10 = false;
     datosEditable = true;
-    editaFind = -1;
 
     if (!_isValidGmailUser(value)) {
       showSmxValidDialog(
@@ -103,6 +122,20 @@ class SmxSaldiFyClienteController extends SmxController {
     }
 
     final correo = _buildGmailAddress(value);
+    final correoAnfitrion = _buildGmailAddress(
+      SmxConstants.controllerMain.rstSysUser10
+          .getValue('SYSUSER10_CORREO')
+          .toString(),
+    );
+
+    if (correo == correoAnfitrion) {
+      showSmxValidDialog(
+        context,
+        mensaje: 'No puede registrarse como su propio cliente.',
+      );
+      return false;
+    }
+
     correoBusqueda = _getGmailUser(correo);
     correoResolved = correo;
 
@@ -111,8 +144,7 @@ class SmxSaldiFyClienteController extends SmxController {
       'QRY_SYSUSER10_FIND',
       'select * from QRY_SYSUSER10_FIND('
           '${SmxConstants.controllerMain.rstSysUser10.getId()}, '
-          "'${_sql(correo)}', "
-          '${isUpdate ? 0 : 1})',
+          "'${_sql(correo)}')",
     );
 
     await showDialogWait(context, () async {
@@ -128,38 +160,17 @@ class SmxSaldiFyClienteController extends SmxController {
     }
 
     final rstFind = getRowset('QRY_SYSUSER10_FIND');
-    existingSysuser10 = rstFind.getRowCount() > 0;
-
-    if (!existingSysuser10) {
-      editaFind = 1;
-      await _prepareNotFoundEmail(correo);
-      _markResolved();
-      return true;
-    }
-
-    rstFind.first();
-
-    final idSysuser10 = rstFind.getId();
-    final edita = rstFind.getValue('EDITA');
-    editaFind = edita;
-
-    if (isUpdate && idSysuser10 > 0 && idSysuser10 != relaSysuser10Cliente) {
+    if (rstFind.getRowCount() > 0) {
+      rstFind.first();
+      if (!context.mounted) return false;
       showSmxValidDialog(
         context,
-        mensaje: 'Este correo pertenece a otro cliente.',
+        mensaje: rstFind.getValue('SYSUSER10_STATUS').toString(),
       );
       return false;
     }
 
-    if (!isUpdate && edita == 2) {
-      isCorreoResolved = false;
-      showSmxValidDialog(context, mensaje: 'Ya esta registrado en mi sistema.');
-      return false;
-    }
-
-    datosEditable = edita == 1;
-    _setSysuser10FromFind(rstFind, correo);
-    _configureSysuser10Action();
+    _prepareAltaEmail(correo);
     _markResolved();
 
     return true;
@@ -180,11 +191,6 @@ class SmxSaldiFyClienteController extends SmxController {
       return;
     }
 
-    if (editaFind == 2 && !isUpdate) {
-      showSmxValidDialog(context, mensaje: 'Ya esta registrado en mi sistema.');
-      return;
-    }
-
     if (isUpdate && !datosEditable) {
       lastSaveOk = true;
       return;
@@ -201,18 +207,14 @@ class SmxSaldiFyClienteController extends SmxController {
         return;
       }
 
-      final correo = _buildGmailAddress(getText('SYSUSER10_CORREO'));
+      final correo = correoResolved;
       rstSysuser10.update('SYSUSER10_CORREO', correo);
       rstSysuser10.update('SYSUSER10_CORREO_01', correo);
     }
 
     if (!isUpdate) {
-      if (existingSysuser10 && !datosEditable) {
-        await _saveRelacionOnly(context);
-      } else {
-        _setRelacionPendiente();
-        await _saveSysuser10(context);
-      }
+      _setRelacionPendiente();
+      await _saveSysuser10(context);
       return;
     }
 
@@ -228,23 +230,10 @@ class SmxSaldiFyClienteController extends SmxController {
   @override
   void filtro(Function(String, Cancela) refresh) {}
 
-  Future<void> _prepareNotFoundEmail(String correo) async {
-    if (!isUpdate) {
-      removeSql('SYSUSER10');
-      addSql('SYSUSER10', 'select * from SYSUSER10_CAB_MOVIL where 1 = 0');
-      await getRowSetFuture('SYSUSER10');
-
-      rstSysuser10 = getRowset('SYSUSER10');
-      rstSysuser10.tabla = 'SYSUSER10_CAB_MOVIL';
-      rstSysuser10.insert();
-      _setDefaults();
-      data.accion = AccionNN.I;
-    }
-
+  void _prepareAltaEmail(String correo) {
     rstSysuser10.first();
     rstSysuser10.update('SYSUSER10_CORREO', _getGmailUser(correo));
     rstSysuser10.update('SYSUSER10_CORREO_01', correo);
-    setText('SYSUSER10_CORREO', _getGmailUser(correo));
 
     data.tablaTroncalRst = rstSysuser10;
     data.tablaTroncal = 'SYSUSER10_CAB_MOVIL';
@@ -262,48 +251,6 @@ class SmxSaldiFyClienteController extends SmxController {
     rstSysuser10.update('SYSUSER10_GEOLOC_ULT', '');
   }
 
-  void _setSysuser10FromFind(SmxRowSet rstFind, String correo) {
-    rstSysuser10.first();
-    rstSysuser10.update('RELA_SYSJSON02', rstFind.getValue('RELA_SYSJSON02'));
-    rstSysuser10.update('ID_SYSUSER10', rstFind.getId());
-    rstSysuser10.update(
-      'SYSUSER10_NOMBRES',
-      rstFind.getValue('SYSUSER10_NOMBRES') ?? '',
-    );
-    rstSysuser10.update(
-      'SYSUSER10_APELLIDOS',
-      rstFind.getValue('SYSUSER10_APELLIDOS') ?? '',
-    );
-    rstSysuser10.update(
-      'SYSUSER10_TELEFONO',
-      rstFind.getValue('SYSUSER10_TELEFONO') ?? '',
-    );
-    rstSysuser10.update('SYSUSER10_CORREO', _getGmailUser(correo));
-    rstSysuser10.update('SYSUSER10_CORREO_01', correo);
-    setText('SYSUSER10_CORREO', _getGmailUser(correo));
-    rstSysuser10.update(
-      'SYSUSER10_FECHA',
-      rstFind.getValue('SYSUSER10_FECHA') ?? DateTime.now(),
-    );
-
-    final geoloc = rstFind.getValue('SYSUSER10_GEOLOC_ULT');
-    if (geoloc != null) {
-      rstSysuser10.update('SYSUSER10_GEOLOC_ULT', geoloc);
-    }
-  }
-
-  void _configureSysuser10Action() {
-    if (datosEditable) {
-      data.accion = AccionNN.W;
-      rstSysuser10.setAccion(AccionNN.W);
-    } else {
-      rstSysuser10.setAccion(AccionNN.N);
-    }
-
-    data.tablaTroncalRst = rstSysuser10;
-    data.tablaTroncal = 'SYSUSER10_CAB_MOVIL';
-  }
-
   void _markResolved() {
     isCorreoResolved = true;
     resolveVersion++;
@@ -316,7 +263,7 @@ class SmxSaldiFyClienteController extends SmxController {
       return false;
     }
 
-    if (!_isValidGmailUser(getText('SYSUSER10_CORREO'))) {
+    if (!_isValidGmailUser(correoBusqueda)) {
       showSmxValidDialog(
         context,
         mensaje: 'Debe ingresar un usuario Gmail valido.',
@@ -349,33 +296,12 @@ class SmxSaldiFyClienteController extends SmxController {
     );
     rstSysuser11.update('RELA_SYSUSER10', rstSysuser10.getId());
     rstSysuser11.update('SYSUSER11_STATUS', 0);
+    rstSysuser11.update('SYSUSER11_STATUS_ACCION', 'A');
   }
 
   Future<void> _saveSysuser10(BuildContext context) async {
     await showDialogWait(context, () async {
       await callTroncalSave(rstSysuser10);
-    });
-
-    if (jsonSend.getError() != null) {
-      final currentContext = data.context;
-      if (currentContext != null && currentContext.mounted) {
-        showSmxSystemErrorDialog(currentContext, message: jsonSend.error!);
-      }
-      return;
-    }
-
-    lastSaveOk = true;
-  }
-
-  Future<void> _saveRelacionOnly(BuildContext context) async {
-    _prepareRelacionPendiente();
-
-    data.accion = AccionNN.I;
-    data.tablaTroncalRst = rstSysuser11;
-    data.tablaTroncal = 'SYSUSER11_DET_CONTACTOS';
-
-    await showDialogWait(context, () async {
-      await callTroncalSave(rstSysuser11);
     });
 
     if (jsonSend.getError() != null) {
@@ -413,9 +339,9 @@ class SmxSaldiFyClienteController extends SmxController {
   bool _isValidGmailUser(String value) {
     final correo = value.trim().toLowerCase();
     if (correo.isEmpty) return false;
-    if (correo.contains('@') && !correo.endsWith('@gmail.com')) return false;
+    if (correo.contains('@')) return false;
 
-    final user = _getGmailUser(correo);
+    final user = correo;
     if (user.isEmpty || user.contains('@')) return false;
 
     return RegExp(r'^[a-z0-9._%+-]+$').hasMatch(user);

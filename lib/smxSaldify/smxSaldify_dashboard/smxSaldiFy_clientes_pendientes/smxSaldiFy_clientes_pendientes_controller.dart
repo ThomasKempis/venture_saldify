@@ -3,6 +3,7 @@ import 'package:venture_saldify/smxLayout/smx_message_dialog.dart';
 import 'package:venture_core_connect/smxJson/SmxJsonUtil.dart';
 import 'package:venture_widgets/smxClassDrivers.dart';
 import 'package:venture_widgets/smxController/smxController.dart';
+import 'package:venture_widgets/smxController/smxRowSetTrack.dart';
 import 'package:venture_widgets/smxShowDialog/smxShowDialogs.dart';
 
 import '../../../smxApis/smxConstants.dart';
@@ -26,7 +27,10 @@ class SmxSaldiFyClientesPendientesController extends SmxController {
       "select * from QRY_SYSUSER11(0, ${SmxConstants.controllerMain.rstSysUser10.getId()})",
     );
 
-    await getRowSetFuture('QRY_SYSUSER11_PENDIENTES');
+    await SmxRowSetTrack.run(
+      controller: this,
+      call: () => getRowSetFuture('QRY_SYSUSER11_PENDIENTES'),
+    );
 
     rstClientesPendientes = getRowset('QRY_SYSUSER11_PENDIENTES');
     rstClientesPendientes.first();
@@ -136,6 +140,7 @@ class SmxSaldiFyClientesPendientesController extends SmxController {
     rstUpdate.first();
     rstUpdate.setAccion(AccionNN.W);
     rstUpdate.update('SYSUSER11_STATUS', 1);
+    rstUpdate.update('SYSUSER11_STATUS_ACCION', 'A');
 
     await showDialogWait(context, () async {
       await callTroncalSave(rstUpdate);
@@ -153,6 +158,7 @@ class SmxSaldiFyClientesPendientesController extends SmxController {
     rstActivated.first();
     rstActivated.setAccion(AccionNN.N);
     rstActivated.update('SYSUSER11_STATUS', 1);
+    rstActivated.update('SYSUSER11_STATUS_ACCION', 'A');
     rstActivated.setAccion(AccionNN.N);
 
     rstClientesPendientes.deleteBuffer();

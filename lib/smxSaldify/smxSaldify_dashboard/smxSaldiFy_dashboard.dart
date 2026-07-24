@@ -5,6 +5,7 @@ import 'package:venture_saldify/smxLayout/smxColors.dart';
 import 'package:venture_saldify/smxLayout/smxLayout.dart';
 
 import '../../smxApis/smxConstants.dart';
+import '../smxSaldify_screens/saldify_ranking/smxSaldiFy_ranking.dart';
 import 'smxSaldiFy_dashboard_controller.dart';
 import 'smxSaldiFy_dashboard_ini.dart';
 import 'smxSaldiFy_dashboard_main.dart';
@@ -89,19 +90,30 @@ class _SmxSaldiFyDashboardState extends State<SmxSaldiFyDashboard> {
                                       !SmxLayout.isWebStandalone,
                                 ),
                                 SizedBox(height: layout.isMobile ? 26 : 34),
-                                Text(
-                                  'Hola, ${widget.adminName}',
-                                  style: const TextStyle(
-                                    color: SmxColors.white70,
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w700,
-                                  ),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        'Hola, ${widget.adminName}',
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                          color: SmxColors.white70,
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    const SmxSaldiFyRanking(),
+                                  ],
                                 ),
                                 const SizedBox(height: 8),
                                 SmxSaldiFyMetricas(
                                   isMobile: layout.isMobile,
                                   refreshNotifier:
                                       _controller.metricasRevisionNotifier,
+                                  onMetricasLoaded: _onMetricasLoaded,
                                 ),
                                 SizedBox(height: layout.isMobile ? 16 : 20),
                                 ValueListenableBuilder<
@@ -204,6 +216,11 @@ class _SmxSaldiFyDashboardState extends State<SmxSaldiFyDashboard> {
   Future<void> _refreshDashboard() async {
     _controller.clearClientes();
     await widget.onRefresh?.call();
+  }
+
+  void _onMetricasLoaded() {
+    if (!mounted) return;
+    _controller.onMetricasLoaded();
   }
 }
 

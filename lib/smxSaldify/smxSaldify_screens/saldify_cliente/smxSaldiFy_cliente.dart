@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:venture_saldify/smxLayout/smxColors.dart';
 import 'package:venture_saldify/smxLayout/smxLayout.dart';
 import 'package:venture_widgets/smxCallBaseStateful.dart';
@@ -40,7 +41,6 @@ class _ClienteView extends StatefulWidget {
 
 class _ClienteViewState extends State<_ClienteView> {
   late final TextEditingController _correoController;
-  bool _didAutoResolve = false;
 
   SmxSaldiFyClienteController get controller => widget.controller;
 
@@ -71,18 +71,6 @@ class _ClienteViewState extends State<_ClienteView> {
 
   @override
   Widget build(BuildContext context) {
-    if (controller.isUpdate && !_didAutoResolve) {
-      _didAutoResolve = true;
-      WidgetsBinding.instance.addPostFrameCallback((_) async {
-        if (!mounted) return;
-        await controller.resolveCorreo(_correoController.text);
-        if (!mounted) return;
-
-        _correoController.text = controller.correoBusqueda;
-        setState(() {});
-      });
-    }
-
     final layout = SmxLayout.sizeFromWidth(MediaQuery.of(context).size.width);
     final pagePadding = layout.pagePadding;
     final topContentInset = SmxLayout.topContentInset(context);
@@ -192,13 +180,34 @@ class _CorreoSearchField extends StatelessWidget {
     return TextField(
       controller: correoController,
       enabled: enabled,
+      autocorrect: false,
+      textCapitalization: TextCapitalization.none,
+      inputFormatters: [
+        FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9._%+-]')),
+        TextInputFormatter.withFunction((oldValue, newValue) {
+          return newValue.copyWith(text: newValue.text.toLowerCase());
+        }),
+      ],
       onSubmitted: (_) => onSubmitted(),
       keyboardType: TextInputType.emailAddress,
       textInputAction: TextInputAction.search,
       decoration: InputDecoration(
         labelText: 'Usuario de Gmail',
         hintText: 'nombre.apellido',
-        helperText: 'Solo lo que va antes de @gmail.com.',
+        suffixIcon: const Padding(
+          padding: EdgeInsets.only(right: 14),
+          child: Center(
+            widthFactor: 1,
+            child: Text(
+              '@gmail.com',
+              style: TextStyle(
+                color: SmxColors.textMuted,
+                fontSize: 14,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ),
+        ),
         filled: true,
         fillColor: SmxColors.whiteAlpha(.92),
         contentPadding: const EdgeInsets.symmetric(
@@ -279,10 +288,14 @@ class _FormPanel extends StatelessWidget {
             key: ValueKey('fecha_${controller.resolveVersion}'),
             field: 'SYSUSER10_FECHA',
             controller: controller,
-            label: 'Fecha',
+            label: 'Fecha Nacimiento',
             withEmpty: false,
             readOnly: readOnly,
           ),
+          if (controller.usuarioAdministraCuenta) ...[
+            const SizedBox(height: 18),
+            const _UsuarioAdministraCuentaNotice(),
+          ],
           const SizedBox(height: 22),
           Align(
             alignment: Alignment.centerRight,
@@ -297,6 +310,60 @@ class _FormPanel extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _UsuarioAdministraCuentaNotice extends StatelessWidget {
+  const _UsuarioAdministraCuentaNotice();
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: SmxColors.dangerBackground,
+        borderRadius: BorderRadius.circular(4),
+        border: Border.all(color: SmxColors.dangerForeground),
+      ),
+      child: const Padding(
+        padding: EdgeInsets.all(14),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(
+              Icons.error_outline_rounded,
+              color: SmxColors.dangerForeground,
+              size: 24,
+            ),
+            SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Atención',
+                    style: TextStyle(
+                      color: SmxColors.dangerForeground,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    'Este usuario ya ingresó a tu red y tomó control de su cuenta. Solo él puede modificar sus datos personales.',
+                    style: TextStyle(
+                      color: SmxColors.dangerForeground,
+                      fontSize: 14,
+                      height: 1.35,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -1,0 +1,467 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>SaldiFY - Propuesta Comercial</title><style>:root{color-scheme:light;--ink:#172033;--line:#d9dee8;--brand:#0e7773;--soft:#eef7f6;--code:#f5f7fb}*{box-sizing:border-box}body{margin:0;background:#fff;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;font-size:11.5pt;line-height:1.55}main{max-width:900px;margin:0 auto;padding:46px 56px 64px}h1{margin:0 0 18px;color:var(--brand);font-size:30pt;line-height:1.1;border-bottom:3px solid var(--brand);padding-bottom:14px}h2{margin:34px 0 12px;color:#1f2a44;font-size:18pt;line-height:1.2;page-break-after:avoid}h3{margin:24px 0 10px;color:var(--brand);font-size:14pt;page-break-after:avoid}p{margin:0 0 11px}ul,ol{margin:8px 0 14px 24px;padding:0}li{margin:4px 0}table{width:100%;border-collapse:collapse;margin:14px 0 18px;page-break-inside:avoid}th,td{border:1px solid var(--line);padding:8px 10px;vertical-align:top}th{background:var(--soft);color:#163f43;font-weight:700}pre{background:var(--code);border:1px solid var(--line);border-left:4px solid var(--brand);border-radius:6px;padding:12px 14px;overflow-wrap:anywhere;white-space:pre-wrap;page-break-inside:avoid}code{font-family:"SFMono-Regular",Consolas,monospace;font-size:9.5pt}@page{size:letter;margin:16mm 15mm}@media print{body{font-size:10.5pt}main{max-width:none;padding:0}h1{font-size:25pt}h2{font-size:16pt;margin-top:26px}h3{font-size:12.5pt}}</style></head><body><main><h1>SaldiFY - Propuesta Comercial</h1>
+<p>Ultima revision: 2026-07-21</p>
+<h2>1. Resumen Ejecutivo</h2>
+<p>SaldiFY es una plataforma digital para administrar redes comerciales de</p>
+<p>anfitriones, vendedores, clientes e invitados, con control de credito, compras,</p>
+<p>pagos, carrito, catalogo, historial, invitaciones y seguimiento operativo.</p>
+<p>El producto fue desarrollado con apoyo de inteligencia artificial aplicada al</p>
+<p>analisis funcional, diseno de interfaz, generacion asistida de codigo,</p>
+<p>documentacion y validacion de flujos. La solucion no parte de una plantilla</p>
+<p>generica: se construyo sobre una plataforma propietaria Venture/SMX con mas de</p>
+<p>17 anos de evolucion, actualmente llevada a Flutter y conectada a un servidor</p>
+<p>propio de servicios web.</p>
+<p>El objetivo comercial de SaldiFY es ofrecer a negocios, distribuidores,</p>
+<p>mayoristas, vendedores independientes y redes comerciales una herramienta para</p>
+<p>organizar su operacion diaria de credito y ventas sin depender de hojas de</p>
+<p>calculo, mensajes sueltos o controles manuales.</p>
+<h2>2. Potencial Comercial</h2>
+<p>SaldiFY atiende una necesidad muy comun en Mexico y Latinoamerica: redes de</p>
+<p>venta, credito y cobranza que operan de manera informal o semiestructurada.</p>
+<p>Muchos negocios venden a credito, trabajan con distribuidores, revendedores,</p>
+<p>clientes frecuentes o grupos de vendedores externos. Sin embargo, suelen llevar</p>
+<p>el control en libretas, Excel, WhatsApp o sistemas administrativos que no</p>
+<p>entienden la relacion de red.</p>
+<p>SaldiFY esta pensado para ese espacio:</p>
+<ul>
+<li>un anfitrion puede administrar clientes;</li>
+<li>un cliente puede participar como invitado;</li>
+<li>ese mismo cliente puede convertirse en anfitrion de su propia red;</li>
+<li>una red puede crecer por invitaciones;</li>
+<li>un anfitrion/cliente puede cambiar de red conservando su arbol descendente;</li>
+<li>el credito, las compras, pagos, carrito, productos e historial se mantienen</li>
+</ul>
+<p>dentro de la relacion comercial correspondiente.</p>
+<p>Esto abre potencial para modelos SaaS de bajo costo mensual, white-label para</p>
+<p>empresas de software, integracion a portafolios existentes o comercializacion</p>
+<p>por alianzas con despachos, distribuidores, comercios, redes de venta directa y</p>
+<p>proveedores de sistemas administrativos.</p>
+<h2>3. Diferenciador Frente al Mercado</h2>
+<p>Existen productos de punto de venta, ERP, CRM, cobranza, catalogos digitales,</p>
+<p>carritos y sistemas de facturacion. Sin embargo, SaldiFY combina en una sola</p>
+<p>logica varios elementos que normalmente estan separados:</p>
+<ul>
+<li>red comercial de anfitrion, cliente e invitado;</li>
+<li>usuario con doble rol: cliente de una red y anfitrion de otra;</li>
+<li>arbol de vendedores/clientes con descendientes;</li>
+<li>traslado de red conservando el subarbol;</li>
+<li>credito asignado por relacion;</li>
+<li>compras y pagos ligados a la relacion comercial;</li>
+<li>compra manual, compra por carrito y catalogo;</li>
+<li>catalogo propio, libre o heredado por decision del anfitrion/cliente;</li>
+<li>reputacion visual por estrellas en el dashboard;</li>
+<li>invitaciones por codigo o enlace;</li>
+<li>historial de movimientos;</li>
+<li>administracion por anfitrion o por invitado segun el estado de la relacion.</li>
+</ul>
+<p>El valor principal no esta solo en las pantallas, sino en la combinacion de:</p>
+<pre><code>red comercial + credito + pagos + compras + catalogo + invitaciones + operaciones</code></pre>
+<p>Esa combinacion hace que SaldiFY pueda funcionar como producto independiente o</p>
+<p>como modulo especializado dentro del portafolio de una empresa de software.</p>
+<h2>4. Valores Diferenciales del Producto</h2>
+<h3>4.1 Compra Multimodal</h3>
+<p>SaldiFY no obliga al usuario a comprar de una sola forma. La plataforma permite</p>
+<p>operar distintos estilos de compra segun la realidad del negocio:</p>
+<ul>
+<li>compra manual por requerimiento del invitado o cliente;</li>
+<li>captura de concepto, cantidad e importe cuando el cliente ya sabe lo que</li>
+</ul>
+<p>necesita y cuanto cuesta;</p>
+<ul>
+<li>posibilidad de adjuntar imagen o evidencia;</li>
+<li>compra por carrito cuando existe catalogo de productos;</li>
+<li>compra asistida por el anfitrion cuando el negocio administra la operacion</li>
+</ul>
+<p>por cuenta del cliente.</p>
+<p>Esto permite atender negocios estructurados y tambien operaciones reales donde</p>
+<p>la venta inicia por una solicitud libre, una foto, un mensaje o un acuerdo</p>
+<p>directo entre cliente y anfitrion.</p>
+<h3>4.2 Catalogo Propio, Libre o Heredado</h3>
+<p>El catalogo no es una imposicion vertical. Cada anfitrion puede operar de tres</p>
+<p>formas:</p>
+<ul>
+<li>sin catalogo, usando compra manual/libre;</li>
+<li>con catalogo propio;</li>
+<li>heredando el catalogo de su anfitrion superior.</li>
+</ul>
+<p>Lo mas importante es que un cliente que tambien actua como anfitrion puede</p>
+<p>decidir si hereda o no el catalogo de su anfitrion. Si decide heredarlo, ese</p>
+<p>catalogo puede propagarse por su red descendente, siempre que los siguientes</p>
+<p>anfitriones tambien lo adopten.</p>
+<p>Esto convierte el catalogo en una herramienta de expansion comercial. Un</p>
+<p>mayorista puede ofrecer productos; un distribuidor puede decidir adoptar ese</p>
+<p>catalogo; y su red puede vender usando la misma base de productos sin duplicar</p>
+<p>captura ni perder trazabilidad.</p>
+<h3>4.3 Red Democratica y No Impositiva</h3>
+<p>La red de SaldiFY esta disenada para que el usuario conserve autonomia. El</p>
+<p>anfitrion superior no condiciona de forma absoluta al cliente/anfitrion que esta</p>
+<p>debajo.</p>
+<p>Un cliente puede:</p>
+<ul>
+<li>pertenecer a una red como invitado;</li>
+<li>operar su propia red como anfitrion;</li>
+<li>decidir si usa catalogo propio, libre o heredado;</li>
+<li>decidir si cambia a otra red cuando la operacion comercial lo permite;</li>
+<li>conservar su arbol descendente cuando se mueve a otra red.</li>
+</ul>
+<p>Esto hace que la red sea mas cercana a una estructura comercial viva que a una</p>
+<p>jerarquia rigida. La decision final sobre su operacion la conserva el</p>
+<p>cliente/anfitrion, no necesariamente el anfitrion principal.</p>
+<h3>4.4 Ranking y Valorizacion del Anfitrion</h3>
+<p>SaldiFY incorpora una logica de valorizacion visual del anfitrion mediante</p>
+<p>estrellas en el dashboard. La idea es similar a una reputacion comercial: entre</p>
+<p>mas fuerte sea la red y mejor sea su comportamiento operativo, mayor sera la</p>
+<p>valorizacion del anfitrion.</p>
+<p>Los indicadores que pueden alimentar esa valorizacion incluyen:</p>
+<ul>
+<li>tamano de la red;</li>
+<li>crecimiento de clientes;</li>
+<li>credito total asignado;</li>
+<li>volumen de compras;</li>
+<li>volumen de pagos;</li>
+<li>saldo y disponible;</li>
+<li>comportamiento de cobranza;</li>
+<li>calidad de cartera;</li>
+<li>actividad operativa de la red.</li>
+</ul>
+<p>La app puede calcular estos indicadores automaticamente a partir de las metricas</p>
+<p>de la red. Esto convierte el dashboard en algo mas que una pantalla</p>
+<p>administrativa: tambien funciona como indicador de reputacion, solidez y</p>
+<p>potencial comercial del anfitrion.</p>
+<h2>5. Plataforma Tecnologica</h2>
+<p>SaldiFY reutiliza y extiende una plataforma propietaria Venture/SMX con mas de</p>
+<p>17 anos de evolucion. Esta plataforma funciona como base de arquitectura,</p>
+<p>comunicacion, datos y metodologia.</p>
+<p>La capa actual usa Flutter para la experiencia visual y componentes moviles/web,</p>
+<p>pero no se comporta como una app Flutter generica. Trabaja sobre una metodologia</p>
+<p>propia basada en:</p>
+<ul>
+<li>`SmxController`;</li>
+<li>`SmxRowSet`;</li>
+<li>aliases de consulta;</li>
+<li>rowsets transaccionales;</li>
+<li>webservices propietarios;</li>
+<li>estructura de base de datos con nomenclatura `SYSUSERxx`;</li>
+<li>stored procedures y queries especializadas;</li>
+<li>widgets ligados directamente a campos del rowset;</li>
+<li>orquestacion por JSON de `SmxRowSet`.</li>
+</ul>
+<p>La base de datos conserva la nomenclatura, reglas y estructura. El JSON del</p>
+<p>`SmxRowSet` opera como orquestador entre la app, los widgets, los controladores,</p>
+<p>el servidor de servicios web y la base de datos.</p>
+<p>Arquitectura conceptual:</p>
+<pre><code>Base de datos
+  -&gt; tablas SYSUSERxx / QRY_ / ADD_ / UPDATE_
+  -&gt; reglas de negocio y rowsets
+
+Servidor propietario de servicios web
+  -&gt; recibe solicitudes
+  -&gt; ejecuta consultas/transacciones
+  -&gt; devuelve JSON de SmxRowSet
+
+Flutter / SaldiFY
+  -&gt; SmxController
+  -&gt; SmxRowSet
+  -&gt; widgets SMX
+  -&gt; pantallas, flujos y experiencia de usuario</code></pre>
+<p>Esta arquitectura reduce la duplicacion de modelos, evita resolver reglas</p>
+<p>complejas en la interfaz y permite que la base sea la fuente principal de</p>
+<p>verdad.</p>
+<h2>6. Valor Agregado de Haber Sido Desarrollado con IA</h2>
+<p>SaldiFY se desarrollo con asistencia de inteligencia artificial en distintas</p>
+<p>fases del proceso:</p>
+<ul>
+<li>conceptualizacion de flujos anfitrion/cliente;</li>
+<li>exploracion de UX y diseno de interfaces;</li>
+<li>creacion de mockups iniciales;</li>
+<li>implementacion asistida de pantallas;</li>
+<li>revision de consistencia entre controladores, rowsets y widgets;</li>
+<li>documentacion tecnica y funcional;</li>
+<li>analisis de reglas de red comercial;</li>
+<li>depuracion de escenarios de invitacion, credito, pagos y catalogo;</li>
+<li>generacion de documentacion para asistente interno de ayuda.</li>
+</ul>
+<p>La IA no reemplazo la plataforma propietaria ni la experiencia de negocio. Su</p>
+<p>valor fue acelerar el analisis, reducir iteraciones, documentar decisiones y</p>
+<p>ayudar a convertir ideas funcionales en codigo y arquitectura.</p>
+<p>El resultado es un producto construido en aproximadamente mes y medio, pero con</p>
+<p>un esfuerzo equivalente considerablemente mayor si se hubiera desarrollado de</p>
+<p>forma individual, manual, con diseno, pruebas, control de calidad y</p>
+<p>documentacion completa.</p>
+<h2>7. Alcance Funcional Actual</h2>
+<p>SaldiFY contempla los siguientes modulos y capacidades:</p>
+<ul>
+<li>logon y acceso por Google;</li>
+<li>modo anfitrion;</li>
+<li>modo invitado/cliente;</li>
+<li>dashboard anfitrion;</li>
+<li>dashboard cliente;</li>
+<li>perfil anfitrion/cliente;</li>
+<li>invitaciones por codigo o enlace;</li>
+<li>clientes activos;</li>
+<li>clientes pendientes;</li>
+<li>clientes archivados;</li>
+<li>red de venta / arbol de invitados;</li>
+<li>credito por relacion;</li>
+<li>plan de pago y corte;</li>
+<li>compras manuales;</li>
+<li>compras por carrito;</li>
+<li>solicitud libre con concepto, importe y evidencia;</li>
+<li>pagos;</li>
+<li>confirmacion y rechazo de movimientos;</li>
+<li>historial;</li>
+<li>catalogo de productos;</li>
+<li>catalogo propio o heredado;</li>
+<li>propagacion de catalogo por red cuando el anfitrion/cliente decide heredarlo;</li>
+<li>ranking/valorizacion visual por estrellas;</li>
+<li>metricas de credito, compras, pagos, saldo y disponible;</li>
+<li>documentacion de pantallas para asistente de IA;</li>
+<li>arquitectura documentada para continuidad tecnica.</li>
+</ul>
+<h2>8. Modelo SaaS Potencial</h2>
+<p>Para usuario final, el precio de mercado mas razonable en Mexico estaria en un</p>
+<p>rango bajo de suscripcion mensual. El cliente invitado deberia entrar gratis</p>
+<p>para no frenar la viralidad de la red.</p>
+<p>Modelo sugerido:</p>
+<pre><code>Invitado / cliente final: gratis
+Anfitrion basico: $99 MXN / mes
+Anfitrion Pro: $149 MXN / mes
+Negocio / multiusuario: $249 - $399 MXN / mes
+White-label / empresa: precio especial o revenue share</code></pre>
+<p>La estrategia recomendada es cobrar al anfitrion, porque es quien obtiene el</p>
+<p>beneficio administrativo directo: control de clientes, credito, compras, pagos,</p>
+<p>carrito, catalogo e historial.</p>
+<h2>9. Punto de Equilibrio Comercial</h2>
+<p>Con un precio principal de $149 MXN mensuales por anfitrion, el punto de</p>
+<p>equilibrio depende del costo de adquisicion de cliente, soporte, servidores,</p>
+<p>equipo tecnico y marketing.</p>
+<p>Estimacion operativa:</p>
+<pre><code>Precio mensual por anfitrion: $149 MXN
+Costo variable estimado: $15 - $30 MXN
+Margen bruto estimado: $119 - $134 MXN por anfitrion</code></pre>
+<p>Clientes pagos requeridos para equilibrio mensual:</p>
+<table><thead><tr><th>Gasto fijo mensual</th><th>Anfitriones pagos aproximados</th></tr></thead><tbody>
+<tr><td>$250,000 MXN</td><td>2,000</td></tr>
+<tr><td>$400,000 MXN</td><td>3,200</td></tr>
+<tr><td>$600,000 MXN</td><td>4,800</td></tr>
+<tr><td>$1,000,000 MXN</td><td>8,000</td></tr>
+</tbody></table>
+<p>Si el costo de adquisicion por anfitrion se mantiene entre $100 y $300 MXN, el</p>
+<p>negocio puede recuperar la inversion comercial rapidamente y reinvertir su</p>
+<p>propio flujo. Si el costo de adquisicion sube por encima de $800 MXN, la</p>
+<p>expansion requeriria mayor capital y un ciclo de recuperacion mas largo.</p>
+<h2>10. Alternativas Comerciales</h2>
+<p>Las siguientes alternativas consideran un escenario en el que una empresa desea</p>
+<p>integrar SaldiFY a su portafolio de productos con su imagen, logo, paleta de</p>
+<p>colores y comunicacion comercial.</p>
+<p>Todas las opciones deben formalizarse por contrato.</p>
+<h3>Opcion 1: Sociedad Comercial 60/40</h3>
+<p>Modelo recomendado cuando el socio comercial quiere impulsarlo activamente como</p>
+<p>producto propio dentro de su portafolio.</p>
+<p>Condiciones propuestas:</p>
+<ul>
+<li>El producto se publica con marca, imagen, logo y paleta del socio comercial.</li>
+<li>Rebranding inicial: $100,000 MXN + IVA.</li>
+<li>Reparto comercial: 60% socio comercial / 40% desarrollador.</li>
+<li>Base de calculo: ingresos efectivamente cobrados menos IVA.</li>
+<li>No se descuentan gastos internos de ventas, nomina, publicidad,</li>
+</ul>
+<p>administracion ni soporte comercial del socio, salvo acuerdo expreso.</p>
+<ul>
+<li>El desarrollador conserva la propiedad tecnologica del producto base.</li>
+<li>El socio comercial opera ventas, facturacion, cobranza y atencion comercial.</li>
+<li>El desarrollador mantiene soporte tecnico del producto base.</li>
+<li>Cuota mensual de infraestructura/plataforma: $15,000 a $25,000 MXN + IVA,</li>
+</ul>
+<p>mientras el producto opere sobre servidores y webservices Venture/SMX del</p>
+<p>desarrollador.</p>
+<ul>
+<li>Modificaciones nuevas, integraciones o funcionalidades no existentes se</li>
+</ul>
+<p>cotizan aparte.</p>
+<p>Recomendacion:</p>
+<p>Si se otorga exclusividad, debe existir un minimo garantizado de ventas o de</p>
+<p>ingresos. Si no se cumple, la exclusividad se pierde.</p>
+<h3>Opcion 2: Venta o Licencia Amplia del Producto</h3>
+<p>Modelo recomendado cuando el comprador quiere adquirir el producto con mayor</p>
+<p>control comercial, sin depender de un reparto mensual.</p>
+<p>Rango propuesto:</p>
+<pre><code>$650,000 a $800,000 MXN + IVA</code></pre>
+<p>Condiciones sugeridas:</p>
+<ul>
+<li>Incluye rebranding inicial basico.</li>
+<li>Incluye entrega del producto para integrarlo al portafolio comercial.</li>
+<li>Incluye transferencia tecnica limitada.</li>
+<li>Incluye soporte tecnico inicial por 30 a 60 dias.</li>
+<li>Cuota mensual de infraestructura/plataforma: $15,000 a $25,000 MXN + IVA,</li>
+</ul>
+<p>mientras el producto opere sobre servidores y webservices Venture/SMX del</p>
+<p>desarrollador.</p>
+<ul>
+<li>Modificaciones nuevas se cotizan aparte.</li>
+<li>La propiedad del core Venture/SMX, librerias propietarias o componentes base</li>
+</ul>
+<p>no se transfiere salvo contrato especifico.</p>
+<p>Nota:</p>
+<p>Si el comprador solicita propiedad total, exclusividad, derecho de sublicenciar</p>
+<p>o control completo del codigo fuente como activo propio, el valor debe subir por</p>
+<p>encima de este rango.</p>
+<h3>Opcion 3: White-label de Entrada + Revenue Share 80/20</h3>
+<p>Modelo recomendado para reducir la barrera de entrada del socio comercial sin</p>
+<p>regalar el producto.</p>
+<p>Condiciones propuestas:</p>
+<ul>
+<li>Licencia white-label inicial: $200,000 MXN + IVA.</li>
+<li>Incluye marca, logo, paleta de colores y despliegue inicial.</li>
+<li>Reparto comercial: 80% socio comercial / 20% desarrollador.</li>
+<li>Base de calculo: ingresos efectivamente cobrados menos IVA.</li>
+<li>El desarrollador conserva la propiedad del codigo y producto base.</li>
+<li>Cuota mensual de infraestructura/plataforma: $15,000 a $25,000 MXN + IVA,</li>
+</ul>
+<p>mientras el producto opere sobre servidores y webservices Venture/SMX del</p>
+<p>desarrollador.</p>
+<ul>
+<li>Modificaciones nuevas se cotizan aparte.</li>
+<li>Soporte comercial y atencion al cliente final quedan a cargo del socio</li>
+</ul>
+<p>comercial, salvo acuerdo distinto.</p>
+<p>Recomendacion:</p>
+<p>Esta opcion no debe incluir exclusividad libre. Si el socio comercial pide</p>
+<p>exclusividad, debe existir minimo garantizado mensual o anual. Si no se cumple,</p>
+<p>la licencia puede continuar, pero sin exclusividad.</p>
+<h2>11. Condiciones Comunes Recomendadas</h2>
+<p>Para cualquiera de las opciones anteriores, se recomienda establecer:</p>
+<ol>
+<li>Que se entiende por ingresos cobrados.</li>
+<li>Que impuestos se excluyen antes de calcular porcentajes.</li>
+<li>Que devoluciones o cancelaciones se pueden descontar.</li>
+<li>Si las comisiones de pasarela de pago se descuentan o no.</li>
+<li>Quien factura al cliente final.</li>
+<li>Quien da soporte comercial.</li>
+<li>Quien da soporte tecnico.</li>
+<li>Quien paga infraestructura.</li>
+<li>Que cambios estan incluidos y cuales se cotizan aparte.</li>
+<li>Si existe exclusividad.</li>
+<li>En que territorio o segmento aplica la exclusividad.</li>
+<li>Que minimo de ventas mantiene la exclusividad.</li>
+<li>Si el socio puede sublicenciar.</li>
+<li>Si puede venderlo como activo propio.</li>
+<li>Que ocurre al terminar el contrato.</li>
+</ol>
+<p>Regla recomendada para porcentajes:</p>
+<pre><code>Los porcentajes se calculan sobre ingresos efectivamente cobrados y conciliados,
+menos IVA, devoluciones y, si se acuerda, comisiones directas de pasarela de
+pago.</code></pre>
+<p>No se recomienda calcular porcentajes sobre utilidad neta si no existe una</p>
+<p>definicion contable muy estricta y auditable.</p>
+<h2>12. Cuota Mensual de Infraestructura y Plataforma</h2>
+<p>La cuota mensual de infraestructura es independiente del precio de venta,</p>
+<p>licencia, rebranding, revenue share, soporte comercial o desarrollos nuevos.</p>
+<p>Esta cuota aplica cuando SaldiFY opera sobre la infraestructura propietaria</p>
+<p>Venture/SMX del desarrollador.</p>
+<p>Conceptos incluidos:</p>
+<ul>
+<li>servidor propietario de servicios web;</li>
+<li>operacion de webservices Venture/SMX;</li>
+<li>conexion y disponibilidad de base de datos;</li>
+<li>administracion tecnica basica del ambiente;</li>
+<li>almacenamiento operativo de datos e imagenes/evidencias dentro del uso</li>
+</ul>
+<p>normal;</p>
+<ul>
+<li>respaldos basicos;</li>
+<li>monitoreo operativo inicial;</li>
+<li>certificados, configuracion y continuidad tecnica del servicio.</li>
+</ul>
+<p>Rango sugerido inicial:</p>
+<pre><code>$15,000 a $25,000 MXN + IVA mensuales</code></pre>
+<p>Este rango corresponde a una operacion inicial o moderada. Si el producto escala</p>
+<p>en usuarios, almacenamiento, transacciones, imagenes, respaldos, disponibilidad</p>
+<p>o ambientes separados, la cuota debe ajustarse por volumen.</p>
+<p>Escalamiento recomendado:</p>
+<ul>
+<li>ambiente inicial: $15,000 a $25,000 MXN + IVA mensuales;</li>
+<li>ambiente con mayor uso o mas clientes: cotizacion por consumo y capacidad;</li>
+<li>alta disponibilidad, replicas, respaldos avanzados o ambientes separados:</li>
+</ul>
+<p>cotizacion adicional;</p>
+<ul>
+<li>migracion a infraestructura del socio comercial: cotizacion independiente.</li>
+</ul>
+<p>Si el socio comercial decide operar SaldiFY en su propia infraestructura, la</p>
+<p>cuota mensual de plataforma puede eliminarse, pero la instalacion, migracion,</p>
+<p>configuracion, pruebas, documentacion y transferencia tecnica deben cotizarse</p>
+<p>por separado.</p>
+<h2>13. Exclusividad</h2>
+<p>La exclusividad aumenta el valor comercial del acuerdo porque limita la</p>
+<p>capacidad del desarrollador de vender, licenciar o explotar el producto con</p>
+<p>otros socios.</p>
+<p>Por esa razon, una exclusividad debe incluir:</p>
+<ul>
+<li>periodo definido;</li>
+<li>territorio definido;</li>
+<li>segmento definido;</li>
+<li>minimo garantizado;</li>
+<li>reportes de ventas;</li>
+<li>derecho de auditoria;</li>
+<li>perdida automatica de exclusividad si no se cumple el minimo.</li>
+</ul>
+<p>Ejemplo:</p>
+<pre><code>Exclusividad comercial por Mexico durante 12 meses, condicionada a un minimo de
+ingresos mensuales o anuales. Si el minimo no se cumple, el socio conserva su
+licencia, pero pierde exclusividad.</code></pre>
+<h2>14. Riesgo de Producto Dormido</h2>
+<p>Existe un riesgo comercial importante: que el socio agregue SaldiFY a su pagina</p>
+<p>o portafolio, pero no lo impulse activamente.</p>
+<p>Para evitar que el producto quede detenido, cualquier acuerdo exclusivo debe</p>
+<p>tener compromisos minimos:</p>
+<ul>
+<li>fecha de lanzamiento;</li>
+<li>pagina comercial publicada;</li>
+<li>campana inicial;</li>
+<li>metas de clientes;</li>
+<li>metas de facturacion;</li>
+<li>reuniones mensuales de seguimiento;</li>
+<li>reporte de leads, conversiones y clientes activos.</li>
+</ul>
+<p>Si el socio no cumple, el desarrollador debe conservar el derecho de buscar</p>
+<p>otros canales.</p>
+<h2>15. Recomendacion de Negociacion</h2>
+<p>La opcion mas equilibrada depende del compromiso real del socio comercial.</p>
+<p>Si el socio tiene cartera, marca y capacidad real de ventas, la mejor opcion</p>
+<p>puede ser la sociedad 60/40 con rebranding pagado y metas minimas.</p>
+<p>Si el socio quiere control sin compartir ingresos, la venta/licencia amplia debe</p>
+<p>cerrarse entre $650,000 y $800,000 MXN + IVA como base, subiendo si solicita</p>
+<p>exclusividad o derechos amplios.</p>
+<p>Si el socio quiere probar el producto con menor inversion inicial, la opcion de</p>
+<p>licencia white-label por $200,000 MXN + IVA mas 80/20 permite iniciar, pero debe</p>
+<p>proteger la propiedad del producto y evitar exclusividad sin minimo garantizado.</p>
+<h2>16. Posicionamiento Sugerido</h2>
+<p>SaldiFY puede presentarse comercialmente como:</p>
+<pre><code>Plataforma para administrar redes de venta, credito, compras y pagos entre
+anfitriones, vendedores y clientes.</code></pre>
+<p>Mensaje corto:</p>
+<pre><code>Controla tu red de vendedores y clientes, asigna credito, registra compras,
+recibe pagos y da seguimiento a cada relacion desde una sola plataforma.</code></pre>
+<p>Mensaje ampliado:</p>
+<pre><code>Vende con catalogo propio o heredado, permite compras manuales o por carrito,
+administra credito y pagos, y deja que cada anfitrion haga crecer su propia red
+con reputacion comercial visible.</code></pre>
+<p>Mensaje para portafolio white-label:</p>
+<pre><code>Una solucion en la nube para negocios que venden a credito, trabajan con
+distribuidores o administran redes de clientes y vendedores.</code></pre>
+<h2>17. Conclusion</h2>
+<p>SaldiFY no debe valorarse solo como una app Flutter. Es un producto digital</p>
+<p>construido sobre una plataforma propietaria madura, con una metodologia propia</p>
+<p>de datos, controladores, rowsets, webservices y base de datos.</p>
+<p>Su mayor valor esta en resolver una operacion comercial real: redes de venta y</p>
+<p>credito con clientes que tambien pueden convertirse en anfitriones de su propia</p>
+<p>red.</p>
+<p>Por eso cualquier acuerdo comercial debe cuidar tres elementos:</p>
+<ol>
+<li>No regalar la propiedad tecnologica.</li>
+<li>No aceptar porcentajes calculados sobre utilidad indefinida.</li>
+<li>No otorgar exclusividad sin metas, minimos y derecho de salida.</li>
+</ol>
+<p>La propuesta debe buscar un equilibrio: permitir que el socio comercial gane y</p>
+<p>haga crecer el producto, pero conservando el valor real de la tecnologia,</p>
+<p>arquitectura, conocimiento y trabajo invertido en SaldiFY.</p></main></body></html>

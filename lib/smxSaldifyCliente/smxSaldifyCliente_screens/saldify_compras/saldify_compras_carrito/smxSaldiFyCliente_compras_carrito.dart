@@ -4,21 +4,19 @@ import 'package:venture_saldify/smxLayout/smxScreens/smxComprasCarrito/models/sm
 import 'package:venture_widgets/smxCallBaseStateful.dart';
 import 'package:venture_widgets/smxController/smxControllerSendData.dart';
 
-import '../../../smxSaldifyCliente_dashboard/smxSaldiFyCliente_metricas/smxSaldiFyCliente_metricas_snapshot.dart';
+import '../../../../smxApis/smxConstants.dart';
 import 'smxSaldiFyCliente_compras_carrito_controller.dart';
 
 class SmxSaldiFyClienteComprasCarrito extends StatelessWidget {
   final String clientName;
   final int idSysuser11;
   final int relaSysuser10Anfitrion;
-  final SmxSaldiFyClienteMetricasSnapshot? metricasIniciales;
 
   const SmxSaldiFyClienteComprasCarrito({
     super.key,
     required this.clientName,
     required this.idSysuser11,
     required this.relaSysuser10Anfitrion,
-    this.metricasIniciales,
   });
 
   @override
@@ -35,7 +33,9 @@ class SmxSaldiFyClienteComprasCarrito extends StatelessWidget {
         model: SmxComprasCarritoViewModel(
           clientName: clientName,
           idSysuser11: idSysuser11,
-          disponible: metricasIniciales?.disponible ?? 0,
+          disponible: SmxConstants.rstMetricasCliente.getValue(
+            'SYSUSER12_DISPONIBLE',
+          ),
         ),
       ),
     );

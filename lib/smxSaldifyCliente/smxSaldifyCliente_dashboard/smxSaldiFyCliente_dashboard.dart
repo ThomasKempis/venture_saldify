@@ -52,11 +52,10 @@ class _SmxSaldiFyClienteDashboardState
       return;
     }
 
-    final metricasSnapshot = dashboardController.metricasSnapshot;
     dashboardController = SmxSaldiFyClienteDashboardController(
       clienteController: widget.controller,
       onRefresh: widget.onRefresh,
-    )..metricasSnapshot = metricasSnapshot;
+    );
   }
 
   @override
@@ -116,8 +115,6 @@ class _SmxSaldiFyClienteDashboardState
                               isMobile: layout.isMobile,
                               relaSysuser10Anfitrion:
                                   dashboardController.relaSysuser10Anfitrion,
-                              onMetricasChanged:
-                                  dashboardController.setMetricasSnapshot,
                             ),
                             SizedBox(height: layout.isMobile ? 16 : 20),
                             Text(

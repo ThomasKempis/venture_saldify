@@ -296,7 +296,8 @@ class _SmxSaldifyLogonBodyState extends State<_SmxSaldifyLogonBody> {
                                               offset: Offset(
                                                 0,
                                                 ///compact ? -32 : -24,
-                                                  compact ? -54 : -44
+                                                ///compact ? -54 : -44
+                                                compact ? -64 : -54
                                               ),
                                               child: _WelcomeCard(
                                                 compact: compact,

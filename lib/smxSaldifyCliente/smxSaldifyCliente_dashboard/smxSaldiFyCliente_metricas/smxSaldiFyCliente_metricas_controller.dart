@@ -56,8 +56,10 @@ class SmxSaldiFyClienteMetricasController extends SmxController {
   Future<void> _loadMetricas() async {
     await getRowSetFuture('QRY_SYSUSER11_SALDOS_INVITADO');
 
-    rstMetricas.value = getRowset('QRY_SYSUSER11_SALDOS_INVITADO');
-    rstMetricas.value!.first();
+    final rst = getRowset('QRY_SYSUSER11_SALDOS_INVITADO');
+    rst.first();
+    SmxConstants.rstMetricasCliente = rst;
+    rstMetricas.value = rst;
   }
 
   @override

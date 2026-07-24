@@ -20,6 +20,9 @@ abstract class SmxConstants {
   static SmxRowSet? rstCabeceraVacia;
   static SmxRowSet? rstDetallesVacios;
 
+  static late SmxRowSet rstMetricasAnfitrion;
+  static late SmxRowSet rstMetricasCliente;
+
   static const String codigoInvitacionKey = 'codigo';
   static const String uuidAnfitrionInvitacionKey = 'uuid_anfitrion';
   static const String uuidInvitadoInvitacionKey = 'uuid_invitado';

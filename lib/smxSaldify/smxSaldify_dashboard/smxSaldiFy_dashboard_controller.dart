@@ -25,6 +25,8 @@ class SmxSaldiFyDashboardController {
     0,
   );
   final ValueNotifier<int> metricasRevisionNotifier = ValueNotifier<int>(0);
+  final ValueNotifier<int> anfitrionAnteriorRevisionNotifier =
+      ValueNotifier<int>(0);
 
   SmxRowSet? _rstClientesActivos;
   SmxRowSet? _rstClientesPendientes;
@@ -36,6 +38,11 @@ class SmxSaldiFyDashboardController {
     contentModeNotifier.dispose();
     pendingActionsRevisionNotifier.dispose();
     metricasRevisionNotifier.dispose();
+    anfitrionAnteriorRevisionNotifier.dispose();
+  }
+
+  void onMetricasLoaded() {
+    anfitrionAnteriorRevisionNotifier.value++;
   }
 
   void clearClientes() {
@@ -336,6 +343,13 @@ class SmxSaldiFyDashboardController {
 
     if (action == null || !context.mounted) {
       return false;
+    }
+
+    if (action == 'datos') {
+      return openCliente(
+        context,
+        relaSysuser10Cliente: client.relaSysuser10Cliente,
+      );
     }
 
     if (action == 'compra') {

@@ -97,6 +97,11 @@ class _ClienteActionsSheet extends StatelessWidget {
                     ),
                     const SizedBox(height: 14),
                     _ClienteActionItem(
+                      icon: Icons.manage_accounts_outlined,
+                      label: 'Datos del cliente',
+                      onTap: () => Navigator.of(context).pop('datos'),
+                    ),
+                    _ClienteActionItem(
                       icon: Icons.add_shopping_cart_rounded,
                       label: 'Agregar compra',
                       onTap: () => Navigator.of(context).pop('compra'),

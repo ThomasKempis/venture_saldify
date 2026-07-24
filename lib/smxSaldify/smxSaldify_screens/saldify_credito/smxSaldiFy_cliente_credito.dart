@@ -138,13 +138,31 @@ class _FormPanel extends StatelessWidget {
                 const SizedBox(height: 16),
                 Container(height: 1, color: SmxColors.blackAlpha(.06)),
                 const SizedBox(height: 18),
-                SmxNumberField(
-                  field: 'SYSUSER12_CREDITO',
-                  controller: controller,
-                  label: 'Credito',
-                  decimales: 2,
-                  currency: true,
-                  isValid: true,
+                Row(
+                  children: [
+                    Expanded(
+                      child: SmxNumberField(
+                        field: 'SYSUSER12_CREDITO',
+                        controller: controller,
+                        label: 'Credito',
+                        decimales: 2,
+                        currency: true,
+                        isValid: true,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: SmxNumberField(
+                        field: 'SYSUSER12_COMISION',
+                        controller: controller,
+                        label: 'Comision por venta (%)',
+                        decimales: 2,
+                        minValue: 0,
+                        maxValue: 100,
+                        isValid: true,
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 18),
                 _CutTypeSelector(

@@ -9,20 +9,17 @@ import 'package:venture_widgets/smxCallBaseStateful.dart';
 import 'package:venture_widgets/smxController/smxControllerSendData.dart';
 
 import 'smxSaldiFyCliente_metricas_controller.dart';
-import 'smxSaldiFyCliente_metricas_snapshot.dart';
 
 class SmxSaldiFyClienteMetricas extends StatefulWidget {
   final bool isMobile;
   final int relaSysuser10Anfitrion;
   final ValueListenable<int>? refreshNotifier;
-  final ValueChanged<SmxSaldiFyClienteMetricasSnapshot>? onMetricasChanged;
 
   const SmxSaldiFyClienteMetricas({
     super.key,
     required this.isMobile,
     required this.relaSysuser10Anfitrion,
     this.refreshNotifier,
-    this.onMetricasChanged,
   });
 
   @override
@@ -48,7 +45,6 @@ class _SmxSaldiFyClienteMetricasState extends State<SmxSaldiFyClienteMetricas> {
           child: _SmxSaldiFyClienteMetricasView(
             isMobile: widget.isMobile,
             controller: controller,
-            onMetricasChanged: widget.onMetricasChanged,
           ),
         );
       },
@@ -115,12 +111,10 @@ class _SmxSaldiFyClienteMetricasRefreshListenerState
 class _SmxSaldiFyClienteMetricasView extends StatelessWidget {
   final bool isMobile;
   final SmxSaldiFyClienteMetricasController controller;
-  final ValueChanged<SmxSaldiFyClienteMetricasSnapshot>? onMetricasChanged;
 
   const _SmxSaldiFyClienteMetricasView({
     required this.isMobile,
     required this.controller,
-    this.onMetricasChanged,
   });
 
   @override
@@ -131,26 +125,26 @@ class _SmxSaldiFyClienteMetricasView extends StatelessWidget {
         ValueListenableBuilder<SmxRowSet?>(
           valueListenable: controller.rstMetricas,
           builder: (context, rstMetricas, _) {
-            final metricas = SmxSaldiFyClienteMetricasSnapshot.fromRowSet(
-              rstMetricas,
-            );
             final hasMetricas =
                 rstMetricas != null && rstMetricas.getRowCount() > 0;
 
-            if (hasMetricas && onMetricasChanged != null) {
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                onMetricasChanged?.call(metricas);
-              });
-            }
-
             return SmxMetricasResumen(
               key: ValueKey(rstMetricas),
-              credito: metricas.credito,
-              disponible: metricas.disponible,
-              compras: metricas.compras,
-              pagos: metricas.pagos,
-              saldo: metricas.saldo,
-              saldoEnDeuda: metricas.deudor > 0,
+              credito: hasMetricas
+                  ? rstMetricas.getValue('SYSUSER12_CREDITO')
+                  : 0,
+              disponible: hasMetricas
+                  ? rstMetricas.getValue('SYSUSER12_DISPONIBLE')
+                  : 0,
+              compras: hasMetricas
+                  ? rstMetricas.getValue('SYSUSER12_COMPRAS')
+                  : 0,
+              pagos: hasMetricas ? rstMetricas.getValue('SYSUSER12_PAGOS') : 0,
+              saldo: hasMetricas
+                  ? rstMetricas.getValue('SYSUSER12_BALANCE')
+                  : 0,
+              saldoEnDeuda:
+                  hasMetricas && rstMetricas.getValue('SYSUSER12_DEUDOR') > 0,
             );
           },
         ),

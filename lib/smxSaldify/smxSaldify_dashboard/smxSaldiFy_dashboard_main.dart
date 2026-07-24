@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:venture_core_connect/smxDataBase/smxRowSet.dart';
 
+import '../../smxApis/smxConstants.dart';
+import '../../smxLayout/smxColors.dart';
+import '../../smxSaldifyCliente/smxSaldifyCliente_dashboard/smxSaldiFyCliente_anfitrion/smxSaldiFyCliente_anfitrion.dart';
 import 'smxSaldiFy_acciones_rapidas/smxSaldiFy_acciones_rapidas.dart';
 import 'smxSaldiFy_clientes/smxSaldiFy_clientes.dart';
 import 'smxSaldiFy_clientes_pendientes/smxSaldiFy_clientes_pendientes.dart';
@@ -36,7 +39,43 @@ class SmxSaldiFyDashboardMain extends StatelessWidget {
           uuidAnfitrion: uuidAnfitrion,
           anfitrionNombre: anfitrionNombre,
         ),
-        SizedBox(height: isMobile ? 24 : 30),
+        ValueListenableBuilder<int>(
+          valueListenable: controller.anfitrionAnteriorRevisionNotifier,
+          builder: (context, revision, _) {
+            if (revision == 0) {
+              return SizedBox(height: isMobile ? 24 : 30);
+            }
+
+            final rstMetricas = SmxConstants.rstMetricasAnfitrion;
+            final relaSysuser10 = rstMetricas.getValue('RELA_SYSUSER10');
+            final relaSysuser11 = rstMetricas.getValue('RELA_SYSUSER11');
+
+            if (relaSysuser10 == 0) {
+              return SizedBox(height: isMobile ? 24 : 30);
+            }
+
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                SizedBox(height: isMobile ? 24 : 30),
+                const Text(
+                  'Tu anfitrion',
+                  style: TextStyle(
+                    color: SmxColors.white70,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                SizedBox(height: isMobile ? 16 : 20),
+                SmxSaldiFyClienteAnfitrion(
+                  desdeDashboardAnfitrion: true,
+                  relaSysuser11: relaSysuser11,
+                ),
+                SizedBox(height: isMobile ? 24 : 30),
+              ],
+            );
+          },
+        ),
         SmxSaldiFyAccionesRapidas(
           isMobile: isMobile,
           cardWidth: quickActionCardWidth,

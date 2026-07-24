@@ -13,7 +13,7 @@ if [ $? -eq 0 ]; then
     # Variables de marca
     APP_TITLE="Saldify"
     APP_TITLE_UPPER="SALDIFY"
-    APP_DESCRIPTION="Gestión de créditos y saldos en línea"
+    APP_DESCRIPTION="Red de venta para gestión de créditos y saldos en línea"
 
     echo "📝 Inyectando textos en index.html..."
     sed -i '' "s/{{APP_TITLE}}/$APP_TITLE/g" build/web/index.html

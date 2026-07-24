@@ -4,12 +4,10 @@ import 'package:url_launcher/url_launcher.dart';
 import '../smxSaldifyCliente_screens/saldify_compras/smxSaldiFyCliente_compras.dart';
 import '../smxSaldifyCliente_screens/saldify_pagos/smxSaldiFyCliente_pagos.dart';
 import '../smxSaldiFyCliente_controller.dart';
-import 'smxSaldiFyCliente_metricas/smxSaldiFyCliente_metricas_snapshot.dart';
 
 class SmxSaldiFyClienteDashboardController {
   final SmxSaldiFyClienteController clienteController;
   final Future<void> Function()? onRefresh;
-  SmxSaldiFyClienteMetricasSnapshot? metricasSnapshot;
 
   SmxSaldiFyClienteDashboardController({
     required this.clienteController,
@@ -33,10 +31,6 @@ class SmxSaldiFyClienteDashboardController {
   int get relaSysuser10Anfitrion => clienteController.relaSysuser10Anfitrion;
 
   bool get conCatalogo => clienteController.conCatalogo;
-
-  void setMetricasSnapshot(SmxSaldiFyClienteMetricasSnapshot snapshot) {
-    metricasSnapshot = snapshot;
-  }
 
   Future<void> refresh() async {
     await onRefresh?.call();
@@ -75,14 +69,12 @@ class SmxSaldiFyClienteDashboardController {
             ? SmxSaldiFyClientePagos(
                 clientName: clientName,
                 idSysuser11: idSysuser11,
-                metricasIniciales: metricasSnapshot,
               )
             : SmxSaldiFyClienteCompras(
                 clientName: clientName,
                 idSysuser11: idSysuser11,
                 relaSysuser10Anfitrion: relaSysuser10Anfitrion,
                 conCatalogo: conCatalogo,
-                metricasIniciales: metricasSnapshot,
               ),
       ),
     );

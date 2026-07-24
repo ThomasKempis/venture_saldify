@@ -13,11 +13,13 @@ import 'smxSaldiFy_metricas_controller.dart';
 class SmxSaldiFyMetricas extends StatefulWidget {
   final bool isMobile;
   final ValueListenable<int>? refreshNotifier;
+  final VoidCallback? onMetricasLoaded;
 
   const SmxSaldiFyMetricas({
     super.key,
     required this.isMobile,
     this.refreshNotifier,
+    this.onMetricasLoaded,
   });
 
   @override
@@ -31,6 +33,7 @@ class _SmxSaldiFyMetricasState extends State<SmxSaldiFyMetricas> {
       controllerBuilder: (context) => SmxSaldiFyMetricasController(
         alias: 'SMXSALDIFY_RED_CLIENTES',
         data: SmxControllerSendData(context: context),
+        onMetricasLoaded: widget.onMetricasLoaded,
       ),
       loadingBuilder: (_) =>
           SmxMetricasResumenSkeleton(isMobile: widget.isMobile),
@@ -121,57 +124,28 @@ class _SmxSaldiFyMetricasView extends StatelessWidget {
         ValueListenableBuilder<SmxRowSet?>(
           valueListenable: controller.rstMetricas,
           builder: (context, rstMetricas, _) {
-            final metricas = _MetricasResumen.fromRowSet(rstMetricas);
+            final hasMetricas =
+                rstMetricas != null && rstMetricas.getRowCount() > 0;
 
             return SmxMetricasResumen(
               key: ValueKey(rstMetricas),
-              credito: metricas.credito,
-              disponible: metricas.disponible,
-              compras: metricas.compras,
-              pagos: metricas.pagos,
-              saldo: metricas.saldo,
+              credito: hasMetricas
+                  ? rstMetricas.getValue('SYSUSER12_CREDITO')
+                  : 0,
+              disponible: hasMetricas
+                  ? rstMetricas.getValue('SYSUSER12_DISPONIBLE')
+                  : 0,
+              compras: hasMetricas
+                  ? rstMetricas.getValue('SYSUSER12_COMPRAS')
+                  : 0,
+              pagos: hasMetricas ? rstMetricas.getValue('SYSUSER12_PAGOS') : 0,
+              saldo: hasMetricas
+                  ? rstMetricas.getValue('SYSUSER12_BALANCE')
+                  : 0,
             );
           },
         ),
       ],
-    );
-  }
-}
-
-class _MetricasResumen {
-  final double credito;
-  final double disponible;
-  final double compras;
-  final double pagos;
-  final double saldo;
-
-  const _MetricasResumen({
-    required this.credito,
-    required this.disponible,
-    required this.compras,
-    required this.pagos,
-    required this.saldo,
-  });
-
-  factory _MetricasResumen.fromRowSet(SmxRowSet? rstMetricas) {
-    if (rstMetricas == null || rstMetricas.getRowCount() == 0) {
-      return const _MetricasResumen(
-        credito: 0,
-        disponible: 0,
-        compras: 0,
-        pagos: 0,
-        saldo: 0,
-      );
-    }
-
-    rstMetricas.first();
-
-    return _MetricasResumen(
-      credito: rstMetricas.getValue('SYSUSER12_CREDITO'),
-      disponible: rstMetricas.getValue('SYSUSER12_DISPONIBLE'),
-      compras: rstMetricas.getValue('SYSUSER12_COMPRAS'),
-      pagos: rstMetricas.getValue('SYSUSER12_PAGOS'),
-      saldo: rstMetricas.getValue('SYSUSER12_BALANCE'),
     );
   }
 }

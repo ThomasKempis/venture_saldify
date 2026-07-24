@@ -9,7 +9,7 @@ class SmxSaldiFyClienteAnfitrionSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      constraints: const BoxConstraints(minHeight: 150),
+      constraints: const BoxConstraints(minHeight: 155),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: SmxColors.whiteAlpha(.95),

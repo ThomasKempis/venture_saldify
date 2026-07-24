@@ -43,6 +43,14 @@ class SmxSaldiFyClientesController extends SmxController {
     return rstClientes.getValue('SYSUSER10_UUID')?.toString().trim() ?? '';
   }
 
+  String getClientEmail() {
+    return rstClientes.getValue('SYSUSER10_CORREO')?.toString().trim() ?? '';
+  }
+
+  String getClientPhone() {
+    return rstClientes.getValue('SYSUSER10_TELEFONO')?.toString().trim() ?? '';
+  }
+
   String getClientStatus() {
     return rstClientes.getValue('SYSUSER12_STATUS')?.toString() ?? '';
   }

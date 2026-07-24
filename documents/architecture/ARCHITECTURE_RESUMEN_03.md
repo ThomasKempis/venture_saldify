@@ -1054,6 +1054,32 @@ Por eso el arbol permite ver:
 Anfitrion -> Cliente -> Cliente como anfitrion -> Clientes de ese cliente
 ```
 
+### Cambio de red conservando descendientes
+
+Un cliente que tambien actua como anfitrion puede cambiar de red y llevarse su
+red descendente. La operacion correcta no copia clientes ni duplica usuarios:
+solo cambia el padre directo del `SYSUSER10` que encabeza el subarbol.
+
+Ejemplo:
+
+```text
+A -> B -> C
+     B -> D
+
+Si B pasa a depender de E:
+
+E -> B -> C
+     B -> D
+```
+
+C y D no se reinvitan ni se recrean. Siguen dependiendo de B. Lo que cambia es
+la relacion de B con su anfitrion superior en `SYSUSER11_DET_CONTACTOS`.
+
+Esta operacion debe tratarse como movimiento estructural de red, distinto de una
+invitacion normal. Debe validarse en base para evitar auto relaciones, doble
+padre directo y ciclos. Tambien debe recalcular metricas y propietario efectivo
+de catalogo heredado cuando aplique.
+
 Se mantiene un limite tecnico:
 
 ```sql

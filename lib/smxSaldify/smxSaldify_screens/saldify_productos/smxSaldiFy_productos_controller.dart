@@ -12,18 +12,24 @@ class SmxSaldiFyProductosController extends SmxController {
   static const String ALIAS_ADD = "ADD_SYSUSER41";
   static const String ALIAS_IMAGES = "SYSUSER41";
   static const String ALIAS_IMAGES_DATA = "SYSUSER42";
+  static const String ALIAS_CATALOGO = "SYSUSER44";
   static const String VIEW_PRODUCTOS = "QRY_SYSUSER41";
   static const String TABLE_PRODUCTOS = "SYSUSER41_DET_PRODUCTOS";
   static const String TABLE_IMAGES = "SYSUSER42_DET_IMAGENES";
+  static const String TABLE_CATALOGO = "SYSUSER44_CAB_CATALOGO";
 
   late SmxRowSet rstProductos; // LISTA (Plural)
   late SmxRowSet rstProducto; // TRANSACCIÓN (Singular)
   late SmxRowSet rstImages;
+  late SmxRowSet rstCatalogo;
 
   bool lastSaveOk = false;
   bool lastStatusOk = false;
+  bool isChangingCatalogMode = false;
   double _existenciaActual = 0;
   late bool _teniaCatalogoAlEntrar;
+  bool _usaCatalogoAnfitrion = false;
+  bool _cambioConfiguracionCatalogo = false;
   final Map<int, int> _imageVersions = {};
 
   SmxSaldiFyProductosController({required super.alias, required super.data});
@@ -33,31 +39,147 @@ class SmxSaldiFyProductosController extends SmxController {
   double get existenciaActual => _existenciaActual;
   List<int> get productosActivosIndexes => _getProductoIndexesByStatus(0);
   List<int> get productosArchivadosIndexes => _getProductoIndexesByStatus(1);
+  bool get puedeHeredarCatalogo =>
+      SmxConstants.rstMetricasAnfitrion.getValue('RELA_SYSUSER10') != 0;
+  bool get usaCatalogoAnfitrion => _usaCatalogoAnfitrion;
 
   @override
   Future<void> init() async {
     if (isBeginDB()) return;
     beginDB();
 
+    await _loadCatalogo();
     await _loadProductos();
     _teniaCatalogoAlEntrar = productosActivosIndexes.isNotEmpty;
     await prepareNuevo();
   }
 
   bool get cambioDisponibilidadCatalogo =>
+      _cambioConfiguracionCatalogo ||
       _teniaCatalogoAlEntrar != productosActivosIndexes.isNotEmpty;
+
+  Future<void> _loadCatalogo() async {
+    final idSysuser10 = SmxConstants.controllerMain.rstSysUser10.getId();
+
+    removeSql(ALIAS_CATALOGO);
+    addSql(
+      ALIAS_CATALOGO,
+      'SELECT * FROM $TABLE_CATALOGO WHERE RELA_SYSUSER10 = $idSysuser10',
+    );
+    await getRowSetFuture(ALIAS_CATALOGO);
+
+    rstCatalogo = getRowset(ALIAS_CATALOGO);
+    rstCatalogo.tabla = TABLE_CATALOGO;
+    _usaCatalogoAnfitrion =
+        puedeHeredarCatalogo && rstCatalogo.getRowCount() > 0;
+    if (_usaCatalogoAnfitrion) {
+      rstCatalogo.first();
+    }
+  }
 
   Future<void> _loadProductos() async {
     await _ensureProductoVacio();
 
-    final idSysuser10 = SmxConstants.controllerMain.rstSysUser10.getId();
+    final idSysuser10 = _usaCatalogoAnfitrion
+        ? rstCatalogo.getValue('RELA_SYSUSER10_ANFITRION')
+        : SmxConstants.controllerMain.rstSysUser10.getId();
+    final statusFilter = _usaCatalogoAnfitrion
+        ? ' AND SYSUSER41_STATUS = 0'
+        : '';
     removeSql(ALIAS_LIST);
     addSql(
       ALIAS_LIST,
-      "SELECT * FROM $VIEW_PRODUCTOS WHERE RELA_SYSUSER10 = $idSysuser10 ORDER BY SYSUSER41_STATUS, SYSUSER41_PRODUCTO",
+      "SELECT * FROM $VIEW_PRODUCTOS WHERE RELA_SYSUSER10 = $idSysuser10$statusFilter ORDER BY SYSUSER41_STATUS, SYSUSER41_PRODUCTO",
     );
     await getRowSetFuture(ALIAS_LIST);
     rstProductos = getRowset(ALIAS_LIST);
+  }
+
+  Future<bool> setUsaCatalogoAnfitrion(bool value) async {
+    if (!puedeHeredarCatalogo ||
+        isChangingCatalogMode ||
+        value == _usaCatalogoAnfitrion) {
+      return false;
+    }
+
+    final context = data.context;
+    if (context == null) return false;
+
+    String? error;
+    isChangingCatalogMode = true;
+    notifyListeners();
+
+    try {
+      await showDialogWait(context, () async {
+        if (value) {
+          await _insertCatalogoHeredado();
+        } else {
+          await _deleteCatalogoHeredado();
+        }
+        error = jsonSend.error;
+        if (error != null) return;
+
+        await _loadCatalogo();
+        error = jsonSend.error;
+        if (error != null) return;
+
+        await _loadProductos();
+        error = jsonSend.error;
+        if (error != null) return;
+
+        await prepareNuevo();
+        error = jsonSend.error;
+        if (error != null) return;
+
+        _cambioConfiguracionCatalogo = true;
+      });
+    } finally {
+      isChangingCatalogMode = false;
+      notifyListeners();
+    }
+
+    if (error != null) {
+      if (context.mounted) {
+        showSmxSystemErrorDialog(context, message: error!);
+      }
+      return false;
+    }
+
+    return true;
+  }
+
+  Future<void> _insertCatalogoHeredado() async {
+    final idSysuser10 = SmxConstants.controllerMain.rstSysUser10.getId();
+    final idAnfitrion = SmxConstants.rstMetricasAnfitrion.getValue(
+      'RELA_SYSUSER10',
+    );
+
+    if (rstCatalogo.getRowCount() == 0) {
+      rstCatalogo.insert();
+    } else {
+      rstCatalogo.first();
+    }
+
+    data.accion = AccionNN.I;
+    data.tablaTroncal = TABLE_CATALOGO;
+    data.tablaTroncalRst = rstCatalogo;
+    rstCatalogo.setAccion(AccionNN.I);
+    rstCatalogo.update('RELA_SYSUSER10_ANFITRION', idAnfitrion);
+    rstCatalogo.update('RELA_SYSUSER10', idSysuser10);
+
+    await callTroncalSave(rstCatalogo);
+  }
+
+  Future<void> _deleteCatalogoHeredado() async {
+    if (rstCatalogo.getRowCount() == 0) return;
+
+    rstCatalogo.first();
+    data.accion = AccionNN.D;
+    data.tablaTroncal = TABLE_CATALOGO;
+    data.tablaTroncalRst = rstCatalogo;
+    rstCatalogo.setAccion(AccionNN.D);
+
+    await callTroncalDelete();
   }
 
   Future<void> prepareNuevo() async {
@@ -77,6 +199,8 @@ class SmxSaldiFyProductosController extends SmxController {
   }
 
   Future<void> setProductoIndex(int index) async {
+    if (_usaCatalogoAnfitrion) return;
+
     rstProductos.index(index);
     final existencia = rstProductos.getValue('SYSUSER41_EXISTENCIA');
     _existenciaActual = existencia is num
@@ -115,6 +239,8 @@ class SmxSaldiFyProductosController extends SmxController {
 
   @override
   Future<void> save() async {
+    if (_usaCatalogoAnfitrion) return;
+
     lastSaveOk = false;
     final context = data.context;
     if (context == null) return;
@@ -152,6 +278,8 @@ class SmxSaldiFyProductosController extends SmxController {
   }
 
   Future<void> toggleStatus(int index) async {
+    if (_usaCatalogoAnfitrion) return;
+
     lastStatusOk = false;
     rstProductos.index(index);
 

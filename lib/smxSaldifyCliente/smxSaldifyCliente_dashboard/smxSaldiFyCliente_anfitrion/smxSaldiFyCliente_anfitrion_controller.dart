@@ -1,21 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:venture_core_connect/smxDataBase/smxRowSet.dart';
 import 'package:venture_widgets/smxClassDrivers.dart';
 import 'package:venture_widgets/smxController/smxController.dart';
 import 'package:venture_widgets/smxController/smxRowSetTrack.dart';
 
+import '../../../smxApis/smxConstants.dart';
 import '../smxSaldiFyCliente_dashboard_controller.dart';
 
 class SmxSaldiFyClienteAnfitrionController extends SmxController {
   static const String _aliasPlan = 'QRY_SYSUSER12';
 
-  final SmxSaldiFyClienteDashboardController _dashboardController;
+  final SmxSaldiFyClienteDashboardController? _dashboardController;
+  final bool desdeDashboardAnfitrion;
+  final int relaSysuser11;
   late SmxRowSet rstPlan;
 
   SmxSaldiFyClienteAnfitrionController({
     required super.alias,
     required super.data,
-    required SmxSaldiFyClienteDashboardController dashboardController,
+    required SmxSaldiFyClienteDashboardController? dashboardController,
+    required this.desdeDashboardAnfitrion,
+    required this.relaSysuser11,
   }) : _dashboardController = dashboardController;
 
   @override
@@ -24,10 +30,11 @@ class SmxSaldiFyClienteAnfitrionController extends SmxController {
 
     beginDB();
 
-    addSql(
-      _aliasPlan,
-      'select * from QRY_SYSUSER12(${_dashboardController.idSysuser11})',
-    );
+    final idSysuser11 = desdeDashboardAnfitrion
+        ? relaSysuser11
+        : _dashboardController!.idSysuser11;
+
+    addSql(_aliasPlan, 'select * from QRY_SYSUSER12($idSysuser11)');
 
     await SmxRowSetTrack.run(
       controller: this,
@@ -42,19 +49,73 @@ class SmxSaldiFyClienteAnfitrionController extends SmxController {
 
   bool get hasPlan => rstPlan.getRowCount() > 0;
 
-  String get nombreAnfitrion => _dashboardController.anfitrionNombreCompleto;
+  String get nombreAnfitrion {
+    if (!desdeDashboardAnfitrion) {
+      return _dashboardController!.anfitrionNombreCompleto;
+    }
 
-  String get telefonoAnfitrion => _dashboardController.anfitrionTelefono.trim();
+    final rst = SmxConstants.rstMetricasAnfitrion;
+    final nombre =
+        '${rst.getValue('SYSUSER10_NOMBRES')} '
+                '${rst.getValue('SYSUSER10_APELLIDOS')}'
+            .trim();
+    return nombre.isEmpty ? 'Anfitrion' : nombre;
+  }
 
-  String get correoAnfitrion => _dashboardController.anfitrionCorreo.trim();
+  String get telefonoAnfitrion {
+    if (!desdeDashboardAnfitrion) {
+      return _dashboardController!.anfitrionTelefono.trim();
+    }
+
+    return SmxConstants.rstMetricasAnfitrion
+        .getValue('SYSUSER10_TELEFONO')
+        .trim();
+  }
+
+  String get correoAnfitrion {
+    if (!desdeDashboardAnfitrion) {
+      return _dashboardController!.anfitrionCorreo.trim();
+    }
+
+    return SmxConstants.rstMetricasAnfitrion
+        .getValue('SYSUSER10_CORREO')
+        .trim();
+  }
 
   String get estadoRelacionLabel {
     if (!hasPlan) return 'Pendiente';
-    return _dashboardController.anfitrionRelacionEstado.trim();
+    if (desdeDashboardAnfitrion) return 'Aprobado';
+    return _dashboardController!.anfitrionRelacionEstado.trim();
   }
 
-  Future<void> launchWhatsApp(BuildContext context) {
-    return _dashboardController.launchWhatsApp(context);
+  Future<void> launchWhatsApp(BuildContext context) async {
+    if (!desdeDashboardAnfitrion) {
+      return _dashboardController!.launchWhatsApp(context);
+    }
+
+    final digits = telefonoAnfitrion.replaceAll(RegExp(r'[^0-9]'), '');
+    if (digits.isEmpty) {
+      if (!context.mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('El anfitrion no tiene WhatsApp registrado'),
+        ),
+      );
+      return;
+    }
+
+    final uri = Uri.parse('https://wa.me/$digits');
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+      return;
+    }
+
+    if (!context.mounted) return;
+
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('No se pudo abrir WhatsApp')));
   }
 
   String get cortePlanLabel {

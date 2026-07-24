@@ -143,6 +143,8 @@ class _InvitaClientesSheet extends StatefulWidget {
 
 class _InvitaClientesSheetState extends State<_InvitaClientesSheet> {
   final TextEditingController _correoController = TextEditingController();
+  final FocusNode _correoFocusNode = FocusNode();
+  final GlobalKey _correoFieldKey = GlobalKey();
   SmxSaldiFyInvitacionGenerada? _invitacionAbierta;
   bool _loadingQr = true;
   bool _loadingCorreo = false;
@@ -151,6 +153,7 @@ class _InvitaClientesSheetState extends State<_InvitaClientesSheet> {
   @override
   void initState() {
     super.initState();
+    _correoFocusNode.addListener(_handleCorreoFocus);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _generarInvitacionAbierta();
     });
@@ -158,67 +161,96 @@ class _InvitaClientesSheetState extends State<_InvitaClientesSheet> {
 
   @override
   void dispose() {
+    _correoFocusNode.removeListener(_handleCorreoFocus);
+    _correoFocusNode.dispose();
     _correoController.dispose();
     super.dispose();
   }
 
+  void _handleCorreoFocus() {
+    if (!_correoFocusNode.hasFocus) return;
+
+    Future<void>.delayed(const Duration(milliseconds: 320), () {
+      if (!mounted || !_correoFocusNode.hasFocus) return;
+
+      final fieldContext = _correoFieldKey.currentContext;
+      if (fieldContext == null || !fieldContext.mounted) return;
+
+      Scrollable.ensureVisible(
+        fieldContext,
+        duration: const Duration(milliseconds: 180),
+        curve: Curves.easeOutCubic,
+        alignment: .8,
+      );
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    return SmxSaldifySheetBackground(
-      child: SingleChildScrollView(
-        padding: EdgeInsets.fromLTRB(
-          22,
-          20,
-          22,
-          20 + MediaQuery.paddingOf(context).bottom,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
-              children: [
-                const Icon(
-                  Icons.qr_code_2_rounded,
-                  color: SmxColors.brandPrimary,
-                  size: 28,
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    widget.anfitrionNombre,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: SmxColors.textDark,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w900,
+    final mediaQuery = MediaQuery.of(context);
+
+    return AnimatedPadding(
+      duration: const Duration(milliseconds: 220),
+      curve: Curves.easeOutCubic,
+      padding: EdgeInsets.only(bottom: mediaQuery.viewInsets.bottom),
+      child: SmxSaldifySheetBackground(
+        child: SingleChildScrollView(
+          padding: EdgeInsets.fromLTRB(
+            22,
+            20,
+            22,
+            20 + mediaQuery.padding.bottom,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                children: [
+                  const Icon(
+                    Icons.qr_code_2_rounded,
+                    color: SmxColors.brandPrimary,
+                    size: 28,
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      widget.anfitrionNombre,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: SmxColors.textDark,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w900,
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 18),
-            const _SectionDivider(label: 'Si esta presente puede leer el QR'),
-            const SizedBox(height: 14),
-            _QrInvitePanel(
-              invitacion: _invitacionAbierta,
-              loading: _loadingQr,
-              onCopy: _copyInvitacionAbierta,
-            ),
-            const SizedBox(height: 18),
-            const _SectionDivider(label: 'Puede invitar por correo Gmail'),
-            const SizedBox(height: 14),
-            _GmailInviteRow(
-              controller: _correoController,
-              loading: _loadingCorreo,
-              onCopy: _copyInvitacionCorreo,
-            ),
-            const SizedBox(height: 18),
-            const _SectionDivider(label: 'Mensaje'),
-            const SizedBox(height: 10),
-            _InviteMessage(mensaje: _mensaje),
-          ],
+                ],
+              ),
+              const SizedBox(height: 18),
+              const _SectionDivider(label: 'Si esta presente puede leer el QR'),
+              const SizedBox(height: 14),
+              _QrInvitePanel(
+                invitacion: _invitacionAbierta,
+                loading: _loadingQr,
+                onCopy: _copyInvitacionAbierta,
+              ),
+              const SizedBox(height: 18),
+              const _SectionDivider(label: 'Puede invitar por correo Gmail'),
+              const SizedBox(height: 14),
+              _GmailInviteRow(
+                fieldKey: _correoFieldKey,
+                controller: _correoController,
+                focusNode: _correoFocusNode,
+                loading: _loadingCorreo,
+                onCopy: _copyInvitacionCorreo,
+              ),
+              const SizedBox(height: 18),
+              const _SectionDivider(label: 'Mensaje'),
+              const SizedBox(height: 10),
+              _InviteMessage(mensaje: _mensaje),
+            ],
+          ),
         ),
       ),
     );
@@ -462,12 +494,16 @@ class _SectionDivider extends StatelessWidget {
 }
 
 class _GmailInviteRow extends StatelessWidget {
+  final GlobalKey fieldKey;
   final TextEditingController controller;
+  final FocusNode focusNode;
   final bool loading;
   final VoidCallback onCopy;
 
   const _GmailInviteRow({
+    required this.fieldKey,
     required this.controller,
+    required this.focusNode,
     required this.loading,
     required this.onCopy,
   });
@@ -478,7 +514,9 @@ class _GmailInviteRow extends StatelessWidget {
       children: [
         Expanded(
           child: TextField(
+            key: fieldKey,
             controller: controller,
+            focusNode: focusNode,
             textInputAction: TextInputAction.done,
             keyboardType: TextInputType.emailAddress,
             autocorrect: false,

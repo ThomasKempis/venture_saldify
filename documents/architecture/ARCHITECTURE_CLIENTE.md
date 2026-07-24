@@ -62,21 +62,22 @@ Clase:
 SmxSaldiFyClienteController
 ```
 
-Consulta principal:
-
-```sql
-select * from QRY_SYSUSER10_SYSUSER11
-where UUID_ANFITRION = ...
-and UUID_INVITADO / INVITADO_CORREO = ...
-```
-
-Si no existe relacion por correo invitado, intenta crearla con:
+La validacion y consolidacion principal se realiza en una sola operacion con
+efectos:
 
 ```sql
 ADD_SYSUSER10_SYSUSER11(uuid_anfitrion, correo_invitado)
 ```
 
-Campos importantes tomados de `QRY_SYSUSER10_SYSUSER11`:
+El controller la ejecuta con `addSTrans()` y `getCallWS()`. Ya no consulta
+primero `QRY_SYSUSER10_SYSUSER11`, porque el SP valida y consolida la relacion,
+ademas de regresar los datos necesarios para el dashboard.
+
+El contrato incluye `MENSAJE`. `OK` permite continuar; cualquier otro valor se
+muestra en `SmxSaldiFyClienteInvitacionEstado` sin entrar al dashboard.
+
+Campos importantes regresados por `ADD_SYSUSER10_SYSUSER11` (obtenidos en
+base desde la relacion consolidada):
 
 - `RELA_SYSUSER10`: id interno del anfitrion.
 - `ID_SYSUSER11`: relacion cliente/anfitrion.
@@ -156,7 +157,8 @@ QRY_SYSUSER11_SALDOS_INVITADO(rela_sysuser10, rela_sysuser10_anfitrion)
 Parametros usados:
 
 - `rela_sysuser10`: `SmxConstants.controllerMain.rstSysUser10.getId()`
-- `rela_sysuser10_anfitrion`: valor recibido desde `QRY_SYSUSER10_SYSUSER11.RELA_SYSUSER10`
+- `rela_sysuser10_anfitrion`: `RELA_SYSUSER10` recibido en el rowset de
+  `ADD_SYSUSER10_SYSUSER11`.
 
 Campos esperados:
 
@@ -448,4 +450,3 @@ Esto permite que hoy funcionen parecido, pero manana puedan divergir sin rompers
 - Pagos y compras cliente quedan con status `0`; la confirmacion/entrega queda para reglas posteriores.
 - Si se agregan pantallas de confirmacion o cobranza, deberian vivir en anfitrion, no en cliente.
 - El historial depende de `QRY_SYSUSER10_HISTORIAL`; si cambian codigos de status, actualizar el mapeo visual.
-
