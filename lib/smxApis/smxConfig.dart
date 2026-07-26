@@ -59,4 +59,13 @@ abstract class SmxConfig {
       SmxBrand.saldify => 'RE DE VENTAS Y CRÉDITOS EN LÍNEA',
     };
   }
+
+  /// URL publica utilizada para abrir los enlaces de invitacion.
+  static String get invitationBaseUrl {
+    return switch (brand) {
+      SmxBrand.redventas => 'https://venture.jars.mx/redVentas',
+      SmxBrand.redcontrol => 'https://venture.jars.mx/redcontrol',
+      SmxBrand.saldify => 'https://venture.jars.mx/venture_saldify',
+    };
+  }
 }

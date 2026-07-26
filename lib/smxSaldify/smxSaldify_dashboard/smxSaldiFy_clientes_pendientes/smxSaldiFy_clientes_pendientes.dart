@@ -9,6 +9,7 @@ import 'package:venture_widgets/smxController/smxControllerSendData.dart';
 
 import '../smxSaldiFy_clientes/smxSaldiFy_clientes.dart';
 import '../smxSaldiFy_invita_clientes/smxSaldiFy_invita_copy.dart';
+import '../smx_saldify_client_search.dart';
 import 'smxSaldiFy_clientes_pendientes_controller.dart';
 
 class SmxSaldiFyClientesPendientes extends StatefulWidget {
@@ -34,8 +35,10 @@ class SmxSaldiFyClientesPendientes extends StatefulWidget {
 
 class _SmxSaldiFyClientesPendientesState
     extends State<SmxSaldiFyClientesPendientes> {
+  final TextEditingController _searchController = TextEditingController();
   bool _showAllClients = false;
   bool _loadedNotified = false;
+  String _searchQuery = '';
   late final SmxSaldiFyClientesPendientesController _controller;
   late final Future<void> _controllerInitialization;
 
@@ -47,6 +50,12 @@ class _SmxSaldiFyClientesPendientesState
       data: SmxControllerSendData(context: context),
     );
     _controllerInitialization = _controller.init();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   @override
@@ -76,16 +85,33 @@ class _SmxSaldiFyClientesPendientesState
               onTrailingTap: () {
                 setState(() {
                   _showAllClients = !_showAllClients;
+                  if (!_showAllClients) {
+                    _searchController.clear();
+                    _searchQuery = '';
+                  }
                 });
               },
             ),
             const SizedBox(height: 12),
+            if (_showAllClients) ...[
+              SmxSaldiFyClientSearchField(
+                controller: _searchController,
+                query: _searchQuery,
+                onChanged: (value) {
+                  setState(() {
+                    _searchQuery = value;
+                  });
+                },
+              ),
+              const SizedBox(height: 12),
+            ],
             _ClientCards(
               isMobile: widget.isMobile,
               isDesktop: widget.isDesktop,
               clientes: _controller.rstClientesPendientes,
               controller: _controller,
               showAll: _showAllClients,
+              searchQuery: _searchQuery,
               onClientTap: widget.onClientPendienteTap,
               onClientActivate: _activatePendiente,
               onClientDelete: _deletePendiente,
@@ -201,6 +227,7 @@ class _ClientCards extends StatelessWidget {
   final SmxRowSet clientes;
   final SmxSaldiFyClientesPendientesController controller;
   final bool showAll;
+  final String searchQuery;
   final ValueChanged<SmxSaldiFyClientTapData> onClientTap;
   final Future<SmxRowSet?> Function(int index, String name) onClientActivate;
   final Future<bool> Function(int index, String name) onClientDelete;
@@ -213,6 +240,7 @@ class _ClientCards extends StatelessWidget {
     required this.clientes,
     required this.controller,
     required this.showAll,
+    required this.searchQuery,
     required this.onClientTap,
     required this.onClientActivate,
     required this.onClientDelete,
@@ -222,12 +250,22 @@ class _ClientCards extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final visibleCount = showAll
-        ? clientes.getRowCount()
-        : clientes.getRowCount().clamp(0, 5).toInt();
+    final clientIndexes = smxVisibleClientIndexes(
+      rowCount: clientes.getRowCount(),
+      showAll: showAll,
+      searchQuery: searchQuery,
+      searchableTextAt: (index) {
+        clientes.index(index);
+        return [
+          controller.getClientName(),
+          controller.getClientEmail(),
+          controller.getClientPhone(),
+        ].join();
+      },
+    );
     final cards = <Widget>[];
 
-    for (var index = 0; index < visibleCount; index++) {
+    for (final index in clientIndexes) {
       final idSysuser11 = _getClientIntValue(
         index,
         controller.getClientRelationId,
@@ -264,6 +302,10 @@ class _ClientCards extends StatelessWidget {
       );
     }
 
+    if (cards.isEmpty) {
+      return const SmxSaldiFyClientSearchEmpty();
+    }
+
     if (isMobile) {
       return Column(
         children: [
@@ -279,7 +321,7 @@ class _ClientCards extends StatelessWidget {
       builder: (context, constraints) {
         const spacing = 14.0;
         final maxColumns = _getMaxColumns(constraints.maxWidth);
-        final columns = visibleCount.clamp(1, maxColumns).toInt();
+        final columns = cards.length.clamp(1, maxColumns).toInt();
         final cardWidth =
             (constraints.maxWidth - (spacing * (columns - 1))) / columns;
 

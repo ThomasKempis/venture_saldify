@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:venture_saldify/smxApis/smxConfig.dart';
 import 'package:venture_saldify/smxApis/smxConstants.dart';
 import 'package:venture_widgets/smxController/smxController.dart';
 
@@ -77,8 +78,6 @@ class SmxSaldifyInvitacionParametros {
 }
 
 class SmxSaldifyInvitacionLink {
-  static const String baseUrl = 'https://venture.jars.mx/venture_saldify';
-
   const SmxSaldifyInvitacionLink._();
 
   static String build({
@@ -108,7 +107,7 @@ class SmxSaldifyInvitacionLink {
     }
 
     return Uri.parse(
-      baseUrl,
+      SmxConfig.invitationBaseUrl,
     ).replace(queryParameters: queryParameters).toString();
   }
 }

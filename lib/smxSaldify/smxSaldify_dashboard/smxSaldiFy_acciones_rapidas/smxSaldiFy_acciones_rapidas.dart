@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:venture_core_connect/smxDataBase/smxRowSet.dart';
 import 'package:venture_saldify/smxLayout/smxColors.dart';
@@ -108,24 +109,33 @@ class _QuickActions extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       height: isMobile ? 118 : 126,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        physics: const BouncingScrollPhysics(),
-        itemCount: acciones.getRowCount(),
-        separatorBuilder: (context, index) => const SizedBox(width: 12),
-        itemBuilder: (context, index) {
-          acciones.index(index);
-          final label = controller.getActionLabel();
+      child: ScrollConfiguration(
+        behavior: ScrollConfiguration.of(context).copyWith(
+          dragDevices: const {
+            PointerDeviceKind.touch,
+            PointerDeviceKind.mouse,
+            PointerDeviceKind.trackpad,
+          },
+        ),
+        child: ListView.separated(
+          scrollDirection: Axis.horizontal,
+          physics: const BouncingScrollPhysics(),
+          itemCount: acciones.getRowCount(),
+          separatorBuilder: (context, index) => const SizedBox(width: 12),
+          itemBuilder: (context, index) {
+            acciones.index(index);
+            final label = controller.getActionLabel();
 
-          return SizedBox(
-            width: cardWidth,
-            child: _QuickActionCard(
-              icon: controller.getActionIcon(),
-              label: label,
-              onTap: () => onActionTap(label),
-            ),
-          );
-        },
+            return SizedBox(
+              width: cardWidth,
+              child: _QuickActionCard(
+                icon: controller.getActionIcon(),
+                label: label,
+                onTap: () => onActionTap(label),
+              ),
+            );
+          },
+        ),
       ),
     );
   }

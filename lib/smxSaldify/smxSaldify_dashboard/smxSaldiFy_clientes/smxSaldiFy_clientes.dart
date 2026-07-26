@@ -10,6 +10,7 @@ import 'package:venture_saldify/smxLayout/smxBackgrounds/saldify_circles_backgro
 import 'package:venture_widgets/smxCallBaseStateful.dart';
 import 'package:venture_widgets/smxController/smxControllerSendData.dart';
 
+import '../smx_saldify_client_search.dart';
 import 'smxSaldiFy_clientes_controller.dart';
 import 'smxSaldiFy_clientes_skeleton.dart';
 
@@ -38,9 +39,17 @@ class SmxSaldiFyClientes extends StatefulWidget {
 }
 
 class _SmxSaldiFyClientesState extends State<SmxSaldiFyClientes> {
+  final TextEditingController _searchController = TextEditingController();
   bool _showAllClients = false;
   bool _loadedNotified = false;
   int? _expandedClientId;
+  String _searchQuery = '';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -71,6 +80,8 @@ class _SmxSaldiFyClientesState extends State<SmxSaldiFyClientes> {
             controller: controller,
             clientes: rstClientes,
             showAllClients: _showAllClients,
+            searchQuery: _searchQuery,
+            searchController: _searchController,
             expandedClientId: _expandedClientId,
             onClientArchive: (index, name) =>
                 _archiveCliente(controller, index, name),
@@ -85,6 +96,15 @@ class _SmxSaldiFyClientesState extends State<SmxSaldiFyClientes> {
             onShowAllClientsChanged: (value) {
               setState(() {
                 _showAllClients = value;
+                if (!value) {
+                  _searchController.clear();
+                  _searchQuery = '';
+                }
+              });
+            },
+            onSearchChanged: (value) {
+              setState(() {
+                _searchQuery = value;
               });
             },
           );
@@ -155,11 +175,14 @@ class _SmxSaldiFyClientesView extends StatelessWidget {
   final SmxSaldiFyClientesController controller;
   final SmxRowSet clientes;
   final bool showAllClients;
+  final String searchQuery;
+  final TextEditingController searchController;
   final int? expandedClientId;
   final Future<bool> Function(int index, String name) onClientArchive;
   final VoidCallback onClientArchived;
   final ValueChanged<int> onClientExpansionChanged;
   final ValueChanged<bool> onShowAllClientsChanged;
+  final ValueChanged<String> onSearchChanged;
 
   const _SmxSaldiFyClientesView({
     required this.isMobile,
@@ -169,11 +192,14 @@ class _SmxSaldiFyClientesView extends StatelessWidget {
     required this.controller,
     required this.clientes,
     required this.showAllClients,
+    required this.searchQuery,
+    required this.searchController,
     required this.expandedClientId,
     required this.onClientArchive,
     required this.onClientArchived,
     required this.onClientExpansionChanged,
     required this.onShowAllClientsChanged,
+    required this.onSearchChanged,
   });
 
   @override
@@ -189,12 +215,21 @@ class _SmxSaldiFyClientesView extends StatelessWidget {
           },
         ),
         const SizedBox(height: 12),
+        if (showAllClients) ...[
+          SmxSaldiFyClientSearchField(
+            controller: searchController,
+            query: searchQuery,
+            onChanged: onSearchChanged,
+          ),
+          const SizedBox(height: 12),
+        ],
         _ClientCards(
           isMobile: isMobile,
           isDesktop: isDesktop,
           clientes: clientes,
           controller: controller,
           showAll: showAllClients,
+          searchQuery: searchQuery,
           expandedClientId: expandedClientId,
           onClientTap: onClientTap,
           onClientNovedadTap: onClientNovedadTap,
@@ -258,6 +293,7 @@ class _ClientCards extends StatelessWidget {
   final SmxRowSet clientes;
   final SmxSaldiFyClientesController controller;
   final bool showAll;
+  final String searchQuery;
   final int? expandedClientId;
   final ValueChanged<SmxSaldiFyClientTapData> onClientTap;
   final ValueChanged<SmxSaldiFyClientTapData>? onClientNovedadTap;
@@ -271,6 +307,7 @@ class _ClientCards extends StatelessWidget {
     required this.clientes,
     required this.controller,
     required this.showAll,
+    required this.searchQuery,
     required this.expandedClientId,
     required this.onClientTap,
     required this.onClientNovedadTap,
@@ -281,12 +318,10 @@ class _ClientCards extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final visibleCount = showAll
-        ? clientes.getRowCount()
-        : clientes.getRowCount().clamp(0, 5).toInt();
+    final clientIndexes = _visibleClientIndexes();
     final cards = <Widget>[];
 
-    for (var index = 0; index < visibleCount; index++) {
+    for (final index in clientIndexes) {
       final idSysuser11 = _getClientIntValue(
         index,
         controller.getClientRelationId,
@@ -363,6 +398,10 @@ class _ClientCards extends StatelessWidget {
       );
     }
 
+    if (cards.isEmpty) {
+      return const SmxSaldiFyClientSearchEmpty();
+    }
+
     if (isMobile) {
       return Column(
         children: [
@@ -378,7 +417,7 @@ class _ClientCards extends StatelessWidget {
       builder: (context, constraints) {
         const spacing = 14.0;
         final maxColumns = _getMaxColumns(constraints.maxWidth);
-        final columns = visibleCount.clamp(1, maxColumns).toInt();
+        final columns = cards.length.clamp(1, maxColumns).toInt();
         final cardWidth =
             (constraints.maxWidth - (spacing * (columns - 1))) / columns;
 
@@ -397,6 +436,23 @@ class _ClientCards extends StatelessWidget {
     if (isDesktop && width >= 1180) return 4;
     if (isDesktop && width >= 820) return 3;
     return 2;
+  }
+
+  List<int> _visibleClientIndexes() {
+    return smxVisibleClientIndexes(
+      rowCount: clientes.getRowCount(),
+      showAll: showAll,
+      searchQuery: searchQuery,
+      searchableTextAt: (index) {
+        clientes.index(index);
+        return [
+          controller.getClientName(),
+          controller.getClientEmail(),
+          controller.getClientPhone(),
+          controller.getClientStatus(),
+        ].join();
+      },
+    );
   }
 
   String _getClientValue(int index, String Function() getValue) {
