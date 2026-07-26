@@ -295,9 +295,10 @@ class _SmxSaldifyLogonBodyState extends State<_SmxSaldifyLogonBody> {
                                             Transform.translate(
                                               offset: Offset(
                                                 0,
+
                                                 ///compact ? -32 : -24,
                                                 ///compact ? -54 : -44
-                                                compact ? -64 : -54
+                                                compact ? -64 : -54,
                                               ),
                                               child: _WelcomeCard(
                                                 compact: compact,
@@ -414,7 +415,7 @@ class _SaldifyBrand extends StatelessWidget {
               SmxConfig.descripcion,
               textAlign: TextAlign.left,
               style: TextStyle(
-                color: SmxColors.brandAccent,
+                color: SmxColors.brandDescription,
                 fontFamily: 'Segoe UI',
                 fontSize: compact ? 13 : 15,
                 fontWeight: FontWeight.w800,

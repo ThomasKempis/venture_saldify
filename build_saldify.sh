@@ -10,15 +10,24 @@ flutter build web --base-href "/venture_saldify/" --dart-define=APP_MODE=saldify
 if [ $? -eq 0 ]; then
     echo "✅ Compilación exitosa. Iniciando personalización de marca..."
 
+    echo "🧹 Retirando parche exclusivo de desarrollo..."
+    sed -i '' '/<!-- DEV_PATCH_START -->/,/<!-- DEV_PATCH_END -->/d' build/web/index.html
+
     # Variables de marca
     APP_TITLE="Saldify"
     APP_TITLE_UPPER="SALDIFY"
     APP_DESCRIPTION="Red de venta para gestión de créditos y saldos en línea"
+    APP_BACKGROUND="linear-gradient(180deg, #155C37 0%, #1B5E20 26%, #0D47A1 100%)"
+    APP_BOTTOM_COLOR="#0D47A1"
+    APP_LOGO_ANIMATION="spinContinuous 4s linear infinite"
 
     echo "📝 Inyectando textos en index.html..."
     sed -i '' "s/{{APP_TITLE}}/$APP_TITLE/g" build/web/index.html
     sed -i '' "s/{{APP_TITLE_UPPER}}/$APP_TITLE_UPPER/g" build/web/index.html
     sed -i '' "s/{{APP_DESCRIPTION}}/$APP_DESCRIPTION/g" build/web/index.html
+    sed -i '' "s|{{APP_BACKGROUND}}|$APP_BACKGROUND|g" build/web/index.html
+    sed -i '' "s|{{APP_BOTTOM_COLOR}}|$APP_BOTTOM_COLOR|g" build/web/index.html
+    sed -i '' "s|{{APP_LOGO_ANIMATION}}|$APP_LOGO_ANIMATION|g" build/web/index.html
 
     echo "📝 Inyectando textos en manifest.json..."
     sed -i '' "s/{{APP_TITLE}}/$APP_TITLE/g" build/web/manifest.json

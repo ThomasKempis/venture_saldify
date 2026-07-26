@@ -142,11 +142,12 @@ class SmxSaldiFyDrawer extends StatelessWidget {
                   padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
                   child: Row(
                     children: [
-                      ClipOval(
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
                         child: SizedBox(
                           width: 34,
                           height: 34,
-                          child: SmxConfig.logo(fit: BoxFit.cover),
+                          child: SmxConfig.logo(fit: BoxFit.contain),
                         ),
                       ),
                       const SizedBox(width: 14),
@@ -177,7 +178,7 @@ class SmxSaldiFyDrawer extends StatelessWidget {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: const TextStyle(
-                                color: SmxColors.brandAccent,
+                                color: SmxColors.brandDescription,
                                 fontFamily: 'Segoe UI',
                                 fontSize: 10,
                                 fontWeight: FontWeight.w700,
@@ -260,11 +261,12 @@ class _NavigationBrand extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final logo = ClipOval(
+    final logo = ClipRRect(
+      borderRadius: BorderRadius.circular(10),
       child: SizedBox(
         width: 34,
         height: 34,
-        child: SmxConfig.logo(fit: BoxFit.cover),
+        child: SmxConfig.logo(fit: BoxFit.contain),
       ),
     );
 
@@ -296,7 +298,7 @@ class _NavigationBrand extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
-                  color: SmxColors.brandAccent,
+                  color: SmxColors.brandDescription,
                   fontFamily: 'Segoe UI',
                   fontSize: 9,
                   fontWeight: FontWeight.w700,

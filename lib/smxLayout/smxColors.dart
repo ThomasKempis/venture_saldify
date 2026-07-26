@@ -1,11 +1,36 @@
 import 'package:flutter/material.dart';
 
+import '../smxApis/smxConfig.dart';
+
 class SmxColors {
   const SmxColors._();
 
-  static const brandPrimary = Color(0xFF1B5E20);
-  static const brandSecondary = Color(0xFF0D47A1);
-  static const brandAccent = Color(0xFF58D9A4);
+  static const brandPrimary = SmxConfig.brand == SmxBrand.redventas
+      ? Color(0xFFE63946)
+      : SmxConfig.brand == SmxBrand.redcontrol
+      ? Color(0xFF1B5E20)
+      : Color(0xFF1B5E20);
+
+  static const brandSecondary = SmxConfig.brand == SmxBrand.redventas
+      ? Color(0xFF0D9488)
+      : SmxConfig.brand == SmxBrand.redcontrol
+      ? Color(0xFF0D47A1)
+      : Color(0xFF0D47A1);
+
+  static const brandAccent = SmxConfig.brand == SmxBrand.redventas
+      ? Color(0xFF14B8A6)
+      : SmxConfig.brand == SmxBrand.redcontrol
+      ? Color(0xFF58D9A4)
+      : Color(0xFF58D9A4);
+
+  static const brandDescription = SmxConfig.brand == SmxBrand.redventas
+      ? Color(0xFFF0FDFA)
+      : brandAccent;
+
+  static const brandInteractive = SmxConfig.brand == SmxBrand.redventas
+      ? brandSecondary
+      : brandPrimary;
+
   static const brandLegacy = Color(0xFFD47B13);
 
   static const navigationDark = Color(0xFF102D36);
@@ -46,6 +71,8 @@ class SmxGradients {
   static const saldifyBackground = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [SmxColors.brandPrimary, SmxColors.brandSecondary],
+    colors: SmxConfig.brand == SmxBrand.redventas
+        ? [SmxColors.brandSecondary, SmxColors.brandPrimary]
+        : [SmxColors.brandPrimary, SmxColors.brandSecondary],
   );
 }

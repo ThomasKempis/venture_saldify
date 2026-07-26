@@ -934,13 +934,13 @@ class _ClientContactLine extends StatelessWidget {
                   style: TextStyle(
                     color: onTap == null
                         ? SmxColors.textMuted
-                        : SmxColors.brandPrimary,
+                        : SmxColors.brandInteractive,
                     fontSize: 13,
                     fontWeight: FontWeight.w800,
                     decoration: onTap == null
                         ? TextDecoration.none
                         : TextDecoration.underline,
-                    decorationColor: SmxColors.brandPrimary,
+                    decorationColor: SmxColors.brandInteractive,
                   ),
                 ),
               ),

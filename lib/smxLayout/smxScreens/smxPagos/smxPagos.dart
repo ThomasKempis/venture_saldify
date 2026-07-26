@@ -333,6 +333,7 @@ class _FormPanel extends StatelessWidget {
               field: 'SYSUSER50_REFERENCIA',
               controller: controller,
               label: 'Referencia',
+              textInputType: SmxTextInputType.mayusculas,
               isValid: true,
             ),
             const SizedBox(height: 18),

@@ -74,11 +74,12 @@ class _SaldifyPerfilHeader extends StatelessWidget {
     return Row(
       children: [
         if (menuButton != null) ...[menuButton!, const SizedBox(width: 14)],
-        ClipOval(
+        ClipRRect(
+          borderRadius: BorderRadius.circular(10),
           child: SizedBox(
             width: 34,
             height: 34,
-            child: SmxConfig.logo(fit: BoxFit.cover),
+            child: SmxConfig.logo(fit: BoxFit.contain),
           ),
         ),
         const SizedBox(width: 14),

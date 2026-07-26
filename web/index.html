@@ -1,25 +1,64 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+  <!-- DEV_PATCH_START -->
   <script>
-    // Parche para desarrollo: Rellena los marcadores si estamos en localhost
+    // Parche exclusivo para desarrollo local. Los builds de producción lo eliminan.
     (function() {
-      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-        const devValues = {
-          '{{APP_TITLE}}': 'Saldify [Dev]',
-          '{{APP_TITLE_UPPER}}': 'SALDIFY',
-          '{{APP_DESCRIPTION}}': 'Red de venta para gestión de créditos y saldos en línea [DEV]'
-        };
-        document.title = devValues['{{APP_TITLE}}'];
-        window.addEventListener('DOMContentLoaded', () => {
-          const nameEl = document.querySelector('.app-name');
-          const sloganEl = document.querySelector('.app-slogan');
-          if (nameEl && nameEl.textContent.includes('{{')) nameEl.textContent = devValues['{{APP_TITLE_UPPER}}'];
-          if (sloganEl && sloganEl.textContent.includes('{{')) sloganEl.textContent = devValues['{{APP_DESCRIPTION}}'];
-        });
+      const isLocalhost =
+        window.location.hostname === 'localhost' ||
+        window.location.hostname === '127.0.0.1';
+
+      if (!isLocalhost) {
+        return;
       }
+
+      const devThemes = {
+        saldify: {
+          title: 'Saldify [Dev]',
+          name: 'SALDIFY',
+          description: 'Red de venta para gestión de créditos y saldos en línea [DEV]',
+          background: 'linear-gradient(180deg, #155C37 0%, #1B5E20 26%, #0D47A1 100%)',
+          bottomColor: '#0D47A1',
+          logoAnimation: 'spinContinuous 4s linear infinite',
+          icon: 'icons/saldify/Icon-512.png'
+        },
+        redventas: {
+          title: 'RedVentas [Dev]',
+          name: 'REDVENTAS',
+          description: 'CONECTA + GESTIONA + CRECE',
+          background: 'linear-gradient(160deg, #0D9488 0%, #238D82 42%, #E63946 100%)',
+          bottomColor: '#B65F77',
+          logoAnimation: 'fadeLogo 2.8s ease-in-out infinite',
+          icon: 'icons/redventas/Icon-512.png'
+        }
+      };
+
+      const requestedMode =
+        new URLSearchParams(window.location.search).get('appMode') || 'saldify';
+      const appMode = devThemes[requestedMode] ? requestedMode : 'saldify';
+      const devTheme = devThemes[appMode];
+
+      document.title = devTheme.title;
+      document.documentElement.style.setProperty('--app-background', devTheme.background);
+      document.documentElement.style.setProperty('--app-bottom-color', devTheme.bottomColor);
+      document.documentElement.style.setProperty('--app-logo-animation', devTheme.logoAnimation);
+
+      window.addEventListener('DOMContentLoaded', () => {
+        const nameEl = document.querySelector('.app-name');
+        const sloganEl = document.querySelector('.app-slogan');
+        const iconEl = document.querySelector('.logo-container img');
+
+        if (nameEl) nameEl.textContent = devTheme.name;
+        if (sloganEl) sloganEl.textContent = devTheme.description;
+        if (iconEl) {
+          iconEl.src = devTheme.icon;
+          iconEl.alt = devTheme.title;
+        }
+      });
     })();
   </script>
+  <!-- DEV_PATCH_END -->
   <base href="$FLUTTER_BASE_HREF">
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -42,8 +81,8 @@
   <link rel="icon" type="image/png" href="favicon.png">
   <title>{{APP_TITLE}}</title>
 
-  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
 
   <script>
     window._flutter = {
@@ -63,18 +102,29 @@
 
   <style>
     :root {
-      --saldify-background: linear-gradient(180deg, #155C37 0%, #1B5E20 26%, #0D47A1 100%);
+      --app-background: {{APP_BACKGROUND}};
+      --app-bottom-color: {{APP_BOTTOM_COLOR}};
+      --app-logo-animation: {{APP_LOGO_ANIMATION}};
       --saldify-bubble: rgba(255, 255, 255, 0.10);
       --saldify-bubble-soft: rgba(255, 255, 255, 0.07);
     }
 
-    html,
+    html {
+      width: 100%;
+      height: 100%;
+      min-height: 100%;
+      margin: 0;
+      background-color: var(--app-bottom-color);
+    }
+
     body {
       width: 100%;
       height: 100%;
       min-height: 100%;
       margin: 0;
-      background: var(--saldify-background);
+      background-color: var(--app-bottom-color);
+      background-image: var(--app-background);
+      background-repeat: no-repeat;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
 
@@ -99,11 +149,13 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      background: var(--saldify-background);
+      background: var(--app-background);
       opacity: 1;
       transition: opacity 0.5s ease-out;
       z-index: 2147483647;
       overflow: hidden;
+      box-sizing: border-box;
+      border-bottom: 1px solid var(--app-bottom-color);
     }
 
     #splash::before,
@@ -166,7 +218,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      animation: spinContinuous 4s linear infinite;
+      animation: var(--app-logo-animation);
     }
 
     .logo-container img {
@@ -188,7 +240,7 @@
 
     .app-name {
       color: #ffffff;
-      font-size: 60px;
+      font-size: 50px;
       font-weight: 800;
       line-height: 1;
       letter-spacing: 4px;
@@ -224,7 +276,7 @@
 
     @media (max-width: 430px) {
       .app-name {
-        font-size: 48px;
+        font-size: 38px;
       }
     }
 
@@ -242,6 +294,11 @@
     @keyframes spinContinuous {
       from { transform: rotate(0deg); }
       to { transform: rotate(360deg); }
+    }
+
+    @keyframes fadeLogo {
+      0%, 100% { opacity: 0.18; }
+      50% { opacity: 1; }
     }
 
     @keyframes fadeInUp {

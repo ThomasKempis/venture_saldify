@@ -173,11 +173,12 @@ class _ClienteHeader extends StatelessWidget {
     return Row(
       children: [
         if (menuButton != null) ...[menuButton!, const SizedBox(width: 14)],
-        ClipOval(
+        ClipRRect(
+          borderRadius: BorderRadius.circular(10),
           child: SizedBox(
             width: 34,
             height: 34,
-            child: SmxConfig.logo(fit: BoxFit.cover),
+            child: SmxConfig.logo(fit: BoxFit.contain),
           ),
         ),
         const SizedBox(width: 14),
@@ -203,7 +204,7 @@ class _ClienteHeader extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
-                  color: SmxColors.brandAccent,
+                  color: SmxColors.brandDescription,
                   fontFamily: 'Segoe UI',
                   fontSize: 11,
                   fontWeight: FontWeight.w700,
