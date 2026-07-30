@@ -1,0 +1,1211 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Saldify: concepto global, modalidades, reputacion comercial y Red de Redes.">
+  <title>Saldify - Explicacion global</title>
+  <link rel="stylesheet" href="docu_shell.css">
+  <style>
+:root {
+      color-scheme: light;
+      --ink: #13283a;
+      --muted: #607386;
+      --brand: #146b54;
+      --brand-2: #0f5f8d;
+      --accent: #58d7a1;
+      --paper: rgba(255, 255, 255, .88);
+      --paper-strong: rgba(255, 255, 255, .96);
+      --line: rgba(255, 255, 255, .22);
+      --shadow: 0 24px 70px rgba(10, 37, 64, .22);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+      background:
+        radial-gradient(circle at 12% 18%, rgba(88, 215, 161, .34) 0 13rem, transparent 13.2rem),
+        radial-gradient(circle at 96% 3%, rgba(143, 205, 231, .38) 0 17rem, transparent 17.2rem),
+        radial-gradient(circle at 86% 92%, rgba(49, 125, 189, .42) 0 21rem, transparent 21.2rem),
+        linear-gradient(135deg, #115c2a 0%, #0d6267 48%, #0d4e8d 100%);
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .shell {
+      width: min(1120px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 34px 0 46px;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 22px;
+      align-items: center;
+      padding: 28px;
+      border: 1px solid var(--line);
+      border-radius: 26px;
+      background: rgba(255, 255, 255, .16);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+    }
+
+    .logo {
+      width: 92px;
+      height: 92px;
+      display: grid;
+      place-items: center;
+      border-radius: 24px;
+      background: var(--paper);
+      overflow: hidden;
+    }
+
+    .logo img {
+      width: 74px;
+      height: 74px;
+      object-fit: contain;
+    }
+
+    .eyebrow {
+      margin: 0 0 8px;
+      color: #9ff0c8;
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      color: #fff;
+      font-size: clamp(36px, 6vw, 64px);
+      line-height: 1;
+      font-weight: 900;
+    }
+
+    .lead {
+      max-width: 720px;
+      margin: 14px 0 0;
+      color: rgba(255, 255, 255, .82);
+      font-size: 17px;
+      line-height: 1.55;
+      font-weight: 650;
+    }
+
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 22px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      color: #fff;
+      background: rgba(255, 255, 255, .14);
+      border: 1px solid rgba(255, 255, 255, .18);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--accent);
+    }
+
+    .section-head {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 20px;
+      margin: 34px 0 16px;
+      color: #fff;
+    }
+
+    .section-head h2 {
+      margin: 0;
+      font-size: 25px;
+      font-weight: 900;
+    }
+
+    .section-head p {
+      margin: 0;
+      color: rgba(255, 255, 255, .7);
+      font-size: 13px;
+      font-weight: 750;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .card {
+      position: relative;
+      min-height: 232px;
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+      border-radius: 22px;
+      background: var(--paper-strong);
+      border: 1px solid rgba(255, 255, 255, .5);
+      box-shadow: 0 18px 44px rgba(8, 37, 64, .18);
+      overflow: hidden;
+      transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      background: #fff;
+      box-shadow: 0 22px 58px rgba(8, 37, 64, .24);
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: auto -28px -42px auto;
+      width: 142px;
+      height: 142px;
+      border-radius: 999px;
+      background: color-mix(in srgb, var(--tone) 22%, transparent);
+    }
+
+    .tag {
+      width: fit-content;
+      padding: 7px 10px;
+      border-radius: 999px;
+      color: color-mix(in srgb, var(--tone) 80%, #15283a);
+      background: color-mix(in srgb, var(--tone) 14%, white);
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .card h3 {
+      margin: 18px 0 10px;
+      font-size: 22px;
+      line-height: 1.12;
+      color: var(--ink);
+      font-weight: 900;
+    }
+
+    .card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.45;
+      font-weight: 650;
+    }
+
+    .open {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: auto;
+      padding-top: 24px;
+      color: color-mix(in srgb, var(--tone) 74%, #102b3d);
+      font-size: 14px;
+      font-weight: 900;
+    }
+
+    .arrow {
+      width: 24px;
+      height: 24px;
+      display: grid;
+      place-items: center;
+      border-radius: 999px;
+      color: #fff;
+      background: var(--tone);
+    }
+
+    .footer {
+      margin-top: 24px;
+      padding: 18px 20px;
+      color: rgba(255, 255, 255, .78);
+      border: 1px solid rgba(255, 255, 255, .16);
+      border-radius: 18px;
+      background: rgba(255, 255, 255, .1);
+      font-size: 13px;
+      font-weight: 700;
+      backdrop-filter: blur(14px);
+    }
+
+    @media (max-width: 860px) {
+      .grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 620px) {
+      .shell {
+        width: min(100% - 22px, 1120px);
+        padding-top: 18px;
+      }
+
+      .hero {
+        grid-template-columns: 1fr;
+        padding: 22px;
+      }
+
+      .logo {
+        width: 76px;
+        height: 76px;
+        border-radius: 20px;
+      }
+
+      .logo img {
+        width: 62px;
+        height: 62px;
+      }
+
+      .section-head {
+        display: block;
+      }
+
+      .section-head p {
+        margin-top: 6px;
+      }
+
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    body.docu-shell-ready {
+      padding-top: 78px;
+    }
+
+    body.docu-shell-ready.docu-native-cover {
+      background:
+        radial-gradient(circle at 12% 18%, rgba(88, 215, 161, .34) 0 13rem, transparent 13.2rem),
+        radial-gradient(circle at 96% 3%, rgba(143, 205, 231, .38) 0 17rem, transparent 17.2rem),
+        radial-gradient(circle at 86% 92%, rgba(49, 125, 189, .42) 0 21rem, transparent 21.2rem),
+        linear-gradient(135deg, #115c2a 0%, #0d6267 48%, #0d4e8d 100%) !important;
+    }
+
+    body.docu-shell-ready.docu-native-cover .shell {
+      width: min(1120px, calc(100% - 32px)) !important;
+      max-width: 1120px !important;
+      margin: 0 auto !important;
+      padding: 34px 0 46px !important;
+    }
+
+    body.docu-shell-ready.docu-native-cover .hero {
+      display: grid !important;
+      grid-template-columns: auto 1fr !important;
+      gap: 22px !important;
+      align-items: center !important;
+      width: 100% !important;
+      margin: 0 !important;
+      padding: 28px !important;
+      border: 1px solid var(--line) !important;
+      border-radius: 26px !important;
+      background: rgba(255, 255, 255, .16) !important;
+      box-shadow: var(--shadow) !important;
+      backdrop-filter: blur(18px);
+    }
+
+    body.docu-shell-ready.docu-native-cover .hero .eyebrow {
+      margin: 0 0 8px !important;
+      color: #9ff0c8 !important;
+      font-size: 14px !important;
+      font-weight: 800 !important;
+      letter-spacing: .08em !important;
+      text-transform: uppercase !important;
+    }
+
+    body.docu-shell-ready.docu-native-cover .hero h1 {
+      margin: 0 !important;
+      color: #fff !important;
+      font-size: clamp(36px, 6vw, 64px) !important;
+      line-height: 1 !important;
+      font-weight: 900 !important;
+    }
+
+    body.docu-shell-ready.docu-native-cover .hero .lead {
+      max-width: 720px !important;
+      margin: 14px 0 0 !important;
+      color: rgba(255, 255, 255, .82) !important;
+      font-size: 17px !important;
+      line-height: 1.55 !important;
+      font-weight: 650 !important;
+    }
+
+    body.docu-shell-ready.docu-native-cover .hero .logo {
+      width: 92px !important;
+      height: 92px !important;
+      border-radius: 24px !important;
+      background: var(--paper) !important;
+    }
+
+    body.docu-shell-ready.docu-native-cover .hero .logo img {
+      width: 100% !important;
+      height: 100% !important;
+      object-fit: cover !important;
+    }
+
+    .doc-card {
+      width: 100%;
+      margin: 0;
+      padding: clamp(34px, 5vw, 64px);
+      border-radius: 26px;
+      background: var(--paper-strong);
+      border: 1px solid rgba(255, 255, 255, .5);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .doc-card-gap {
+      height: 48px;
+    }
+
+    .doc-card-inner {
+      width: 100%;
+      margin: 0 auto;
+      padding: 0 32px;
+    }
+
+    .doc-card h2 {
+      margin: 42px 0 14px;
+      color: var(--brand);
+      font-size: clamp(26px, 3.2vw, 38px);
+      line-height: 1.16;
+      font-weight: 900;
+    }
+
+    .doc-card > h2:first-child,
+    .doc-card .chapter:first-child h2:first-child {
+      margin-top: 0;
+    }
+
+    .doc-card h1 {
+      margin: 0 0 24px;
+      color: var(--ink);
+      font-size: clamp(30px, 4vw, 44px);
+      line-height: 1.08;
+      font-weight: 900;
+    }
+
+    .doc-card h3 {
+      margin: 30px 0 10px;
+      color: var(--brand-2);
+      font-size: 22px;
+      line-height: 1.2;
+      font-weight: 900;
+    }
+
+    .doc-card p,
+    .doc-card li {
+      color: var(--ink);
+      font-size: 17px;
+      line-height: 1.7;
+      font-weight: 550;
+    }
+
+    .doc-card p {
+      max-width: none;
+      margin: 0 0 18px;
+    }
+
+    .doc-card ul,
+    .doc-card ol {
+      max-width: none;
+      margin: 12px 0 26px;
+      padding-left: 24px;
+    }
+
+    .doc-card p,
+    .doc-card ul,
+    .doc-card ol,
+    .doc-card pre,
+    .doc-card table {
+      margin-left: 28px;
+    }
+
+    .doc-card h3 {
+      margin-left: 28px;
+    }
+
+    .doc-card li::marker {
+      color: var(--brand);
+      font-weight: 900;
+    }
+
+    .doc-card .chapter {
+      padding: 58px 0;
+      border-top: 1px solid rgba(19, 40, 58, .12);
+    }
+
+    .doc-card .chapter:first-of-type {
+      margin-top: 34px;
+    }
+
+    .chapter-kicker {
+      margin-bottom: 10px;
+      color: #1fb77d;
+      font-size: 13px;
+      font-weight: 900;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+
+    .section-rule {
+      border: 0;
+      border-top: 1px solid rgba(19, 40, 58, .12);
+      margin: 34px 0 0;
+    }
+
+    .doc-card pre {
+      max-width: 860px;
+      margin: 26px 0;
+      padding: 22px;
+      border-radius: 18px;
+      color: #eafff6;
+      background: #103949;
+      overflow: auto;
+      white-space: pre-wrap;
+    }
+
+    .doc-card code {
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: .92em;
+    }
+
+    .doc-card blockquote {
+      max-width: 900px;
+      margin: 30px 0;
+      padding: 24px 28px;
+      border-left: 6px solid var(--accent);
+      border-radius: 18px;
+      color: var(--ink);
+      background: rgba(88, 215, 161, .13);
+      font-size: 22px;
+      line-height: 1.5;
+      font-weight: 800;
+    }
+
+    .table-wrap {
+      overflow: auto;
+      margin: 26px 0;
+    }
+
+    .doc-card table {
+      width: 100%;
+      min-width: 720px;
+      border-collapse: collapse;
+    }
+
+    .doc-card th,
+    .doc-card td {
+      padding: 14px 16px;
+      text-align: left;
+      vertical-align: top;
+      border-bottom: 1px solid rgba(19, 40, 58, .12);
+    }
+
+    .doc-card th {
+      color: #fff;
+      background: var(--brand);
+      font-size: 13px;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    @media (max-width: 620px) {
+      body.docu-shell-ready.docu-native-cover .shell {
+        width: min(100% - 22px, 1120px) !important;
+        padding-top: 18px !important;
+      }
+
+      body.docu-shell-ready.docu-native-cover .hero {
+        grid-template-columns: 1fr !important;
+        padding: 22px !important;
+      }
+
+      body.docu-shell-ready.docu-native-cover .hero .logo {
+        width: 76px !important;
+        height: 76px !important;
+        border-radius: 20px !important;
+      }
+
+      body.docu-shell-ready.docu-native-cover .hero .logo img {
+        width: 100% !important;
+        height: 100% !important;
+      }
+
+      .doc-card {
+        padding: 26px 20px;
+      }
+
+      .doc-card-inner {
+        width: 100%;
+        padding: 0 4px;
+      }
+
+      .doc-card-gap {
+        height: 32px;
+      }
+
+      .doc-card p,
+      .doc-card li {
+        font-size: 16px;
+      }
+    }
+
+    @media print {
+      body.docu-shell-ready.docu-native-cover .shell {
+        width: 100% !important;
+        max-width: none !important;
+        padding: 18mm 12mm !important;
+      }
+
+      body.docu-shell-ready.docu-native-cover .hero {
+        margin: 0 0 16mm !important;
+        padding: 18mm !important;
+        break-inside: avoid;
+      }
+
+      .doc-card-gap {
+        display: none !important;
+      }
+
+      .doc-card {
+        margin: 0 !important;
+        padding: 18mm !important;
+        border-radius: 14px !important;
+        box-shadow: none !important;
+        break-inside: auto;
+      }
+
+      .doc-card-inner {
+        width: 100% !important;
+        max-width: none !important;
+        margin: 0 !important;
+        padding: 0 8mm !important;
+      }
+
+      .doc-card p,
+      .doc-card li {
+        font-size: 12pt !important;
+        line-height: 1.55 !important;
+      }
+
+      .doc-card h1 {
+        font-size: 22pt !important;
+      }
+
+      .doc-card h2 {
+        font-size: 22pt !important;
+      }
+    }
+
+  </style>
+</head>
+<body class="docu-shell-boot docu-native-cover">
+  <main class="shell">
+    <section class="hero" aria-labelledby="titulo">
+      <div class="logo">
+        <img src="images/docu_001_concepto_saldify_crop.png" alt="Concepto Saldify">
+      </div>
+      <div>
+        <p class="lead">De una cartera organizada a una Red de Redes comercial, medible, libre y capaz de crecer.</p>
+        <div class="meta">
+          <span class="pill"><span class="dot"></span>Controla</span>
+          <span class="pill"><span class="dot"></span>Conecta</span>
+          <span class="pill"><span class="dot"></span>Vende</span>
+          <span class="pill"><span class="dot"></span>Expande</span>
+        </div>
+      </div>
+    </section>
+
+    <div class="doc-card-gap" aria-hidden="true"></div>
+
+    <section class="doc-card" aria-label="Contenido de Explicacion global">
+      <div class="doc-card-inner">
+<h2 id="introduccion-del-documento">Introduccion</h2>
+<p>Saldify es una App para organizar, conectar y desarrollar carteras de venta.</p>
+<p>Puede comenzar como una herramienta sencilla para controlar clientes, credito, compras, pagos y saldos, y evolucionar hasta convertirse en una Red de Redes comercial formada por distribuidores, mayoristas, minoristas, prestadores de servicios, vendedores y clientes finales.</p>
+<p>Su valor no consiste solamente en digitalizar lo que antes se llevaba en Excel, libretas o conversaciones de WhatsApp. Saldify distribuye la operacion entre los participantes, conserva la trazabilidad de cada relacion y permite que un cliente se convierta en Anfitrion de su propia cartera sin perder su independencia.</p>
+<p>La propuesta puede resumirse en cuatro acciones:</p>
+<pre data-lang="text">
+<code>Controla -&gt; Conecta -&gt; Vende -&gt; Expande</code>
+</pre>
+<p>Sobre esa operacion se construyen dos capacidades transversales:</p>
+<ul>
+<li>la evaluacion de reputacion comercial mediante estrellas;</li>
+<li>la libertad de cambiar de red sin perder clientes ni historial, siempre que las obligaciones directas se encuentren liquidadas.</li>
+</ul>
+<hr class="section-rule">
+<section class="chapter" id="1-saldify-y-la-explicacion-global-del-concepto">
+<div class="chapter-kicker">Capitulo 1</div>
+<h1>Saldify y la Explicacion Global del Concepto</h1>
+<h2 id="1-1-el-problema-que-resuelve">El problema que resuelve</h2>
+<p>Muchos negocios administran su cartera de ventas mediante hojas de calculo, mensajes, notas, llamadas y recordatorios personales.</p>
+<p>Ese modelo puede funcionar mientras la operacion es pequena, pero presenta problemas frecuentes:</p>
+<ul>
+<li>la informacion queda dispersa;</li>
+<li>cuesta localizar la situacion de cada cliente;</li>
+<li>las compras y los pagos se mezclan con conversaciones personales;</li>
+<li>el saldo puede depender de formulas manuales;</li>
+<li>no siempre existe evidencia clara de quien registro o confirmo una operacion;</li>
+<li>al cambiar o perder un dispositivo puede resultar dificil reconstruir la cartera;</li>
+<li>crecer obliga a repetir mas trabajo administrativo.</li>
+</ul>
+<p>Saldify concentra la informacion comercial en una sola relacion operativa:</p>
+<ul>
+<li>clientes;</li>
+<li>invitaciones;</li>
+<li>credito;</li>
+<li>disponible;</li>
+<li>compras;</li>
+<li>pagos;</li>
+<li>saldos;</li>
+<li>fechas y planes de corte;</li>
+<li>productos y catalogos;</li>
+<li>historial;</li>
+<li>cobranza;</li>
+<li>gestiones pendientes;</li>
+<li>estructura de red.</li>
+</ul>
+<h2 id="1-2-el-anfitrion">El Anfitrion</h2>
+<p>El Anfitrion es la persona o empresa que administra una cartera directa.</p>
+<p>Puede crear o invitar clientes, asignar credito, establecer condiciones de corte, ofrecer productos o servicios, revisar compras, confirmar entregas, validar pagos y dar seguimiento a la cobranza.</p>
+<p>El Anfitrion controla exclusivamente a sus clientes directos. Si uno de ellos forma su propia cartera, puede conocer esa red descendente, pero no operar a los clientes de su cliente.</p>
+<h2 id="1-3-el-invitado">El Invitado</h2>
+<p>El Invitado es el cliente que acepta vincularse con un Anfitrion.</p>
+<p>Puede consultar su credito, disponible, compras, pagos, saldo, cortes e historial. Tambien puede solicitar compras, utilizar catalogos, informar pagos y dar seguimiento a las decisiones de su Anfitrion.</p>
+<p>El Invitado deja de ser un registro pasivo y participa directamente en la operacion.</p>
+<h2 id="1-4-una-persona-puede-tener-ambos-roles">Una persona puede tener ambos roles</h2>
+<p>La misma persona puede ser:</p>
+<ul>
+<li>Invitado frente a quien le vende o abastece;</li>
+<li>Anfitrion frente a sus propios clientes.</li>
+</ul>
+<p>Esto permite representar cadenas comerciales reales. Un minorista puede ser cliente de un mayorista y, al mismo tiempo, administrar su propia cartera de consumidores o revendedores.</p>
+<h2 id="1-5-responsabilidad-compartida">Responsabilidad compartida</h2>
+<p>Saldify no elimina la responsabilidad comercial de las partes. La organiza.</p>
+<p>El cliente registra o solicita. El Anfitrion revisa y confirma cuando la operacion lo requiere. Ambos conservan visibilidad sobre el estado y el historial.</p>
+<p>Este principio permite mantener una operacion agil sin perder control:</p>
+<pre data-lang="text">
+<code>El Invitado informa -&gt; El Anfitrion valida -&gt; La App conserva el historial</code>
+</pre>
+<h2 id="1-6-de-herramienta-de-control-a-plataforma-comercial">De herramienta de control a plataforma comercial</h2>
+<p>Saldify puede utilizarse inicialmente como un control de cartera. Sin embargo, su verdadero potencial aparece cuando el Anfitrion invita a sus clientes, publica su oferta y permite que algunos participantes desarrollen sus propias redes.</p>
+<p>La App deja entonces de ser solamente una sustitucion de Excel y WhatsApp para convertirse en una plataforma de operacion comercial colaborativa.</p>
+<hr class="section-rule">
+</section>
+<section class="chapter" id="2-saldify-y-sus-modalidades">
+<div class="chapter-kicker">Capitulo 2</div>
+<h1>Saldify y sus Modalidades</h1>
+<p>Las modalidades no son planes excluyentes. Representan diferentes grados de participacion y pueden coexistir dentro de una misma cartera.</p>
+<p>Un Anfitrion puede administrar manualmente algunos clientes, recibir solicitudes directas de otros, ofrecer catalogo a otro grupo y, al mismo tiempo, formar parte de una Red de Redes.</p>
+<h2 id="2-1-modalidad-standalone-controla-tu-cartera">Modalidad Standalone - Controla tu cartera</h2>
+<p>Standalone es el punto de entrada.</p>
+<p>El Anfitrion puede:</p>
+<ul>
+<li>crear clientes;</li>
+<li>activar su relacion comercial;</li>
+<li>asignar credito;</li>
+<li>establecer fecha y plan de corte;</li>
+<li>registrar compras;</li>
+<li>registrar pagos;</li>
+<li>consultar saldos y disponible;</li>
+<li>revisar historial y cobranza.</li>
+</ul>
+<p>En esta modalidad el Anfitrion realiza la mayor parte del trabajo. El cliente no necesita entrar a la App.</p>
+<p>El credito funciona como un primer control comercial: define cuanto puede utilizar el cliente y permite conocer saldo y disponibilidad. Los cortes ayudan a organizar cuando debe revisarse o liquidarse la relacion.</p>
+<p>Standalone reemplaza la dispersion de hojas, mensajes y anotaciones por una cartera organizada, recuperable y consultable.</p>
+<h3 id="ejemplos-de-uso-1">Ejemplos de uso</h3>
+<ul>
+<li>vendedor independiente que ofrece productos a credito;</li>
+<li>negocio que controla clientes frecuentes;</li>
+<li>prestador de servicios que registra anticipos y saldos;</li>
+<li>distribuidor que desea ordenar su cartera antes de invitar clientes.</li>
+</ul>
+<h2 id="2-2-modalidad-direct-connect-conecta-solicitudes-directas">Modalidad Direct Connect - Conecta solicitudes directas</h2>
+<p>Direct Connect comienza cuando el Anfitrion invita a un cliente y este acepta.</p>
+<p>A partir de ese momento el Invitado participa en la operacion:</p>
+<ul>
+<li>consulta su cuenta;</li>
+<li>solicita productos o servicios;</li>
+<li>describe lo que necesita;</li>
+<li>puede apoyar la solicitud con imagenes;</li>
+<li>informa sus pagos;</li>
+<li>revisa el estado de cada movimiento.</li>
+</ul>
+<p>El Anfitrion deja de capturar todo manualmente. Su trabajo principal consiste en:</p>
+<ul>
+<li>invitar al cliente;</li>
+<li>asignar credito y condiciones de corte;</li>
+<li>revisar solicitudes;</li>
+<li>acordar precio o margen;</li>
+<li>realizar la entrega o prestar el servicio;</li>
+<li>confirmar compras y pagos;</li>
+<li>atender gestiones pendientes.</li>
+</ul>
+<p>Direct Connect funciona especialmente bien cuando no existe un producto fijo o cuando cada operacion requiere cotizacion.</p>
+<h3 id="ejemplos-de-uso-2">Ejemplos de uso</h3>
+<ul>
+<li>reparacion de televisores, celulares o electrodomesticos;</li>
+<li>servicios tecnicos y profesionales;</li>
+<li>productos sobre pedido;</li>
+<li>compras especiales realizadas por el Anfitrion para revender;</li>
+<li>trabajos cuyo precio final depende del diagnostico.</li>
+</ul>
+<h2 id="2-3-modalidad-market-connect-vende-mediante-catalogo">Modalidad Market Connect - Vende mediante catalogo</h2>
+<p>Market Connect permite que el Anfitrion publique una oferta estructurada.</p>
+<p>El Anfitrion define:</p>
+<ul>
+<li>productos;</li>
+<li>imagenes;</li>
+<li>descripciones;</li>
+<li>precios;</li>
+<li>disponibilidad;</li>
+<li>condiciones comerciales.</li>
+</ul>
+<p>El Invitado consulta el catalogo, selecciona cantidades y genera su solicitud mediante un carrito.</p>
+<p>El control de credito, compras, pagos, cortes, saldo, disponible e historial se mantiene igual. Lo que cambia es la forma de originar la compra.</p>
+<p>Market Connect transforma la cartera en un canal comercial activo. El cliente no necesita preguntar repetidamente que vende el Anfitrion: puede consultar la oferta y solicitar mercancia directamente.</p>
+<h3 id="ejemplos-de-uso-3">Ejemplos de uso</h3>
+<ul>
+<li>distribuidores de productos;</li>
+<li>venta por catalogo;</li>
+<li>mayoristas y minoristas;</li>
+<li>comercios con clientes frecuentes;</li>
+<li>redes de revendedores.</li>
+</ul>
+<h2 id="2-4-modalidad-connect-to-connect-expande-una-red-de-redes">Modalidad Connect to Connect - Expande una Red de Redes</h2>
+<p>Connect to Connect aparece cuando un Invitado decide convertirse tambien en Anfitrion y crear su propia cartera.</p>
+<p>La estructura puede crecer por niveles:</p>
+<pre data-lang="text">
+<code>Anfitrion distribuidor
+└── Cliente / Anfitrion minorista
+    └── Cliente / Anfitrion revendedor
+        └── Cliente final</code>
+</pre>
+<p>Cada nivel administra unicamente a sus clientes directos.</p>
+<p>El nivel superior puede conocer la existencia y comportamiento general de la red descendente, pero no sustituye al Anfitrion directo ni administra sus clientes.</p>
+<p>Esta autonomia crea una red democratica:</p>
+<ul>
+<li>cada participante conserva su cartera;</li>
+<li>cada relacion mantiene sus propias condiciones;</li>
+<li>cada Anfitrion controla su operacion directa;</li>
+<li>la red puede crecer sin concentrar toda la administracion en una sola persona.</li>
+</ul>
+<h2 id="2-5-comparacion-de-modalidades">Comparacion de modalidades</h2>
+<div class="table-wrap">
+<table>
+<thead>
+<tr>
+<th>Modalidad</th>
+<th>Quien registra la necesidad</th>
+<th>Forma de oferta</th>
+<th>Alcance principal</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Standalone</td>
+<td>El Anfitrion</td>
+<td>Registro manual</td>
+<td>Control de cartera</td>
+</tr>
+<tr>
+<td>Direct Connect</td>
+<td>El Invitado</td>
+<td>Solicitud o cotizacion</td>
+<td>Productos y servicios personalizados</td>
+</tr>
+<tr>
+<td>Market Connect</td>
+<td>El Invitado</td>
+<td>Catalogo y carrito</td>
+<td>Venta estructurada de productos</td>
+</tr>
+<tr>
+<td>Connect to Connect</td>
+<td>Cada nivel de la red</td>
+<td>Oferta propia o heredada</td>
+<td>Expansion comercial multinivel</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h2 id="2-6-capacidades-comunes">Capacidades comunes</h2>
+<p>Todas las modalidades pueden apoyarse en:</p>
+<ul>
+<li>credito;</li>
+<li>planes y fechas de corte;</li>
+<li>compras;</li>
+<li>pagos;</li>
+<li>saldo y disponible;</li>
+<li>confirmacion de operaciones;</li>
+<li>historial;</li>
+<li>cobranza;</li>
+<li>alertas y gestiones pendientes;</li>
+<li>evaluacion comercial.</li>
+</ul>
+<hr class="section-rule">
+</section>
+<section class="chapter" id="3-saldify-como-cartera-de-venta-autoevaluada">
+<div class="chapter-kicker">Capitulo 3</div>
+<h1>Saldify como Cartera de Venta Autoevaluada</h1>
+<h2 id="3-1-la-estrella-del-anfitrion">La estrella del Anfitrion</h2>
+<p>Cada Anfitrion cuenta con una estrella que representa su reputacion comercial dentro de Saldify.</p>
+<p>La estrella convierte la cartera en una cartera autoevaluada: la actividad registrada por la propia operacion permite valorar estabilidad, cumplimiento, crecimiento y calidad.</p>
+<p>No se trata solamente de medir cuanto vende una persona. Tambien importa como administra, cobra, compra y paga.</p>
+<h2 id="3-2-evaluacion-del-rol-de-anfitrion">Evaluacion del rol de Anfitrion</h2>
+<p>Cuando una persona actua como Anfitrion, su evaluacion considera elementos como:</p>
+<ul>
+<li>cantidad y crecimiento de clientes;</li>
+<li>niveles y alcance de su red;</li>
+<li>volumen de compras y pagos;</li>
+<li>comportamiento de saldos;</li>
+<li>puntualidad de cobranza;</li>
+<li>cumplimiento de entregas;</li>
+<li>tiempo de atencion de solicitudes;</li>
+<li>gestiones pendientes;</li>
+<li>movimientos confirmados o rechazados;</li>
+<li>calidad y actividad de su cartera;</li>
+<li>continuidad de su operacion.</li>
+</ul>
+<p>Un Anfitrion con volumen alto pero cartera vencida no representa el mismo valor que uno con crecimiento ordenado, pagos puntuales y operaciones confirmadas a tiempo.</p>
+<h2 id="3-3-evaluacion-cuando-el-anfitrion-tambien-es-invitado">Evaluacion cuando el Anfitrion tambien es Invitado</h2>
+<p>Cuando el Anfitrion pertenece como cliente a una red superior, la evaluacion tambien considera su comportamiento como Invitado:</p>
+<ul>
+<li>puntualidad de sus pagos;</li>
+<li>cumplimiento de sus cortes;</li>
+<li>volumen y frecuencia de compra;</li>
+<li>saldo y disponible;</li>
+<li>solicitudes pendientes;</li>
+<li>confirmaciones y rechazos;</li>
+<li>estabilidad de su relacion con el Anfitrion superior.</li>
+</ul>
+<p>De esta manera, la reputacion refleja las dos caras del participante:</p>
+<pre data-lang="text">
+<code>Como administra su cartera + Como cumple con su propio Anfitrion</code>
+</pre>
+<h2 id="3-4-evaluacion-acumulada-de-la-red">Evaluacion acumulada de la red</h2>
+<p>En una Red de Redes, el comportamiento de los niveles inferiores contribuye a la evaluacion del nivel superior.</p>
+<p>La reputacion de un distribuidor no depende solamente de su operacion personal, sino tambien de la calidad de la red que construye:</p>
+<ul>
+<li>capacidad de pago de los participantes;</li>
+<li>salud de las carteras descendentes;</li>
+<li>velocidad de abastecimiento;</li>
+<li>cumplimiento de entregas;</li>
+<li>crecimiento sostenible;</li>
+<li>estabilidad de la cobranza.</li>
+</ul>
+<p>Cada estrella aporta informacion al nivel anterior, formando un indice acumulado de confianza y desempeno comercial.</p>
+<p>La evaluacion debe conservar la responsabilidad directa: un Anfitrion es valorado principalmente por su propia operacion y por la calidad de la red que decidio desarrollar, sin asumir control directo sobre clientes que pertenecen a otro nivel.</p>
+<h2 id="3-5-una-reputacion-construida-por-operaciones">Una reputacion construida por operaciones</h2>
+<p>La estrella no depende de recomendaciones informales ni de opiniones aisladas. Se construye con la actividad que la red registra:</p>
+<ul>
+<li>solicitudes;</li>
+<li>entregas;</li>
+<li>compras;</li>
+<li>pagos;</li>
+<li>fechas;</li>
+<li>saldos;</li>
+<li>confirmaciones;</li>
+<li>crecimiento;</li>
+<li>cumplimiento.</li>
+</ul>
+<p>Esto permite crear un indice de reputacion comercial interno que puede ayudar a:</p>
+<ul>
+<li>reconocer redes saludables;</li>
+<li>identificar clientes puntuales;</li>
+<li>valorar distribuidores consistentes;</li>
+<li>ofrecer mejores condiciones a participantes confiables;</li>
+<li>detectar carteras que requieren atencion;</li>
+<li>respaldar decisiones comerciales con historial.</li>
+</ul>
+<p>La evaluacion de Saldify pertenece al contexto operativo de la App. No sustituye a una institucion financiera ni a un buro de credito externo.</p>
+<h2 id="3-6-la-estrella-como-incentivo">La estrella como incentivo</h2>
+<p>La evaluacion no debe entenderse solamente como control. Tambien es un incentivo para mejorar:</p>
+<ul>
+<li>pagar puntualmente;</li>
+<li>confirmar operaciones;</li>
+<li>atender solicitudes;</li>
+<li>mantener saldos saludables;</li>
+<li>desarrollar clientes responsables;</li>
+<li>construir redes sostenibles.</li>
+</ul>
+<p>Cada participante puede transformar su buen comportamiento en reputacion y su reputacion en nuevas oportunidades comerciales.</p>
+<hr class="section-rule">
+</section>
+<section class="chapter" id="4-saldify-red-de-redes-su-verdadero-potencial">
+<div class="chapter-kicker">Capitulo 4</div>
+<h1>Saldify Red de Redes: su Verdadero Potencial</h1>
+<h2 id="4-1-una-estructura-comercial-real">Una estructura comercial real</h2>
+<p>Las cadenas comerciales no funcionan como una sola lista de clientes. Un distribuidor abastece a minoristas; los minoristas venden a revendedores o clientes finales; algunos clientes crean nuevas carteras.</p>
+<p>Saldify representa esa realidad mediante relaciones directas conectadas.</p>
+<p>Cada participante puede comprar hacia arriba y vender hacia abajo sin perder el control de su propia operacion.</p>
+<h2 id="4-2-herencia-de-productos">Herencia de productos</h2>
+<p>Un Invitado que se convierte en Anfitrion puede:</p>
+<ul>
+<li>crear su propio catalogo;</li>
+<li>trabajar mediante solicitudes directas;</li>
+<li>utilizar el catalogo de su Anfitrion superior.</li>
+</ul>
+<p>Cuando decide utilizar productos heredados, sus clientes pueden consultar una oferta originada en un nivel superior de la red.</p>
+<p>El catalogo heredado conserva la referencia del proveedor efectivo y se presenta como una oferta de consulta para quien no es propietario. Esto evita que un participante modifique productos que pertenecen a otro nivel.</p>
+<h2 id="4-3-ejemplo-completo-de-abastecimiento">Ejemplo completo de abastecimiento</h2>
+<p>Supongamos esta red:</p>
+<pre data-lang="text">
+<code>Distribuidor A
+└── Minorista B
+    └── Cliente final C</code>
+</pre>
+<p>B es Invitado de A y Anfitrion de C.</p>
+<h3 id="paso-1-c-solicita-el-producto">Paso 1: C solicita el producto</h3>
+<p>C consulta el catalogo disponible con B y genera una solicitud.</p>
+<p>La compra pertenece a la relacion directa entre C y B. B es responsable ante C de revisar precio, credito, disponibilidad y entrega.</p>
+<h3 id="paso-2-b-determina-como-abastecer">Paso 2: B determina como abastecer</h3>
+<p>Si B ya tiene el producto, puede atender la solicitud directamente.</p>
+<p>Si necesita abastecerse, B actua como Invitado de A y realiza su propia compra con el distribuidor.</p>
+<p>La operacion B con A es diferente de la operacion C con B. Cada relacion conserva su precio, margen, credito, corte, saldo e historial.</p>
+<h3 id="paso-3-a-abastece-a-b">Paso 3: A abastece a B</h3>
+<p>A recibe la solicitud de B, prepara el producto y realiza la entrega.</p>
+<p>B puede conocer cuanto tiempo transcurrio desde la solicitud hasta la entrega y confirmar el estado de la compra dentro de su relacion con A.</p>
+<h3 id="paso-4-b-entrega-a-c">Paso 4: B entrega a C</h3>
+<p>Una vez abastecido, B entrega el producto a C y confirma la operacion correspondiente.</p>
+<p>Saldify conserva los tiempos y estados de cada tramo:</p>
+<pre data-lang="text">
+<code>A abastece a B -&gt; B entrega a C</code>
+</pre>
+<p>Esto permite evaluar no solamente si la venta se realizo, sino cuanto tiempo tardo la red en llevar el producto hasta el cliente final.</p>
+<h2 id="4-4-pago-optimista-y-confirmacion">Pago optimista y confirmacion</h2>
+<p>Cuando un Invitado informa un pago, Saldify puede mostrarlo de manera optimista como una operacion registrada o pendiente.</p>
+<p>Sin embargo, informar no equivale a confirmar la recepcion del dinero.</p>
+<p>El flujo correcto es:</p>
+<pre data-lang="text">
+<code>El Invitado informa el pago
+          ↓
+El Anfitrion verifica la recepcion
+          ↓
+El Anfitrion confirma o rechaza
+          ↓
+La App actualiza el estado y conserva el historial</code>
+</pre>
+<p>En el ejemplo anterior existen dos pagos independientes:</p>
+<ul>
+<li>C paga a B y B confirma;</li>
+<li>B paga a A y A confirma.</li>
+</ul>
+<p>El dinero y la responsabilidad no saltan automaticamente entre niveles. Cada Anfitrion responde por su relacion directa.</p>
+<p>Este modelo permite medir:</p>
+<ul>
+<li>tiempo entre solicitud y entrega;</li>
+<li>tiempo entre entrega y pago;</li>
+<li>puntualidad respecto al corte;</li>
+<li>tiempo de confirmacion;</li>
+<li>rechazos o correcciones;</li>
+<li>eficiencia de cada tramo de abastecimiento.</li>
+</ul>
+<p>Esa informacion alimenta la reputacion comercial de cada participante y de la red.</p>
+<h2 id="4-5-autonomia-entre-niveles">Autonomia entre niveles</h2>
+<p>Aunque A pueda conocer la red que existe debajo de B, A no administra directamente a C.</p>
+<ul>
+<li>A administra a B.</li>
+<li>B administra a C.</li>
+<li>C opera con B.</li>
+</ul>
+<p>Esta regla evita que la red se convierta en una estructura centralizada donde un nivel superior controla relaciones que no le pertenecen.</p>
+<h2 id="4-6-portabilidad-de-red">Portabilidad de red</h2>
+<p>Un Cliente que tambien es Anfitrion puede aceptar la invitacion de otro Anfitrion y cambiar de red.</p>
+<p>Al trasladarse conserva:</p>
+<ul>
+<li>identidad y acceso;</li>
+<li>perfil;</li>
+<li>clientes directos;</li>
+<li>arbol descendente;</li>
+<li>catalogo y configuraciones;</li>
+<li>compras;</li>
+<li>pagos;</li>
+<li>saldos;</li>
+<li>estados;</li>
+<li>historial;</li>
+<li>reputacion construida.</li>
+</ul>
+<p>Lo unico que cambia es su Anfitrion superior.</p>
+<h2 id="4-7-condiciones-para-cambiar-de-red">Condiciones para cambiar de red</h2>
+<p>La portabilidad se permite cuando la relacion directa con el Anfitrion actual se encuentra limpia:</p>
+<ul>
+<li>saldo en cero;</li>
+<li>compras pendientes resueltas;</li>
+<li>pagos confirmados;</li>
+<li>entregas concluidas;</li>
+<li>ausencia de gestiones abiertas;</li>
+<li>cumplimiento de las condiciones de corte;</li>
+<li>inexistencia de una relacion circular.</li>
+</ul>
+<p>No es necesario que todos los descendientes tengan saldo cero. Cada descendiente conserva sus obligaciones con su Anfitrion directo. Lo que debe liquidarse es la relacion de quien cambia de red con el Anfitrion que deja.</p>
+<h2 id="4-8-prevencion-de-ciclos">Prevencion de ciclos</h2>
+<p>Saldify verifica que el nuevo Anfitrion no forme parte de la red descendente del participante que se traslada.</p>
+<p>Ejemplo no permitido:</p>
+<pre data-lang="text">
+<code>A
+└── B
+    └── C</code>
+</pre>
+<p>A no puede convertirse en Invitado de B ni de C porque la red terminaria dependiendo de si misma.</p>
+<p>Ejemplo permitido:</p>
+<pre data-lang="text">
+<code>Antes
+
+A                 X
+└── B
+    └── C
+
+Despues
+
+A                 X
+                  └── B
+                      └── C</code>
+</pre>
+<p>B cambia de red con C, conserva su cartera y deja de depender directamente de A.</p>
+<h2 id="4-9-una-red-democratica">Una red democratica</h2>
+<p>La portabilidad evita redes cautivas.</p>
+<p>Un participante puede elegir la red que le ofrece mejores condiciones, productos, abastecimiento, servicio o posibilidades de crecimiento, siempre que haya cumplido sus compromisos actuales.</p>
+<p>El resultado es una red comercial basada en:</p>
+<ul>
+<li>cumplimiento;</li>
+<li>reputacion;</li>
+<li>libertad;</li>
+<li>responsabilidad directa;</li>
+<li>trazabilidad;</li>
+<li>competencia por ofrecer mejores condiciones.</li>
+</ul>
+<h2 id="4-10-aplicacion-a-diferentes-cadenas-comerciales">Aplicacion a diferentes cadenas comerciales</h2>
+<p>La Red de Redes puede representar:</p>
+<ul>
+<li>fabricante -&gt; distribuidor -&gt; minorista -&gt; cliente final;</li>
+<li>mayorista -&gt; revendedor -&gt; consumidor;</li>
+<li>proveedor de servicios -&gt; tecnico -&gt; cliente;</li>
+<li>empresa -&gt; representante -&gt; vendedor externo;</li>
+<li>importador -&gt; distribuidor regional -&gt; comercio;</li>
+<li>cualquier modelo donde un participante compre hacia arriba y venda hacia abajo.</li>
+</ul>
+<hr class="section-rule">
+</section>
+<section class="chapter" id="5-saldify-una-solucion-unica-en-el-mercado">
+<div class="chapter-kicker">Capitulo 5</div>
+<h1>Saldify: una Solucion Unica en el Mercado</h1>
+<h2 id="5-1-mas-que-una-herramienta-aislada">Mas que una herramienta aislada</h2>
+<p>Saldify no es solamente:</p>
+<ul>
+<li>una hoja de calculo digital;</li>
+<li>una agenda de clientes;</li>
+<li>un control de cobranza;</li>
+<li>un catalogo;</li>
+<li>un carrito;</li>
+<li>un sistema de invitaciones;</li>
+<li>una aplicacion de pagos;</li>
+<li>una visualizacion de redes.</li>
+</ul>
+<p>Su diferenciador surge al integrar todas esas capacidades dentro de una misma relacion comercial.</p>
+<pre data-lang="text">
+<code>Cartera
++ Credito
++ Compras
++ Pagos
++ Cortes
++ Catalogo
++ Invitaciones
++ Red de Redes
++ Reputacion
++ Portabilidad
+= Saldify</code>
+</pre>
+<h2 id="5-2-el-trabajo-se-distribuye-sin-perder-control">El trabajo se distribuye sin perder control</h2>
+<p>En Standalone, el Anfitrion controla toda la operacion.</p>
+<p>En Direct Connect y Market Connect, el cliente participa y reduce la carga administrativa del Anfitrion.</p>
+<p>En Connect to Connect, cada participante puede desarrollar su propia cartera y la operacion se distribuye por niveles.</p>
+<p>El crecimiento ya no significa que una sola persona tenga que capturar cada compra y cada pago.</p>
+<h2 id="5-3-el-historial-se-convierte-en-valor">El historial se convierte en valor</h2>
+<p>Cada solicitud, entrega, compra, pago, corte y confirmacion contribuye a crear historial.</p>
+<p>Ese historial permite conocer:</p>
+<ul>
+<li>quien opera;</li>
+<li>como cumple;</li>
+<li>que volumen desarrolla;</li>
+<li>que tan saludable es su cartera;</li>
+<li>cuanto tarda en abastecer;</li>
+<li>como responde su red;</li>
+<li>que reputacion ha construido.</li>
+</ul>
+<p>La informacion deja de ser solamente administrativa y se convierte en un activo comercial.</p>
+<h2 id="5-4-crecimiento-con-autonomia">Crecimiento con autonomia</h2>
+<p>Saldify permite crecer sin obligar a los participantes a entregar el control de su cartera.</p>
+<p>Cada Anfitrion:</p>
+<ul>
+<li>administra a sus clientes;</li>
+<li>define sus relaciones comerciales;</li>
+<li>conserva su historial;</li>
+<li>desarrolla reputacion;</li>
+<li>puede heredar una oferta;</li>
+<li>puede cambiar de red al cumplir sus obligaciones.</li>
+</ul>
+<p>Esta combinacion de autonomia y conexion es uno de los principales diferenciadores de Saldify.</p>
+<h2 id="5-5-cierre">Cierre</h2>
+<p>Saldify comienza resolviendo un problema cotidiano: organizar clientes, credito, ventas, pagos y saldos.</p>
+<p>Despues conecta al Anfitrion con sus clientes, convierte el catalogo en un canal de venta, distribuye la operacion y permite que cada participante desarrolle su propia cartera.</p>
+<p>Finalmente, transforma esas carteras en una Red de Redes capaz de medir cumplimiento, reputacion, abastecimiento, crecimiento y calidad comercial.</p>
+<p>Saldify no solamente ayuda a vender. Crea una infraestructura para que una red comercial pueda organizarse, evaluarse, abastecerse, competir y crecer sin perder su libertad.</p>
+<h2 id="mensaje-final">Mensaje final</h2>
+<blockquote>Saldify convierte una cartera de clientes en una red comercial viva. Cada<br>participante puede comprar, vender, construir reputacion, desarrollar su<br>propia red y elegir donde crecer, mientras la App conserva el control, la<br>trazabilidad y la confianza de toda la operacion.</blockquote>
+</section>
+<section class="chapter faq" id="6-preguntas-frecuentes">
+<div class="chapter-kicker">Capitulo 6</div>
+<h1>Preguntas Frecuentes</h1>
+<h2>Donde encuentro un reporte de mis ventas?</h2>
+<p>Saldify no depende de un reporte estatico que deba generarse al final del dia, de la semana o del mes.</p>
+<p>El dashboard, las notificaciones, las gestiones pendientes, la cobranza y el historial funcionan en conjunto como una lectura operativa y predictiva de la cartera.</p>
+<p>La App controla continuamente:</p>
+<ul>
+<li>compras registradas y pendientes;</li>
+<li>entregas por confirmar;</li>
+<li>pagos informados y pagos confirmados;</li>
+<li>saldos, disponible y credito utilizado;</li>
+<li>fechas de corte y clientes proximos a vencer;</li>
+<li>operaciones que requieren atencion.</li>
+</ul>
+<p>Un reporte tradicional mostraria la misma informacion que Saldify ya mantiene actualizada. En lugar de esperar un documento, el Anfitrion consulta la situacion real de su cartera y puede entrar al historial de cada cliente.</p>
+<blockquote>Saldify sustituye el reporte retrospectivo por una cartera activa que informa que ocurrio, que esta pendiente y que requiere atencion.</blockquote>
+<h2>Saldify es un sistema de ventas?</h2>
+<p>Saldify controla ventas, compras, pagos, entregas, credito y cobranza, pero no es un sistema tradicional de ventas.</p>
+<p>Un sistema tradicional suele registrar una operacion ya realizada y emitir reportes posteriores. Saldify acompana la relacion comercial en tiempo real: conecta a las partes, controla credito y saldos, identifica gestiones, muestra proximos vencimientos, conserva historial y permite desarrollar una Red de Redes.</p>
+<p>Su alcance es mayor: es una App de gestion comercial colaborativa que organiza la cartera antes, durante y despues de cada venta.</p>
+<h2>Puedo utilizar Saldify aunque mis clientes no entren a la App?</h2>
+<p>Si. La modalidad Standalone permite que el Anfitrion administre clientes, credito, compras, pagos, cortes y saldos sin participacion directa del cliente.</p>
+<p>El negocio puede organizar primero su cartera actual e invitar clientes gradualmente. Cuando un cliente acepta, puede solicitar compras, informar pagos y consultar su historial, mientras el Anfitrion conserva la validacion.</p>
+<p>Saldify permite evolucionar desde el control individual hacia una cartera conectada sin transformar toda la operacion de una sola vez.</p>
+<h2>Connect to Connect es una estructura piramidal?</h2>
+<p>No. Connect to Connect representa una cadena comercial de relaciones directas, no una estructura basada solamente en incorporar personas.</p>
+<p>Cada nivel realiza actividad comercial real: compra o vende, administra credito, entrega mercancia, registra pagos y responde por sus clientes directos.</p>
+<p>El Anfitrion superior puede conocer la red descendente, pero no controla a los clientes de sus clientes ni recibe control automatico sobre sus ventas o pagos.</p>
+<p>Cada participante conserva su cartera, su historial y su libertad de cambiar de red cuando liquida sus compromisos y no produce un ciclo. La red crece por actividad comercial, cumplimiento y reputacion, no por simple reclutamiento.</p>
+</section>
+      </div>
+    </section>
+  </main>
+  <script src="docu_shell.js" defer></script>
+</body>
+</html>

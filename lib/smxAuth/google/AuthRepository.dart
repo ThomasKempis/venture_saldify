@@ -7,6 +7,13 @@ class AuthRepository {
 
   AuthRepository({FirebaseAuth? auth}) : _auth = auth ?? FirebaseAuth.instance;
 
+  User? getCurrentUser() {
+    final currentUser = _auth.currentUser;
+    if (currentUser != null) return currentUser;
+    return _auth.currentUser;
+  }
+
+  /*
   Future<User?> getCurrentUser() async {
     final currentUser = _auth.currentUser;
     if (currentUser != null) return currentUser;
@@ -16,6 +23,7 @@ class AuthRepository {
       onTimeout: () => null,
     );
   }
+  */
 
   Future<UserCredential> signInWithGoogle({
     bool forceAccountSelection = false,

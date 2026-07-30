@@ -103,6 +103,8 @@ class _SmxSaldiFy extends State<SmxSaldiFy> {
       role: SmxSaldifyAssistantRole.anfitrion,
       screen: screen,
       isMobile: layout.isMobile,
+      showFloatingLauncher:
+          screen != SmxSaldifyAssistantScreen.dashboardAnfitrion,
       child: page,
     );
   }

@@ -27,17 +27,18 @@ void main() async {
 void _applyDevCodigoInvitacion({required bool isInvitado}) {
   if (!kDebugMode || !isInvitado) return;
 
-  //const String codigo = 'SF076721180594'; //calixto
-  const String codigo = 'SF262092221742'; //santiago
+  const String codigoKey = 'codigo';
+  const String codigo = 'SF542030956578'; // calixto smxsas@gmail.com
+  // const String codigo = 'SF262092221742'; // santiago santiago.azael.mohr@gmail.com
 
-  if (Uri.base.queryParameters.containsKey(SmxConstants.codigoInvitacionKey)) {
+  if (Uri.base.queryParameters.containsKey(codigoKey)) {
     return;
   }
 
   final newUri = Uri.base.replace(
     queryParameters: {
       ...Uri.base.queryParameters,
-      SmxConstants.codigoInvitacionKey: codigo,
+      codigoKey: codigo,
     },
   );
 
@@ -56,7 +57,7 @@ class MyAppSmx extends StatelessWidget {
       locale: const Locale('es', 'MX'),
       debugShowCheckedModeBanner: false,
       theme: SmxThemeData(),
-      home: SmxSaldifyLogon(codigoInicial: SmxConstants.codigoInvitacionParam),
+      home: SmxSaldifyLogon(),
     );
   }
 }

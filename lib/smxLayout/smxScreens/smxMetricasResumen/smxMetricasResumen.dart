@@ -12,6 +12,8 @@ class SmxMetricasResumen extends StatelessWidget {
   final double pagos;
   final double saldo;
   final bool saldoEnDeuda;
+  final String comprasLabel;
+  final String pagosLabel;
 
   const SmxMetricasResumen({
     super.key,
@@ -21,6 +23,8 @@ class SmxMetricasResumen extends StatelessWidget {
     required this.pagos,
     required this.saldo,
     this.saldoEnDeuda = false,
+    this.comprasLabel = 'Ventas',
+    this.pagosLabel = 'Cobros',
   });
 
   @override
@@ -29,13 +33,13 @@ class SmxMetricasResumen extends StatelessWidget {
       builder: (context, constraints) {
         final isCompact = constraints.maxWidth < 660;
         final comprasCard = _ResumenMetricData(
-          label: 'Compras',
+          label: comprasLabel,
           value: compras,
           note: 'Realizadas',
           color: const Color(0xFF65B8FF),
         );
         final pagosCard = _ResumenMetricData(
-          label: 'Pagos',
+          label: pagosLabel,
           value: pagos,
           note: 'Recibidos',
           color: const Color(0xFF22C55E),

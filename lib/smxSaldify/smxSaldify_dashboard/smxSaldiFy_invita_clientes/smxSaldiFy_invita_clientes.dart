@@ -7,6 +7,7 @@ import 'package:venture_saldify/smxApis/smxDepth.dart';
 import 'package:venture_saldify/smxLayout/smxBackgrounds/smx_saldify_sheet_bg.dart';
 import 'package:venture_saldify/smxLayout/smxColors.dart';
 import 'package:venture_saldify/smxLayout/smxBackgrounds/saldify_circles_background.dart';
+import 'package:venture_saldify/smxSaldifyAssistant/smxSaldifyAssistant.dart';
 
 import 'smxSaldiFy_invita_clientes_models.dart';
 import 'smxSaldiFy_invita_service.dart';
@@ -93,7 +94,7 @@ class SmxSaldiFyInvitaClientes extends StatelessWidget {
                           ),
                           SizedBox(height: 6),
                           Text(
-                            'Toca el QR para mostrar tu invitacion abierta o copiar un link restringido a Gmail.',
+                            'Toca el QR para mostrar tu invitacion o copia el enlace para compartirlo.',
                             style: TextStyle(
                               color: SmxColors.textMuted,
                               fontSize: 12,
@@ -105,6 +106,22 @@ class SmxSaldiFyInvitaClientes extends StatelessWidget {
                       ),
                     ),
                   ],
+                ),
+              ),
+              Positioned(
+                top: 10,
+                right: 10,
+                child: Builder(
+                  builder: (context) {
+                    final openAssistant = SmxSaldifyAssistantScope.maybeOpenOf(
+                      context,
+                    );
+                    if (openAssistant == null) {
+                      return const SizedBox.shrink();
+                    }
+
+                    return _InvitaAssistantButton(onTap: openAssistant);
+                  },
                 ),
               ),
             ],
@@ -128,6 +145,38 @@ class SmxSaldiFyInvitaClientes extends StatelessWidget {
   }
 }
 
+class _InvitaAssistantButton extends StatelessWidget {
+  final VoidCallback onTap;
+
+  const _InvitaAssistantButton({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: 'Ayuda Saldify',
+      child: Material(
+        color: SmxColors.white,
+        shape: const CircleBorder(),
+        elevation: 6,
+        shadowColor: SmxColors.blackAlpha(.18),
+        child: InkWell(
+          customBorder: const CircleBorder(),
+          onTap: onTap,
+          child: const SizedBox(
+            width: 38,
+            height: 38,
+            child: Icon(
+              Icons.smart_toy_rounded,
+              color: SmxColors.brandPrimary,
+              size: 21,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _InvitaClientesSheet extends StatefulWidget {
   final String uuidAnfitrion;
   final String anfitrionNombre;
@@ -142,46 +191,15 @@ class _InvitaClientesSheet extends StatefulWidget {
 }
 
 class _InvitaClientesSheetState extends State<_InvitaClientesSheet> {
-  final TextEditingController _correoController = TextEditingController();
-  final FocusNode _correoFocusNode = FocusNode();
-  final GlobalKey _correoFieldKey = GlobalKey();
   SmxSaldiFyInvitacionGenerada? _invitacionAbierta;
   bool _loadingQr = true;
-  bool _loadingCorreo = false;
   String _mensaje = '';
 
   @override
   void initState() {
     super.initState();
-    _correoFocusNode.addListener(_handleCorreoFocus);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _generarInvitacionAbierta();
-    });
-  }
-
-  @override
-  void dispose() {
-    _correoFocusNode.removeListener(_handleCorreoFocus);
-    _correoFocusNode.dispose();
-    _correoController.dispose();
-    super.dispose();
-  }
-
-  void _handleCorreoFocus() {
-    if (!_correoFocusNode.hasFocus) return;
-
-    Future<void>.delayed(const Duration(milliseconds: 320), () {
-      if (!mounted || !_correoFocusNode.hasFocus) return;
-
-      final fieldContext = _correoFieldKey.currentContext;
-      if (fieldContext == null || !fieldContext.mounted) return;
-
-      Scrollable.ensureVisible(
-        fieldContext,
-        duration: const Duration(milliseconds: 180),
-        curve: Curves.easeOutCubic,
-        alignment: .8,
-      );
     });
   }
 
@@ -236,16 +254,6 @@ class _InvitaClientesSheetState extends State<_InvitaClientesSheet> {
                 onCopy: _copyInvitacionAbierta,
               ),
               const SizedBox(height: 18),
-              const _SectionDivider(label: 'Puede invitar por correo Gmail'),
-              const SizedBox(height: 14),
-              _GmailInviteRow(
-                fieldKey: _correoFieldKey,
-                controller: _correoController,
-                focusNode: _correoFocusNode,
-                loading: _loadingCorreo,
-                onCopy: _copyInvitacionCorreo,
-              ),
-              const SizedBox(height: 18),
               const _SectionDivider(label: 'Mensaje'),
               const SizedBox(height: 10),
               _InviteMessage(mensaje: _mensaje),
@@ -262,12 +270,7 @@ class _InvitaClientesSheetState extends State<_InvitaClientesSheet> {
 
     SmxSaldiFyInvitacionGenerada? invitacion;
 
-    invitacion = await SmxSaldifyInvitaService.crearInvitacion(
-      controller: SmxConstants.controllerMain,
-      parametros: SmxSaldifyInvitacionParametros.anfitrionAnonimo(
-        uuidAnfitrion: widget.uuidAnfitrion,
-      ),
-    );
+    invitacion = await SmxSaldifyInvitaService.crearInvitacion();
 
     if (!mounted) return;
 
@@ -290,54 +293,6 @@ class _InvitaClientesSheetState extends State<_InvitaClientesSheet> {
     if (invitacion == null) return;
 
     await _copyLink(invitacion.link, 'Se copio el link anonimo');
-  }
-
-  Future<void> _copyInvitacionCorreo() async {
-    final correoUsuario = _correoController.text.trim().toLowerCase();
-    final correo = '$correoUsuario@gmail.com';
-
-    if (correoUsuario.isEmpty) {
-      setState(() => _mensaje = 'Ingrese un correo Gmail.');
-      return;
-    }
-
-    if (correoUsuario.contains('@')) {
-      setState(() => _mensaje = 'Ingrese solo el nombre, sin @gmail.com.');
-      return;
-    }
-
-    if (!RegExp(r'^[a-z0-9._%+-]+$').hasMatch(correoUsuario)) {
-      setState(() => _mensaje = 'Ingrese un correo Gmail valido.');
-      return;
-    }
-
-    setState(() => _loadingCorreo = true);
-
-    SmxSaldiFyInvitacionGenerada? invitacion;
-
-    invitacion = await SmxSaldifyInvitaService.crearInvitacion(
-      controller: SmxConstants.controllerMain,
-      parametros: SmxSaldifyInvitacionParametros.invitadoCorreo(
-        uuidAnfitrion: widget.uuidAnfitrion,
-        correoInvitado: correo,
-      ),
-    );
-
-    if (!mounted) return;
-
-    setState(() => _loadingCorreo = false);
-
-    final error = SmxConstants.controllerMain.jsonSend.getError();
-    if (error != null) {
-      if (!mounted) return;
-      showSmxSystemErrorDialog(context, message: error);
-      return;
-    }
-
-    final invite = invitacion;
-    if (invite == null) return;
-
-    await _copyLink(invite.link, 'Se copio link por correo');
   }
 
   Future<void> _copyLink(String link, String mensaje) async {
@@ -488,104 +443,6 @@ class _SectionDivider extends StatelessWidget {
           ),
         ),
         Expanded(child: Divider(color: SmxColors.blackAlpha(.12))),
-      ],
-    );
-  }
-}
-
-class _GmailInviteRow extends StatelessWidget {
-  final GlobalKey fieldKey;
-  final TextEditingController controller;
-  final FocusNode focusNode;
-  final bool loading;
-  final VoidCallback onCopy;
-
-  const _GmailInviteRow({
-    required this.fieldKey,
-    required this.controller,
-    required this.focusNode,
-    required this.loading,
-    required this.onCopy,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: TextField(
-            key: fieldKey,
-            controller: controller,
-            focusNode: focusNode,
-            textInputAction: TextInputAction.done,
-            keyboardType: TextInputType.emailAddress,
-            autocorrect: false,
-            textCapitalization: TextCapitalization.none,
-            inputFormatters: [
-              FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9._%+-]')),
-              TextInputFormatter.withFunction((oldValue, newValue) {
-                return newValue.copyWith(text: newValue.text.toLowerCase());
-              }),
-            ],
-            decoration: InputDecoration(
-              filled: true,
-              fillColor: SmxColors.whiteAlpha(.9),
-              hintText: 'correo',
-              suffixIcon: const Padding(
-                padding: EdgeInsets.only(right: 14),
-                child: Center(
-                  widthFactor: 1,
-                  child: Text(
-                    '@gmail.com',
-                    style: TextStyle(
-                      color: SmxColors.textMuted,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                ),
-              ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: BorderSide(color: SmxColors.blackAlpha(.1)),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: BorderSide(color: SmxColors.blackAlpha(.1)),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: const BorderSide(
-                  color: SmxColors.brandPrimary,
-                  width: 1.4,
-                ),
-              ),
-            ),
-            style: const TextStyle(
-              color: SmxColors.textDark,
-              fontSize: 14,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-        ),
-        const SizedBox(width: 10),
-        IconButton.filled(
-          tooltip: 'Copiar link Gmail',
-          onPressed: loading ? null : onCopy,
-          iconSize: 28,
-          icon: loading
-              ? const SizedBox(
-                  width: 18,
-                  height: 18,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : const Icon(Icons.link),
-          style: IconButton.styleFrom(
-            backgroundColor: SmxColors.brandPrimary,
-            foregroundColor: SmxColors.white,
-            fixedSize: const Size(48, 48),
-          ),
-        ),
       ],
     );
   }

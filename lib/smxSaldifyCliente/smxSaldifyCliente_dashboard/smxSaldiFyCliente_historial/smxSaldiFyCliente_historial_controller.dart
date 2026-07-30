@@ -107,6 +107,31 @@ class SmxSaldiFyClienteHistorialController extends SmxController {
     }
   }
 
+  String getMovimientoSearchExtra() {
+    return [
+      _getOptionalValue('SYSUSER90_FAPL'),
+      _getOptionalValue('SYSUSER90_REFERENCIA'),
+      _getOptionalValue('SYSUSER90_OWNER'),
+      _getOptionalValue('SYSUSER90_ENTIDAD'),
+      _getOptionalValue('SYSUSER10_NOMBRES'),
+      _getOptionalValue('SYSUSER10_APELLIDOS'),
+      _getOptionalValue('SYSUSER10_CORREO'),
+      _getOptionalValue('SYSUSER10_EMAIL'),
+      _getOptionalValue('SYSUSER10_TELEFONO'),
+      _getOptionalValue('SYSUSER11_ALIAS'),
+      _getOptionalValue('SYSUSER11_CORREO'),
+      _getOptionalValue('SYSUSER11_TELEFONO'),
+    ].where((value) => value.isNotEmpty).join(' ');
+  }
+
+  String _getOptionalValue(String field) {
+    try {
+      return rstHistorial.getValue(field)?.toString().trim() ?? '';
+    } catch (_) {
+      return '';
+    }
+  }
+
   String _formatDateMeses(dynamic value) {
     final date = _toDate(value);
     if (date == null) return value?.toString() ?? '';

@@ -779,6 +779,127 @@ Reglas:
 - Disponible no puede superar el credito.
 - Los calculos de periodo/corte conservan la misma regla de cantidad por importe.
 
+### QRY_SYSUSER11_SALDOS
+
+Contrato corregido:
+
+- `SYSUSER12_COMPRAS` conserva el acumulado historico de compras.
+- `SYSUSER12_PAGOS` conserva el acumulado historico de pagos confirmados.
+- `SYSUSER12_COMPRAS_ULT` y `SYSUSER12_PAGOS_ULT` se usan solamente como variables internas para calcular corte/deudor.
+- El corte no debe pisar las metricas principales de compras y pagos.
+
+```sql
+create or alter procedure QRY_SYSUSER11_SALDOS (
+    RELA_SYSUSER12 bigint,
+    FECHA_CORTE date,
+    FECHA_CORTE_ANT date)
+returns (
+    SYSUSER12_CREDITO double precision,
+    SYSUSER12_DISPONIBLE double precision,
+    SYSUSER12_COMPRAS double precision,
+    SYSUSER12_PAGOS double precision,
+    SYSUSER12_BALANCE double precision,
+    SYSUSER12_DEUDOR double precision)
+as
+declare variable RELA_SYSUSER11 bigint;
+declare variable SYSUSER12_PLAN integer;
+declare variable SYSUSER12_PORCENTAJE double precision;
+declare variable PAGO_MINIMO double precision;
+declare variable SYSUSER12_COMPRAS_ULT double precision;
+declare variable SYSUSER12_PAGOS_ULT double precision;
+begin
+    select
+        s12.rela_sysuser11,
+        s12.sysuser12_credito,
+        s12.sysuser12_plan,
+        s12.sysuser12_porcentaje
+    from sysuser12_dep_clientes s12
+    where s12.id_sysuser12 = :rela_sysuser12
+    into :rela_sysuser11,
+         :sysuser12_credito,
+         :sysuser12_plan,
+         :sysuser12_porcentaje;
+
+    if (sysuser12_credito is null) then sysuser12_credito = 0.0;
+
+    select sum(c.sysuser40_cantidad * c.sysuser40_importe)
+    from sysuser40_det_compras c
+    where c.rela_sysuser11 = :rela_sysuser11
+    into :sysuser12_compras;
+
+    select sum(p.sysuser50_importe)
+    from sysuser50_det_pagos p
+    where p.rela_sysuser11 = :rela_sysuser11
+      and p.sysuser50_status = 1
+    into :sysuser12_pagos;
+
+    if (sysuser12_compras is null) then sysuser12_compras = 0.0;
+    if (sysuser12_pagos is null) then sysuser12_pagos = 0.0;
+
+    sysuser12_deudor = 0.0;
+    sysuser12_balance = sysuser12_compras - sysuser12_pagos;
+
+    if (fecha_corte is not null and fecha_corte_ant is not null) then
+    begin
+        select sum(c.sysuser40_cantidad * c.sysuser40_importe)
+        from sysuser40_det_compras c
+        where c.rela_sysuser11 = :rela_sysuser11
+          and c.sysuser40_fecha >= :fecha_corte_ant
+          and c.sysuser40_fecha <= :fecha_corte
+        into :sysuser12_compras_ult;
+
+        select sum(p.sysuser50_importe)
+        from sysuser50_det_pagos p
+        where p.rela_sysuser11 = :rela_sysuser11
+          and p.sysuser50_status = 1
+          and p.sysuser50_fecha >= :fecha_corte_ant
+          and p.sysuser50_fecha <= :fecha_corte
+        into :sysuser12_pagos_ult;
+
+        if (sysuser12_compras_ult is null) then sysuser12_compras_ult = 0.0;
+        if (sysuser12_pagos_ult is null) then sysuser12_pagos_ult = 0.0;
+
+        if (sysuser12_balance > 0) then
+        begin
+            if (sysuser12_pagos_ult = 0) then
+                sysuser12_deudor = sysuser12_balance;
+            else
+            begin
+                if (sysuser12_plan = 1) then
+                begin
+                    -- hizo por lo menos un pago libero algo de credito
+                end
+                else if (sysuser12_plan = 2) then
+                begin
+                    if (sysuser12_pagos_ult < sysuser12_balance) then
+                        sysuser12_deudor = sysuser12_balance - sysuser12_pagos_ult;
+                end
+                else if (sysuser12_plan = 3) then
+                begin
+                    pago_minimo = sysuser12_balance * (sysuser12_porcentaje / 100.0);
+
+                    if (sysuser12_pagos_ult < pago_minimo) then
+                        sysuser12_deudor = pago_minimo - sysuser12_pagos_ult;
+                end
+            end
+        end
+
+        ---sysuser12_compras = sysuser12_compras_ult;
+        ---sysuser12_pagos = sysuser12_pagos_ult;
+    end
+
+    if (sysuser12_balance < 0) then sysuser12_balance = 0.0;
+
+    sysuser12_disponible = sysuser12_credito - sysuser12_balance;
+
+    if (sysuser12_disponible < 0) then sysuser12_disponible = 0.0;
+    if (sysuser12_disponible > sysuser12_credito) then
+        sysuser12_disponible = sysuser12_credito;
+
+    suspend;
+end
+```
+
 ### Historico
 
 Vista:

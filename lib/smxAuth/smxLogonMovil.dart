@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:universal_html/html.dart' as html;
-import 'package:uuid/uuid.dart';
 import 'package:venture_saldify/smxApis/smxConstants.dart';
 import 'package:venture_core_connect/smxConstants_core.dart';
 import 'package:venture_core_connect/smxJson/SmxJsonUtil.dart';
 import 'package:venture_core_connect/smxJson/smxJsonFiles.dart';
 import 'package:venture_widgets/smxTmpScreen.dart';
 import 'package:venture_core_connect/smxDataBase/smxRowSet.dart';
-import 'package:venture_widgets/smxShowDialog/smxShowDialogs.dart';
 import 'package:venture_widgets/smxViewMap/smxLocationReporter.dart';
 
 import '../smxSaldify/smxSaldify.dart';
@@ -19,9 +17,11 @@ import 'smxAuth.dart';
 class SmxLogonMovil extends SmxTmpCtl {
   static const edad_maxima = 14;
   final SmxAuthUser authUser;
+  final SmxSaldifyAccessMode accessMode;
   late SmxRowSet rstSysUser10;
+  String _uuidAnfitrionInvitacion = '';
 
-  SmxLogonMovil({required this.authUser}) {
+  SmxLogonMovil({required this.authUser, required this.accessMode}) {
     SmxConstants.controllerMain = this;
   }
 
@@ -59,41 +59,39 @@ class SmxLogonMovil extends SmxTmpCtl {
           "'$geolocalizacionSql')",
     );
 
-    await showDialogWait(context, () async {
-      await getCallWS();
+    await getCallWS();
 
-      if (jsonSend.getError() != null) {
-        throw StateError(jsonSend.error!);
+    if (jsonSend.getError() != null) {
+      throw StateError(jsonSend.error!);
+    }
+
+    rstSysUser10 = getRowset('SYSUSER10');
+
+    if (rstSysUser10.getRowCount() == 0) {
+      throw StateError('ADD_SYSUSER10 no regresó datos del usuario.');
+    }
+
+    rstSysUser10.first();
+
+    SmxConstants_core.instancia = "SALDIFY";
+    SmxConstants_core.usuario = rstSysUser10.getValue('SYSUSER99_USUARIO');
+    SmxConstants_core.clave = rstSysUser10.getValue('SYSUSER99_PASSWORD');
+
+    resetJsonSend();
+
+    rstSysUser10.first();
+    rstSysUser10.tabla = 'SYSUSER10_CAB_MOVIL';
+
+    if (rstSysUser10.getValue('RELA_SYSJSON02') <= 0) {
+      data.tablaTroncalRst = rstSysUser10;
+
+      final idImage = await _callWSImageLoad();
+
+      if (idImage > 0) {
+        rstSysUser10.update('RELA_SYSJSON02', idImage);
+        await callTroncalSave(rstSysUser10);
       }
-
-      rstSysUser10 = getRowset('SYSUSER10');
-
-      if (rstSysUser10.getRowCount() == 0) {
-        throw StateError('ADD_SYSUSER10 no regresó datos del usuario.');
-      }
-
-      rstSysUser10.first();
-
-      SmxConstants_core.instancia = "SALDIFY";
-      SmxConstants_core.usuario = rstSysUser10.getValue('SYSUSER99_USUARIO');
-      SmxConstants_core.clave = rstSysUser10.getValue('SYSUSER99_PASSWORD');
-
-      resetJsonSend();
-
-      rstSysUser10.first();
-      rstSysUser10.tabla = 'SYSUSER10_CAB_MOVIL';
-
-      if (rstSysUser10.getValue('RELA_SYSJSON02') <= 0) {
-        data.tablaTroncalRst = rstSysUser10;
-
-        final idImage = await _callWSImageLoad();
-
-        if (idImage > 0) {
-          rstSysUser10.update('RELA_SYSJSON02', idImage);
-          await callTroncalSave(rstSysUser10);
-        }
-      }
-    });
+    }
   }
 
   Future<void> navigateToAppMovil(BuildContext context) async {
@@ -108,18 +106,14 @@ class SmxLogonMovil extends SmxTmpCtl {
       accion: 'LOGIN',
     );
 
-    SmxSaldifyAccessSession.markActive(
-      SmxConstants.isClienteInvitado
-          ? SmxSaldifyAccessMode.invitado
-          : SmxSaldifyAccessMode.anfitrion,
-      getCorreo(),
-    );
+    SmxSaldifyAccessSession.markActive(accessMode, getCorreo());
 
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: (_) =>
-            SmxConstants.isClienteInvitado ? SmxSaldiFyCliente() : SmxSaldiFy(),
+        builder: (_) => accessMode == SmxSaldifyAccessMode.invitado
+            ? SmxSaldiFyCliente()
+            : SmxSaldiFy(),
       ),
     );
   }
@@ -130,6 +124,22 @@ class SmxLogonMovil extends SmxTmpCtl {
 
   String getUuid() {
     return rstSysUser10.getValue('SYSUSER10_UUID')?.toString() ?? '';
+  }
+
+  String getUuidAnfitrion() {
+    if (_uuidAnfitrionInvitacion.isNotEmpty) {
+      return _uuidAnfitrionInvitacion;
+    }
+
+    return rstSysUser10
+            .getValue('SYSUSER99_UUID_ANFITRION')
+            ?.toString()
+            .trim() ??
+        '';
+  }
+
+  void setUuidAnfitrion(String uuidAnfitrion) {
+    _uuidAnfitrionInvitacion = uuidAnfitrion.trim();
   }
 
   String getNombres() {

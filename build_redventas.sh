@@ -45,6 +45,29 @@ if [ $? -eq 0 ]; then
         echo "🎨 Favicon oficial copiado a la raíz (/favicon.png)."
     fi
 
+    echo "📚 Preparando documentación HTML..."
+    rm -rf build/web/htmls
+    cp -R documents/htmls build/web/htmls
+    cp -fv build/web/htmls/docu.html build/web/docu.html
+    rm -f build/web/htmls/docu.html
+    sed -i '' 's|href="docu_|href="htmls/docu_|g' build/web/docu.html
+    sed -i '' 's|../../assets/images/saldify/logo.png|assets/assets/images/redventas/logo.png|g' build/web/docu.html
+    sed -i '' 's|assets/images/saldify/logo.png|assets/images/redventas/logo.png|g' build/web/htmls/docu_shell.js
+    sed -i '' "s|'../assets/images/redventas/logo.png'|'../assets/assets/images/redventas/logo.png'|g" build/web/htmls/docu_shell.js
+
+    echo "📝 Aplicando nombre RedVentas en la documentación..."
+    find build/web/htmls -type f \( -name '*.html' -o -name '*.js' \) -exec sed -i '' \
+        -e "s/Saldify Docs/$APP_TITLE_UPPER DOCS/g" \
+        -e "s/Documento Saldify/DOCUMENTO $APP_TITLE_UPPER/g" \
+        -e "s/SaldiFY/$APP_TITLE/g" \
+        -e "s/Saldify/$APP_TITLE/g" \
+        -e "s/SALDIFY/$APP_TITLE_UPPER/g" {} +
+    sed -i '' \
+        -e "s/SaldiFY/$APP_TITLE/g" \
+        -e "s/Saldify/$APP_TITLE/g" \
+        -e "s/SALDIFY/$APP_TITLE_UPPER/g" build/web/docu.html
+    echo "📚 Documentación lista en /docu.html y /htmls/."
+
     echo "✨ ¡Branding aplicado correctamente!"
     echo "🏁 Todo listo en: build/web/"
 else

@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart';
+import 'package:universal_html/html.dart' as html;
 import 'package:venture_saldify/smxApis/smxConfig.dart';
-import 'package:venture_saldify/smxApis/smxConstants.dart';
 import 'package:venture_saldify/smxApis/smxDepth.dart';
 import 'package:venture_saldify/smxAuth/smxAuth.dart';
 import 'package:venture_saldify/smxAuth/smxLogonMovil.dart';
 import 'package:venture_saldify/smxLayout/smxColors.dart';
 import 'package:venture_saldify/smxLayout/smxLayout.dart';
+import 'package:venture_saldify/smxLayout/smx_message_dialog.dart';
 import 'package:venture_saldify/smxSaldifyAssistant/smxSaldifyAssistant.dart';
 import 'package:venture_saldify/smxSaldifyAssistant/smxSaldifyAssistant_context.dart';
 import 'package:venture_saldify/smxLayout/smxBackgrounds/logon_access_bg.dart';
@@ -17,24 +18,10 @@ import 'smxSaldifyAccessSession.dart';
 import 'smxSaldifyLogon_controller.dart';
 
 class SmxSaldifyLogon extends StatelessWidget {
-  static const welcomeAsset = SmxSaldifyLogonController.welcomeAsset;
-  static const welcomeAssetHd = SmxSaldifyLogonController.welcomeAssetHd;
-
   static Future<void> warmUpAssets() =>
       SmxSaldifyLogonController.warmUpAssets();
 
-  final VoidCallback? onAnfitrionTap;
-  final VoidCallback? onInvitadoTap;
-  final ValueChanged<String>? onInvitadoCodigoTap;
-  final String codigoInicial;
-
-  const SmxSaldifyLogon({
-    super.key,
-    this.onAnfitrionTap,
-    this.onInvitadoTap,
-    this.onInvitadoCodigoTap,
-    this.codigoInicial = '',
-  });
+  const SmxSaldifyLogon({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -42,31 +29,18 @@ class SmxSaldifyLogon extends StatelessWidget {
       controllerBuilder: (context) => SmxSaldifyLogonController(
         alias: 'SMXSALDIFY_LOGON',
         data: SmxControllerSendData(context: context),
-        codigoInicial: codigoInicial,
       ),
       loadingBuilder: (_) => const _SmxSaldifyLogonLoading(),
-      builder: (context, controller) => _SmxSaldifyLogonBody(
-        controller: controller,
-        onAnfitrionTap: onAnfitrionTap,
-        onInvitadoTap: onInvitadoTap,
-        onInvitadoCodigoTap: onInvitadoCodigoTap,
-      ),
+      builder: (context, controller) =>
+          _SmxSaldifyLogonBody(controller: controller),
     );
   }
 }
 
 class _SmxSaldifyLogonBody extends StatefulWidget {
   final SmxSaldifyLogonController controller;
-  final VoidCallback? onAnfitrionTap;
-  final VoidCallback? onInvitadoTap;
-  final ValueChanged<String>? onInvitadoCodigoTap;
 
-  const _SmxSaldifyLogonBody({
-    required this.controller,
-    required this.onAnfitrionTap,
-    required this.onInvitadoTap,
-    required this.onInvitadoCodigoTap,
-  });
+  const _SmxSaldifyLogonBody({required this.controller});
 
   @override
   State<_SmxSaldifyLogonBody> createState() => _SmxSaldifyLogonBodyState();
@@ -76,6 +50,7 @@ class _SmxSaldifyLogonBodyState extends State<_SmxSaldifyLogonBody> {
   late final SmxAuth _auth;
   bool _forceNextAuthAccountSelection = false;
   bool _forceNextAnfitrionAccountSelection = false;
+  bool _isEntering = false;
 
   @override
   void initState() {
@@ -123,81 +98,100 @@ class _SmxSaldifyLogonBodyState extends State<_SmxSaldifyLogonBody> {
     Future<void> Function(SmxAuthUser user) onAuthenticated, {
     bool forceAccountSelection = false,
   }) async {
-    _auth.resetStatus();
-    if (_auth.isLoading) return;
+    if (_isEntering || _auth.isLoading) return;
 
+    _auth.resetStatus();
     final shouldForceAccountSelection =
         forceAccountSelection ||
         _forceNextAuthAccountSelection ||
         SmxSaldifyAccessSession.ultimoModo != null &&
             SmxSaldifyAccessSession.ultimoModo != accessMode;
 
-    final user = await _auth.signIn(
-      provider,
-      forceAccountSelection: shouldForceAccountSelection,
-    );
-    if (!mounted) return;
+    setState(() {
+      _isEntering = true;
+    });
 
-    if (user == null) {
-      _auth.resetStatus();
-      return;
+    try {
+      final user = await _auth.signIn(
+        provider,
+        forceAccountSelection: shouldForceAccountSelection,
+      );
+      if (!mounted) return;
+
+      if (user == null) {
+        _auth.resetStatus();
+        return;
+      }
+
+      await onAuthenticated(user);
+    } catch (error) {
+      if (!mounted) return;
+
+      await showSmxSystemErrorDialog(context, message: error.toString());
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isEntering = false;
+        });
+      }
     }
-
-    await onAuthenticated(user);
   }
 
-  Future<void> _continueToApp(SmxAuthUser user) async {
-    final controller = SmxLogonMovil(authUser: user);
+  Future<void> _continueToApp(
+    SmxAuthUser user,
+    SmxSaldifyAccessMode accessMode,
+  ) async {
+    final controller = SmxLogonMovil(authUser: user, accessMode: accessMode);
     await controller.navigateToAppMovil(context);
   }
 
-  void _onCodigoInvitadoTap() {
-    final codigo = widget.controller.validarFormatoCodigo();
-    if (codigo == null) return;
+  void _onInvitacionUrlTap() {
+    if (!widget.controller.isInvitacionUrlValida) return;
 
-    _authenticate(SmxAuthProvider.google, SmxSaldifyAccessMode.invitado, (
-      user,
-    ) async {
-      final logonController = SmxLogonMovil(authUser: user);
-      await logonController.prepareUser(context);
-      if (!mounted) return;
+    _authenticate(
+      SmxAuthProvider.google,
+      SmxSaldifyAccessMode.invitado,
+      (user) async {
+        final logonController = SmxLogonMovil(
+          authUser: user,
+          accessMode: SmxSaldifyAccessMode.invitado,
+        );
+        await logonController.prepareUser(context);
+        if (!mounted) return;
 
-      final validado = await widget.controller.validarCodigoAutenticado(
-        codigo,
-        user.email,
-        uuidUsuario: logonController.getUuid(),
-      );
-      if (!validado || !mounted) {
-        _forceNextAuthAccountSelection = true;
-        return;
-      }
+        final validado = await widget.controller.validarInvitacionUrl(
+          user.email,
+          uuidUsuario: logonController.getUuid(),
+        );
 
-      _forceNextAuthAccountSelection = false;
+        if (!validado || !mounted) {
+          _forceNextAuthAccountSelection = true;
+          return;
+        }
 
-      if (widget.onInvitadoCodigoTap != null) {
-        widget.onInvitadoCodigoTap!(codigo);
-        return;
-      }
+        logonController.setUuidAnfitrion(
+          widget.controller.uuidAnfitrionValidado,
+        );
+        _forceNextAuthAccountSelection = false;
 
-      await logonController.navigatePreparedUser(context);
-    });
+        await logonController.navigatePreparedUser(context);
+      },
+      forceAccountSelection: true,
+    );
   }
 
   void _onInvitadoTap() {
-    if (!widget.controller.cargarInvitadoGuardado(context)) return;
+    _authenticate(
+      SmxAuthProvider.google,
+      SmxSaldifyAccessMode.invitado,
+      (user) async {
+        _forceNextAuthAccountSelection = false;
+        _forceNextAnfitrionAccountSelection = false;
 
-    _authenticate(SmxAuthProvider.google, SmxSaldifyAccessMode.invitado, (
-      user,
-    ) async {
-      _forceNextAuthAccountSelection = false;
-
-      if (widget.onInvitadoTap != null) {
-        widget.onInvitadoTap!();
-        return;
-      }
-
-      await _continueToApp(user);
-    });
+        await _continueToApp(user, SmxSaldifyAccessMode.invitado);
+      },
+      forceAccountSelection: _forceNextAnfitrionAccountSelection,
+    );
   }
 
   void _onAnfitrionTap() {
@@ -205,17 +199,10 @@ class _SmxSaldifyLogonBodyState extends State<_SmxSaldifyLogonBody> {
       SmxAuthProvider.google,
       SmxSaldifyAccessMode.anfitrion,
       (user) async {
-        SmxConstants.clearClienteInvitado();
-
         _forceNextAuthAccountSelection = false;
         _forceNextAnfitrionAccountSelection = false;
 
-        if (widget.onAnfitrionTap != null) {
-          widget.onAnfitrionTap!();
-          return;
-        }
-
-        await _continueToApp(user);
+        await _continueToApp(user, SmxSaldifyAccessMode.anfitrion);
       },
       forceAccountSelection: _forceNextAnfitrionAccountSelection,
     );
@@ -247,9 +234,7 @@ class _SmxSaldifyLogonBodyState extends State<_SmxSaldifyLogonBody> {
                     child: LayoutBuilder(
                       builder: (context, constraints) {
                         final compact = constraints.maxWidth < 520;
-                        final welcomeAsset = widget.controller.getWelcomeAsset(
-                          constraints.maxWidth,
-                        );
+                        final welcomeImage = widget.controller.welcomeImage;
                         final maxWidth = compact ? constraints.maxWidth : 760.0;
                         final horizontalPadding = compact ? 22.0 : 36.0;
                         final topPadding = compact ? 0.0 : 36.0;
@@ -288,40 +273,61 @@ class _SmxSaldifyLogonBodyState extends State<_SmxSaldifyLogonBody> {
                                               CrossAxisAlignment.stretch,
                                           children: [
                                             _SaldifyBrand(compact: compact),
-                                            _WelcomeGraphic(
-                                              compact: compact,
-                                              asset: welcomeAsset,
-                                            ),
+                                            if (welcomeImage != null)
+                                              _WelcomeGraphic(
+                                                compact: compact,
+                                                image: welcomeImage,
+                                              ),
                                             Transform.translate(
                                               offset: Offset(
                                                 0,
 
                                                 ///compact ? -32 : -24,
                                                 ///compact ? -54 : -44
-                                                compact ? -64 : -54,
+                                                welcomeImage != null
+                                                    ? compact
+                                                          ? -64
+                                                          : -54
+                                                    : compact
+                                                    ? 16
+                                                    : 24,
                                               ),
-                                              child: _WelcomeCard(
-                                                compact: compact,
-                                                hasCodigoInicialValido: widget
-                                                    .controller
-                                                    .hasCodigoInicialValido,
-                                                codigoController: widget
-                                                    .controller
-                                                    .codigoController,
-                                                codigoError: widget
-                                                    .controller
-                                                    .codigoError,
-                                                onAnfitrionTap: _onAnfitrionTap,
-                                                onCambiarCuentaAnfitrionTap:
-                                                    _onCambiarCuentaAnfitrionTap,
-                                                forceNextAnfitrionAccountSelection:
-                                                    _forceNextAnfitrionAccountSelection,
-                                                onInvitadoTap: _onInvitadoTap,
-                                                onCodigoChanged: widget
-                                                    .controller
-                                                    .clearCodigoError,
-                                                onInvitadoCodigoTap:
-                                                    _onCodigoInvitadoTap,
+                                              child: Column(
+                                                mainAxisSize: MainAxisSize.min,
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.stretch,
+                                                children: [
+                                                  _WelcomeCard(
+                                                    compact: compact,
+                                                    isInvitacionUrlValida: widget
+                                                        .controller
+                                                        .isInvitacionUrlValida,
+                                                    codigo: widget
+                                                        .controller
+                                                        .codigoUrl,
+                                                    codigoError: widget
+                                                        .controller
+                                                        .codigoError,
+                                                    onAnfitrionTap:
+                                                        _onAnfitrionTap,
+                                                    onCambiarCuentaAnfitrionTap:
+                                                        _onCambiarCuentaAnfitrionTap,
+                                                    forceNextAnfitrionAccountSelection:
+                                                        _forceNextAnfitrionAccountSelection,
+                                                    onInvitadoTap:
+                                                        _onInvitadoTap,
+                                                    onInvitadoCodigoTap:
+                                                        _onInvitacionUrlTap,
+                                                  ),
+                                                  SizedBox(
+                                                    height: compact ? 12 : 14,
+                                                  ),
+                                                  Center(
+                                                    child: _DocumentationLink(
+                                                      compact: compact,
+                                                    ),
+                                                  ),
+                                                ],
                                               ),
                                             ),
                                           ],
@@ -343,6 +349,16 @@ class _SmxSaldifyLogonBodyState extends State<_SmxSaldifyLogonBody> {
                 ),
               ),
             ),
+            if (_isEntering)
+              const Positioned.fill(
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    ModalBarrier(dismissible: false, color: Color(0x99000000)),
+                    CircularProgressIndicator(color: SmxColors.brandAccent),
+                  ],
+                ),
+              ),
           ],
         );
       },
@@ -432,44 +448,91 @@ class _SaldifyBrand extends StatelessWidget {
 
 class _WelcomeGraphic extends StatelessWidget {
   final bool compact;
-  final String asset;
+  final Image image;
 
-  const _WelcomeGraphic({required this.compact, required this.asset});
+  const _WelcomeGraphic({required this.compact, required this.image});
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
       height: compact ? 238 : 286,
-      child: Align(
-        alignment: Alignment.bottomCenter,
-        child: Image.asset(asset, fit: BoxFit.contain),
+      child: Align(alignment: Alignment.bottomCenter, child: image),
+    );
+  }
+}
+
+class _DocumentationLink extends StatelessWidget {
+  final bool compact;
+
+  const _DocumentationLink({required this.compact});
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: SmxColors.transparent,
+      borderRadius: BorderRadius.circular(999),
+      child: InkWell(
+        onTap: _openDocumentation,
+        borderRadius: BorderRadius.circular(999),
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: compact ? 12 : 14,
+            vertical: compact ? 7 : 8,
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.menu_book_rounded,
+                color: SmxColors.white,
+                size: compact ? 17 : 18,
+              ),
+              SizedBox(width: compact ? 6 : 7),
+              Text(
+                'Conocer ${SmxConfig.titulo}',
+                style: TextStyle(
+                  color: SmxColors.white,
+                  fontSize: compact ? 13 : 14,
+                  fontWeight: FontWeight.w900,
+                  height: 1,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
+  }
+
+  void _openDocumentation() {
+    final path = kDebugMode ? 'documents/htmls/docu.html' : 'docu.html';
+    final uri = Uri.base.resolve(path);
+    html.window.sessionStorage['saldify_documentation_return_url'] = Uri.base
+        .toString();
+    html.window.location.assign(uri.toString());
   }
 }
 
 class _WelcomeCard extends StatelessWidget {
   final bool compact;
-  final bool hasCodigoInicialValido;
-  final TextEditingController codigoController;
+  final bool isInvitacionUrlValida;
+  final String codigo;
   final String? codigoError;
   final VoidCallback? onAnfitrionTap;
   final VoidCallback onCambiarCuentaAnfitrionTap;
   final bool forceNextAnfitrionAccountSelection;
   final VoidCallback? onInvitadoTap;
-  final VoidCallback onCodigoChanged;
   final VoidCallback onInvitadoCodigoTap;
 
   const _WelcomeCard({
     required this.compact,
-    required this.hasCodigoInicialValido,
-    required this.codigoController,
+    required this.isInvitacionUrlValida,
+    required this.codigo,
     required this.codigoError,
     required this.onAnfitrionTap,
     required this.onCambiarCuentaAnfitrionTap,
     required this.forceNextAnfitrionAccountSelection,
     required this.onInvitadoTap,
-    required this.onCodigoChanged,
     required this.onInvitadoCodigoTap,
   });
 
@@ -549,7 +612,7 @@ class _WelcomeCard extends StatelessWidget {
                   _InfoButton(
                     onTap: () => _showAccessInfo(
                       context,
-                      hasCodigoInicialValido: hasCodigoInicialValido,
+                      isInvitacionUrlValida: isInvitacionUrlValida,
                     ),
                   ),
                 ],
@@ -570,13 +633,11 @@ class _WelcomeCard extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        if (hasCodigoInicialValido) ...[
+                        if (isInvitacionUrlValida) ...[
                           _InvitadoOptionCard(
                             compact: compact,
-                            hasCodigoInicialValido: hasCodigoInicialValido,
-                            codigoController: codigoController,
+                            codigo: codigo,
                             codigoError: codigoError,
-                            onCodigoChanged: onCodigoChanged,
                             onInvitadoCodigoTap: onInvitadoCodigoTap,
                           ),
                         ] else ...[
@@ -644,14 +705,14 @@ class _WelcomeCard extends StatelessWidget {
 
   void _showAccessInfo(
     BuildContext context, {
-    required bool hasCodigoInicialValido,
+    required bool isInvitacionUrlValida,
   }) {
     showModalBottomSheet<void>(
       context: context,
       backgroundColor: SmxColors.transparent,
       isScrollControlled: true,
       builder: (context) =>
-          _AccessInfoSheet(hasCodigoInicialValido: hasCodigoInicialValido),
+          _AccessInfoSheet(isInvitacionUrlValida: isInvitacionUrlValida),
     );
   }
 }
@@ -684,9 +745,9 @@ class _InfoButton extends StatelessWidget {
 }
 
 class _AccessInfoSheet extends StatelessWidget {
-  final bool hasCodigoInicialValido;
+  final bool isInvitacionUrlValida;
 
-  const _AccessInfoSheet({required this.hasCodigoInicialValido});
+  const _AccessInfoSheet({required this.isInvitacionUrlValida});
 
   @override
   Widget build(BuildContext context) {
@@ -743,21 +804,21 @@ class _AccessInfoSheet extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 16),
-            if (hasCodigoInicialValido) ...[
+            if (isInvitacionUrlValida) ...[
               const _AccessInfoItem(
                 icon: Icons.confirmation_number_outlined,
                 color: Color(0xFF1454B8),
-                title: 'Código de invitación',
+                title: 'Invitación recibida',
                 text:
-                    'Código único para ingresar a la red del Anfitrion cuando recibes un link de invitacion.',
+                    'Link válido para ingresar a la red del Anfitrion como Invitado.',
               ),
               const SizedBox(height: 14),
               const _AccessInfoItem(
                 icon: Icons.check_circle_outline_rounded,
                 color: Color(0xFF1454B8),
-                title: 'Validar código',
+                title: 'Continuar',
                 text:
-                    'Valida el link recibido. Despues podras entrar desde el acceso general como Invitado en este dispositivo.',
+                    'Autentica tu cuenta. Despues podras entrar desde el acceso general como Invitado en este dispositivo.',
               ),
             ] else ...[
               const _AccessInfoItem(
@@ -771,9 +832,9 @@ class _AccessInfoSheet extends StatelessWidget {
               const _AccessInfoItem(
                 icon: Icons.switch_account_rounded,
                 color: SmxColors.successForeground,
-                title: 'Cambiar cuenta de Anfitrión',
+                title: 'Cambiar cuenta de Google',
                 text:
-                    'Activalo solo si administras otra red y necesitas elegir otra cuenta de Anfitrion.',
+                    'Activalo solo si administras otra red y necesitas elegir otra cuenta de Anfitrion o cliente.',
               ),
               const SizedBox(height: 14),
               const _AccessInfoItem(
@@ -982,8 +1043,8 @@ class _ChangeHostAccountAction extends StatelessWidget {
                 const SizedBox(width: 7),
                 Text(
                   active
-                      ? 'Se elegirá otra cuenta de Anfitrión'
-                      : 'Cambiar cuenta de Anfitrión',
+                      ? 'Se elegirá otra cuenta de Google'
+                      : 'Cambiar cuenta de google',
                   style: TextStyle(
                     color: enabled ? color : disabledColor,
                     fontSize: compact ? 12 : 13,
@@ -1001,29 +1062,21 @@ class _ChangeHostAccountAction extends StatelessWidget {
 
 class _InvitadoOptionCard extends StatelessWidget {
   final bool compact;
-  final bool hasCodigoInicialValido;
-  final TextEditingController codigoController;
+  final String codigo;
   final String? codigoError;
-  final VoidCallback onCodigoChanged;
   final VoidCallback onInvitadoCodigoTap;
 
   const _InvitadoOptionCard({
     required this.compact,
-    required this.hasCodigoInicialValido,
-    required this.codigoController,
+    required this.codigo,
     required this.codigoError,
-    required this.onCodigoChanged,
     required this.onInvitadoCodigoTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    final cardBgColor = hasCodigoInicialValido
-        ? const Color(0xFFF0F4F7)
-        : (compact ? SmxColors.white : const Color(0xFFF5FBFF));
-    final cardBorderColor = hasCodigoInicialValido
-        ? const Color(0xFFDDE4EB)
-        : const Color(0xFFCFE0F6);
+    const cardBgColor = Color(0xFFF0F4F7);
+    const cardBorderColor = Color(0xFFDDE4EB);
     final radius = compact ? 16.0 : 20.0;
 
     return Material(
@@ -1042,22 +1095,14 @@ class _InvitadoOptionCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              TextField(
-                controller: codigoController,
-                enabled: !hasCodigoInicialValido,
-                onChanged: (_) => onCodigoChanged(),
-                textCapitalization: TextCapitalization.characters,
-                inputFormatters: [
-                  FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9-]')),
-                  UpperCaseTextFormatter(),
-                ],
+              TextFormField(
+                initialValue: codigo,
+                enabled: false,
                 decoration: InputDecoration(
                   hintText: 'Código de invitación',
                   errorText: codigoError,
                   filled: true,
-                  fillColor: hasCodigoInicialValido
-                      ? const Color(0xFFE8EEF2)
-                      : SmxColors.white,
+                  fillColor: const Color(0xFFE8EEF2),
                   contentPadding: EdgeInsets.symmetric(
                     horizontal: 14,
                     vertical: compact ? 12 : 15,
@@ -1066,16 +1111,9 @@ class _InvitadoOptionCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(compact ? 13 : 16),
                     borderSide: const BorderSide(color: Color(0xFFD1DAE4)),
                   ),
-                  enabledBorder: OutlineInputBorder(
+                  disabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(compact ? 13 : 16),
                     borderSide: const BorderSide(color: Color(0xFFD1DAE4)),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(compact ? 13 : 16),
-                    borderSide: const BorderSide(
-                      color: Color(0xFF1454B8),
-                      width: 1.6,
-                    ),
                   ),
                   prefixIcon: const Icon(
                     Icons.confirmation_number_outlined,
@@ -1083,9 +1121,7 @@ class _InvitadoOptionCard extends StatelessWidget {
                   ),
                 ),
                 style: TextStyle(
-                  color: hasCodigoInicialValido
-                      ? SmxColors.textMuted
-                      : SmxColors.textDark,
+                  color: SmxColors.textMuted,
                   fontSize: compact ? 15 : 17,
                   fontWeight: FontWeight.w900,
                   letterSpacing: 1,
@@ -1099,7 +1135,7 @@ class _InvitadoOptionCard extends StatelessWidget {
                   icon: compact
                       ? const SizedBox.shrink()
                       : const Icon(Icons.check_circle_outline_rounded),
-                  label: const Text('Validar código'),
+                  label: const Text('Continuar'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF0647B7),
                     foregroundColor: SmxColors.white,
@@ -1143,19 +1179,6 @@ class _OptionIcon extends StatelessWidget {
         borderRadius: BorderRadius.circular(compact ? 14 : 16),
       ),
       child: Icon(icon, color: color, size: compact ? 27 : 29),
-    );
-  }
-}
-
-class UpperCaseTextFormatter extends TextInputFormatter {
-  @override
-  TextEditingValue formatEditUpdate(
-    TextEditingValue oldValue,
-    TextEditingValue newValue,
-  ) {
-    return newValue.copyWith(
-      text: newValue.text.toUpperCase(),
-      selection: newValue.selection,
     );
   }
 }

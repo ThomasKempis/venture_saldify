@@ -1,0 +1,459 @@
+:root {
+  --docu-shell-ink: #13283a;
+  --docu-shell-muted: #607386;
+  --docu-shell-brand: #146b54;
+  --docu-shell-blue: #0f5f8d;
+  --docu-shell-accent: #58d7a1;
+}
+
+html,
+body,
+.docu-shell-actions {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar,
+.docu-shell-actions::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+body.docu-shell-ready {
+  padding-top: calc(var(--docu-shell-height, 68px) + 10px) !important;
+  background:
+    radial-gradient(circle at 7% 16%, rgba(88, 215, 161, .22) 0 14rem, transparent 14.2rem),
+    radial-gradient(circle at 96% 3%, rgba(143, 205, 231, .26) 0 18rem, transparent 18.2rem),
+    radial-gradient(circle at 90% 92%, rgba(49, 125, 189, .28) 0 23rem, transparent 23.2rem),
+    linear-gradient(135deg, #115c2a 0%, #0d6267 48%, #0d4e8d 100%) !important;
+  color: var(--docu-shell-ink);
+}
+
+body.docu-shell-boot:not(.docu-native-cover) .hero,
+body.docu-shell-boot .cover,
+body.docu-shell-boot .overview,
+body.docu-shell-boot .sidebar,
+body.docu-shell-boot .print-btn,
+body.docu-shell-boot .toolbar,
+body.docu-shell-boot .skip {
+  display: none !important;
+}
+
+.docu-shell {
+  position: fixed;
+  z-index: 1000;
+  top: 0;
+  left: 0;
+  right: 0;
+  min-height: 68px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px clamp(14px, 4vw, 34px);
+  color: #fff;
+  background:
+    radial-gradient(circle at 8% 12%, rgba(88, 215, 161, .22) 0 8rem, transparent 8.2rem),
+    linear-gradient(135deg, #115c2a 0%, #0d6267 48%, #0d4e8d 100%);
+  border-bottom: 1px solid rgba(255, 255, 255, .16);
+  box-shadow: 0 16px 44px rgba(8, 37, 64, .24);
+}
+
+.docu-shell-logo {
+  width: 46px;
+  height: 46px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, .9);
+  overflow: hidden;
+}
+
+.docu-shell-logo img {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+}
+
+.docu-shell-title {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.docu-shell-title strong {
+  display: block;
+  overflow: hidden;
+  color: #fff;
+  font-size: 16px;
+  line-height: 1.12;
+  font-weight: 900;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.docu-shell-title span {
+  display: block;
+  margin-top: 2px;
+  overflow: hidden;
+  color: rgba(255, 255, 255, .68);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.docu-shell-back-app {
+  flex: 0 0 auto;
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 13px;
+  border: 1px solid rgba(255, 255, 255, .24);
+  border-radius: 999px;
+  color: #fff;
+  background: rgba(255, 255, 255, .16);
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.docu-shell-back-app:hover {
+  background: rgba(255, 255, 255, .24);
+}
+
+.docu-shell-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+
+.docu-shell-action {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 38px;
+  padding: 0 13px;
+  border: 1px solid rgba(255, 255, 255, .18);
+  border-radius: 999px;
+  color: #fff;
+  background: rgba(255, 255, 255, .13);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 1;
+  cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.docu-shell-action:hover {
+  background: rgba(255, 255, 255, .22);
+}
+
+.docu-shell-action.primary {
+  color: var(--docu-shell-ink);
+  background: var(--docu-shell-accent);
+  border-color: transparent;
+}
+
+.docu-shell-ready .print-btn,
+.docu-shell-ready .toolbar,
+.docu-shell-ready .sidebar,
+.docu-shell-ready .skip {
+  display: none !important;
+}
+
+.docu-shell-ready .page {
+  margin-left: 0 !important;
+}
+
+.docu-shell-ready .docu-cover {
+  width: min(1120px, calc(100% - 32px));
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 22px;
+  align-items: center;
+  margin: 34px auto 0;
+  padding: 28px;
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, .23);
+  border-radius: 26px;
+  background: rgba(255, 255, 255, .17);
+  box-shadow: 0 24px 70px rgba(8, 37, 64, .22);
+  backdrop-filter: blur(18px);
+}
+
+.docu-cover-logo {
+  width: 92px;
+  height: 92px;
+  display: grid;
+  place-items: center;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, .92);
+  overflow: hidden;
+}
+
+.docu-cover-logo img {
+  width: 74px;
+  height: 74px;
+  object-fit: contain;
+}
+
+.docu-cover-eyebrow {
+  margin: 0 0 10px;
+  color: #9ff0c8;
+  font-size: 14px;
+  font-weight: 900;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+.docu-cover h1 {
+  margin: 0;
+  color: #fff;
+  font-size: clamp(34px, 5vw, 54px);
+  line-height: 1;
+  font-weight: 900;
+  letter-spacing: 0;
+}
+
+.docu-cover p {
+  max-width: 760px;
+  margin: 16px 0 0;
+  color: rgba(255, 255, 255, .84);
+  font-size: 17px;
+  line-height: 1.55;
+  font-weight: 750;
+}
+
+.docu-shell-ready .content,
+.docu-shell-ready:not(.docu-native-cover) body > main,
+.docu-shell-ready .page > main {
+  width: min(1080px, calc(100% - 32px)) !important;
+  max-width: 1080px !important;
+  margin: 0 auto !important;
+  padding: 22px 0 54px !important;
+}
+
+.docu-shell-ready .document,
+.docu-shell-ready:not(.docu-native-cover) body > main,
+.docu-shell-ready .page > main > article,
+.docu-shell-ready .page > article {
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, .5) !important;
+  border-radius: 24px !important;
+  background: rgba(255, 255, 255, .96) !important;
+  box-shadow: 0 24px 70px rgba(8, 37, 64, .22) !important;
+}
+
+.docu-shell-ready .document,
+.docu-shell-ready:not(.docu-native-cover) body > main {
+  padding: clamp(24px, 5vw, 54px) !important;
+}
+
+body.docu-shell-ready:not(.docu-native-cover) .hero,
+body.docu-shell-ready:not(.docu-native-cover) .cover {
+  display: none !important;
+}
+
+body.docu-shell-ready:not(.docu-native-cover) .hero::after,
+body.docu-shell-ready:not(.docu-native-cover) .cover::before,
+body.docu-shell-ready:not(.docu-native-cover) .cover::after {
+  display: none !important;
+}
+
+body.docu-shell-ready:not(.docu-native-cover) .hero h1,
+body.docu-shell-ready:not(.docu-native-cover) .cover h1,
+.docu-shell-ready main > h1,
+.docu-shell-ready article > h1,
+.docu-shell-ready .document > h1 {
+  max-width: 900px !important;
+  margin: 0 0 18px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  color: inherit !important;
+  font-size: clamp(34px, 5.2vw, 58px) !important;
+  line-height: 1.05 !important;
+  font-weight: 900 !important;
+  letter-spacing: 0 !important;
+}
+
+.docu-shell-ready main > h1,
+.docu-shell-ready article > h1,
+.docu-shell-ready .document > h1 {
+  color: var(--docu-shell-ink) !important;
+}
+
+body.docu-shell-ready:not(.docu-native-cover) .hero p,
+body.docu-shell-ready:not(.docu-native-cover) .cover p,
+body.docu-shell-ready:not(.docu-native-cover) .lead {
+  max-width: 860px !important;
+  color: rgba(255, 255, 255, .82) !important;
+  font-size: clamp(17px, 2vw, 23px) !important;
+  line-height: 1.45 !important;
+  font-weight: 700 !important;
+}
+
+body.docu-shell-ready:not(.docu-native-cover) .lead,
+.docu-shell-ready main > h1 + p {
+  color: var(--docu-shell-muted) !important;
+}
+
+.docu-shell-ready .overview,
+.docu-shell-ready .chapter,
+.docu-shell-ready section {
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 26px 0 !important;
+  border-color: rgba(19, 40, 58, .1) !important;
+}
+
+.docu-shell-ready .overview {
+  display: none !important;
+}
+
+.docu-shell-ready h2 {
+  margin: 28px 0 12px !important;
+  color: var(--docu-shell-brand) !important;
+  font-size: clamp(22px, 2.6vw, 30px) !important;
+  line-height: 1.16 !important;
+  font-weight: 900 !important;
+}
+
+.docu-shell-ready h3 {
+  margin: 22px 0 10px !important;
+  color: var(--docu-shell-blue) !important;
+  font-size: 19px !important;
+  line-height: 1.25 !important;
+  font-weight: 900 !important;
+}
+
+.docu-shell-ready p,
+.docu-shell-ready li {
+  color: var(--docu-shell-ink);
+  font-size: 16px !important;
+  line-height: 1.65 !important;
+}
+
+.docu-shell-ready p,
+.docu-shell-ready ul,
+.docu-shell-ready ol,
+.docu-shell-ready pre,
+.docu-shell-ready blockquote,
+.docu-shell-ready .table-wrap {
+  max-width: 920px !important;
+}
+
+.docu-shell-ready table {
+  width: 100% !important;
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+  overflow: hidden !important;
+  border: 1px solid rgba(19, 40, 58, .12) !important;
+  border-radius: 14px !important;
+}
+
+.docu-shell-ready th {
+  color: #fff !important;
+  background: var(--docu-shell-brand) !important;
+}
+
+.docu-shell-ready th,
+.docu-shell-ready td {
+  padding: 12px 14px !important;
+  border-color: rgba(19, 40, 58, .1) !important;
+}
+
+.docu-shell-ready pre,
+.docu-shell-ready blockquote,
+.docu-shell-ready .callout,
+.docu-shell-ready .mode {
+  border-radius: 14px !important;
+  box-shadow: none !important;
+}
+
+.docu-shell-ready .mode-grid {
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)) !important;
+}
+
+.docu-shell-ready .closing {
+  margin: 32px calc(clamp(24px, 5vw, 54px) * -1) calc(clamp(24px, 5vw, 54px) * -1) !important;
+  padding: clamp(32px, 6vw, 58px) clamp(24px, 6vw, 64px) !important;
+  background: linear-gradient(135deg, #115c2a 0%, #0d6267 54%, #0d4e8d 100%) !important;
+}
+
+.docu-shell-ready footer {
+  display: none !important;
+}
+
+@media (max-width: 720px) {
+  .docu-shell {
+    flex-wrap: wrap;
+  }
+
+  .docu-shell-title {
+    flex-basis: auto;
+  }
+
+  .docu-shell-back-app {
+    min-height: 34px;
+    padding: 0 10px;
+    font-size: 12px;
+  }
+
+  .docu-shell-actions {
+    width: 100%;
+    justify-content: flex-start;
+    overflow-x: auto;
+    padding-left: 0;
+  }
+
+  .docu-shell-action {
+    min-height: 34px;
+    padding: 0 11px;
+    font-size: 12px;
+  }
+
+  .docu-shell-ready .content,
+  .docu-shell-ready:not(.docu-native-cover) body > main,
+  .docu-shell-ready .page > main {
+    width: min(100% - 22px, 1080px) !important;
+    padding-top: 18px !important;
+  }
+
+  .docu-shell-ready .docu-cover {
+    width: min(100% - 22px, 1080px);
+    grid-template-columns: 1fr;
+    min-height: 0;
+  }
+
+  .docu-cover-logo {
+    width: 86px;
+    height: 86px;
+    border-radius: 20px;
+  }
+
+  .docu-cover-logo img {
+    width: 68px;
+    height: 68px;
+  }
+}
+
+@media print {
+  body.docu-shell-ready {
+    padding-top: 0;
+  }
+
+  .docu-shell {
+    display: none !important;
+  }
+}

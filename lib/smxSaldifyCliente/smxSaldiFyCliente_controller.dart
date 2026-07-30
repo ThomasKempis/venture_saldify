@@ -27,13 +27,9 @@ class SmxSaldiFyClienteController extends SmxController {
 
     beginDB();
 
-    if (!SmxConstants.isClienteInvitado) {
+    final uuidAnfitrion = controllerMain.getUuidAnfitrion();
+    if (uuidAnfitrion.isEmpty) {
       status = SmxSaldiFyClienteStatus.invalido;
-      return;
-    }
-
-    if (!_isUsuarioInvitado()) {
-      status = SmxSaldiFyClienteStatus.usuarioNoCorresponde;
       return;
     }
 
@@ -44,8 +40,8 @@ class SmxSaldiFyClienteController extends SmxController {
     addSTrans(
       aliasSql,
       "select * from ADD_SYSUSER10_SYSUSER11("
-      "'${SmxConstants.uuidAnfitrionParam}', "
-      "'${controllerMain.getCorreo()}')",
+      "'${_sql(uuidAnfitrion)}', "
+      "'${_sql(controllerMain.getCorreo())}')",
     );
 
     await getCallWS();
@@ -123,18 +119,6 @@ class SmxSaldiFyClienteController extends SmxController {
     };
   }
 
-  bool _isUsuarioInvitado() {
-    if (SmxConstants.hasUuidInvitado) {
-      return uuidUsuarioLogueado == SmxConstants.uuidInvitadoParam;
-    }
-
-    if (SmxConstants.hasCorreoInvitado) {
-      return controllerMain.getCorreo() == SmxConstants.correoInvitadoParam;
-    }
-
-    return false;
-  }
-
   String get uuidUsuarioLogueado {
     return controllerMain.rstSysUser10
             .getValue('SYSUSER10_UUID')
@@ -206,6 +190,10 @@ class SmxSaldiFyClienteController extends SmxController {
     if (value is int) return value;
     if (value is double) return value.toInt();
     return int.tryParse(value?.toString() ?? '') ?? -1;
+  }
+
+  static String _sql(String value) {
+    return value.replaceAll("'", "''");
   }
 
   @override

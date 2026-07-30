@@ -11,6 +11,7 @@ import '../smxSaldify_screens/saldify_historial/smxSaldiFy_historial.dart';
 import '../smxSaldify_screens/saldify_mired/smxSaldiFy_mired.dart';
 import '../smxSaldify_screens/saldify_pagos/smxSaldiFy_pagos.dart';
 import '../smxSaldify_screens/saldify_productos/smxSaldiFy_productos.dart';
+import '../smxSaldify_screens/saldify_reportes/smxSaldiFy_reportes.dart';
 import 'smxSaldiFy_clientes/smxSaldiFy_clientes.dart';
 import 'smxSaldiFy_dashboard_menu.dart';
 
@@ -258,6 +259,12 @@ class SmxSaldiFyDashboardController {
     return Navigator.of(context).push<bool>(
       MaterialPageRoute(builder: (_) => const SmxSaldiFyProductos()),
     );
+  }
+
+  Future<void> openReportes(BuildContext context) {
+    return Navigator.of(
+      context,
+    ).push<void>(MaterialPageRoute(builder: (_) => const SmxSaldiFyReportes()));
   }
 
   Future<bool?> openClienteCredito(

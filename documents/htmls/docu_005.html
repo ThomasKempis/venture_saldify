@@ -3,285 +3,813 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="color-scheme" content="light dark">
-  <title>Saldify - Resumen de Arquitectura de Red</title>
+  <meta name="description" content="Saldify: resumen de arquitectura de red, reglas estructurales, validaciones, invariantes y estado de implementacion.">
+  <title>Saldify - Arquitectura</title>
+  <link rel="stylesheet" href="docu_shell.css">
   <style>
-    :root {
-      --bg: #f5f7f8;
-      --surface: #ffffff;
-      --surface-soft: #edf5f3;
-      --text: #173042;
-      --muted: #617482;
-      --line: #d9e2e5;
-      --primary: #0d9488;
-      --primary-dark: #08766d;
-      --accent: #d90429;
-      --code-bg: #102d35;
-      --code-text: #e8f4f2;
-      --shadow: 0 8px 28px rgba(18, 52, 60, 0.08);
+:root {
+      color-scheme: light;
+      --ink: #13283a;
+      --muted: #607386;
+      --brand: #146b54;
+      --brand-2: #0f5f8d;
+      --accent: #58d7a1;
+      --paper: rgba(255, 255, 255, .88);
+      --paper-strong: rgba(255, 255, 255, .96);
+      --line: rgba(255, 255, 255, .22);
+      --shadow: 0 24px 70px rgba(10, 37, 64, .22);
     }
 
-    * { box-sizing: border-box; }
-    html { scroll-behavior: smooth; }
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       margin: 0;
-      background: var(--bg);
-      color: var(--text);
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
-        "Segoe UI", sans-serif;
-      font-size: 16px;
-      line-height: 1.65;
-      letter-spacing: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+      background:
+        radial-gradient(circle at 12% 18%, rgba(88, 215, 161, .34) 0 13rem, transparent 13.2rem),
+        radial-gradient(circle at 96% 3%, rgba(143, 205, 231, .38) 0 17rem, transparent 17.2rem),
+        radial-gradient(circle at 86% 92%, rgba(49, 125, 189, .42) 0 21rem, transparent 21.2rem),
+        linear-gradient(135deg, #115c2a 0%, #0d6267 48%, #0d4e8d 100%);
     }
 
-    .page { min-height: 100vh; }
-    .sidebar {
-      position: fixed;
-      inset: 0 auto 0 0;
-      width: 310px;
-      overflow-y: auto;
-      background: #10343b;
-      color: #fff;
-      border-right: 1px solid rgba(255, 255, 255, 0.12);
-      padding: 28px 20px;
-    }
-
-    .brand {
-      padding: 0 10px 20px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.16);
-      margin-bottom: 18px;
-    }
-
-    .brand strong { display: block; font-size: 22px; }
-    .brand span { color: #a9d8d3; font-size: 13px; }
-    .toc-title {
-      color: #a9d8d3;
-      font-size: 12px;
-      font-weight: 700;
-      text-transform: uppercase;
-      margin: 0 10px 10px;
-    }
-
-    .toc { list-style: none; padding: 0; margin: 0; }
-    .toc li { margin: 2px 0; }
-    .toc a {
-      display: block;
-      color: #e7f3f2;
-      text-decoration: none;
-      padding: 7px 10px;
-      border-radius: 6px;
-      font-size: 13px;
-      line-height: 1.35;
-    }
-    .toc a:hover, .toc a:focus { background: rgba(255, 255, 255, 0.1); }
-    .toc-subitem a { color: #bcd6d3; padding-left: 24px; font-size: 12px; }
-
-    .content { margin-left: 310px; padding: 42px 5vw 80px; }
-    .document {
-      width: min(100%, 980px);
-      margin: 0 auto;
-      background: var(--surface);
-      border: 1px solid var(--line);
-      box-shadow: var(--shadow);
-      padding: clamp(26px, 5vw, 68px);
-    }
-
-    .toolbar {
-      width: min(100%, 980px);
-      margin: 0 auto 14px;
-      display: flex;
-      justify-content: flex-end;
-      gap: 8px;
-    }
-    .toolbar button {
-      border: 1px solid var(--line);
-      background: var(--surface);
-      color: var(--text);
-      border-radius: 6px;
-      padding: 8px 12px;
-      cursor: pointer;
-      font: inherit;
-      font-size: 13px;
-    }
-    .toolbar button:hover { border-color: var(--primary); color: var(--primary-dark); }
-
-    h1, h2, h3 { line-height: 1.25; scroll-margin-top: 24px; }
-    h1 {
-      font-size: clamp(34px, 5vw, 52px);
-      color: #123a43;
-      border-bottom: 4px solid var(--primary);
-      padding-bottom: 22px;
-      margin: 0 0 34px;
-    }
-    h2 {
-      font-size: 27px;
-      margin: 58px 0 18px;
-      padding-top: 12px;
-      border-top: 1px solid var(--line);
-    }
-    h3 { font-size: 20px; margin: 34px 0 12px; color: var(--primary-dark); }
-    .heading-link {
-      opacity: 0;
-      color: var(--primary);
-      text-decoration: none;
-      margin-left: -22px;
-      padding-right: 8px;
-      font-weight: 500;
-    }
-    h1:hover .heading-link, h2:hover .heading-link, h3:hover .heading-link,
-    .heading-link:focus { opacity: 1; }
-
-    p { margin: 12px 0 18px; }
-    ul, ol { padding-left: 26px; margin: 10px 0 22px; }
-    li { margin: 6px 0; }
-    strong { color: #102e3d; }
-    code {
-      background: var(--surface-soft);
-      color: var(--primary-dark);
-      border: 1px solid #d4e7e4;
-      border-radius: 4px;
-      padding: 2px 5px;
-      font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
-      font-size: 0.9em;
-    }
-    pre {
-      overflow-x: auto;
-      background: var(--code-bg);
-      color: var(--code-text);
-      border-left: 4px solid var(--primary);
-      border-radius: 6px;
-      padding: 18px 20px;
-      margin: 18px 0 26px;
-      line-height: 1.5;
-    }
-    pre code {
-      background: transparent;
+    a {
       color: inherit;
-      border: 0;
-      padding: 0;
+      text-decoration: none;
+    }
+
+    .shell {
+      width: min(1120px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 34px 0 46px;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 22px;
+      align-items: center;
+      padding: 28px;
+      border: 1px solid var(--line);
+      border-radius: 26px;
+      background: rgba(255, 255, 255, .16);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+    }
+
+    .logo {
+      width: 92px;
+      height: 92px;
+      display: grid;
+      place-items: center;
+      border-radius: 24px;
+      background: var(--paper);
+      overflow: hidden;
+    }
+
+    .logo img {
+      width: 74px;
+      height: 74px;
+      object-fit: contain;
+    }
+
+    .eyebrow {
+      margin: 0 0 8px;
+      color: #9ff0c8;
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      color: #fff;
+      font-size: clamp(36px, 6vw, 64px);
+      line-height: 1;
+      font-weight: 900;
+    }
+
+    .lead {
+      max-width: 720px;
+      margin: 14px 0 0;
+      color: rgba(255, 255, 255, .82);
+      font-size: 17px;
+      line-height: 1.55;
+      font-weight: 650;
+    }
+
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 22px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      color: #fff;
+      background: rgba(255, 255, 255, .14);
+      border: 1px solid rgba(255, 255, 255, .18);
       font-size: 13px;
+      font-weight: 800;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--accent);
+    }
+
+    .section-head {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 20px;
+      margin: 34px 0 16px;
+      color: #fff;
+    }
+
+    .section-head h2 {
+      margin: 0;
+      font-size: 25px;
+      font-weight: 900;
+    }
+
+    .section-head p {
+      margin: 0;
+      color: rgba(255, 255, 255, .7);
+      font-size: 13px;
+      font-weight: 750;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .card {
+      position: relative;
+      min-height: 232px;
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+      border-radius: 22px;
+      background: var(--paper-strong);
+      border: 1px solid rgba(255, 255, 255, .5);
+      box-shadow: 0 18px 44px rgba(8, 37, 64, .18);
+      overflow: hidden;
+      transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      background: #fff;
+      box-shadow: 0 22px 58px rgba(8, 37, 64, .24);
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: auto -28px -42px auto;
+      width: 142px;
+      height: 142px;
+      border-radius: 999px;
+      background: color-mix(in srgb, var(--tone) 22%, transparent);
+    }
+
+    .tag {
+      width: fit-content;
+      padding: 7px 10px;
+      border-radius: 999px;
+      color: color-mix(in srgb, var(--tone) 80%, #15283a);
+      background: color-mix(in srgb, var(--tone) 14%, white);
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .card h3 {
+      margin: 18px 0 10px;
+      font-size: 22px;
+      line-height: 1.12;
+      color: var(--ink);
+      font-weight: 900;
+    }
+
+    .card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.45;
+      font-weight: 650;
+    }
+
+    .open {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: auto;
+      padding-top: 24px;
+      color: color-mix(in srgb, var(--tone) 74%, #102b3d);
+      font-size: 14px;
+      font-weight: 900;
+    }
+
+    .arrow {
+      width: 24px;
+      height: 24px;
+      display: grid;
+      place-items: center;
+      border-radius: 999px;
+      color: #fff;
+      background: var(--tone);
     }
 
     .footer {
-      color: var(--muted);
+      margin-top: 24px;
+      padding: 18px 20px;
+      color: rgba(255, 255, 255, .78);
+      border: 1px solid rgba(255, 255, 255, .16);
+      border-radius: 18px;
+      background: rgba(255, 255, 255, .1);
       font-size: 13px;
-      text-align: center;
-      margin-top: 28px;
+      font-weight: 700;
+      backdrop-filter: blur(14px);
     }
 
-    @media (max-width: 900px) {
-      .sidebar { position: static; width: 100%; max-height: 340px; }
-      .content { margin-left: 0; padding: 24px 16px 56px; }
-      .document { padding: 28px 22px; }
-      .toolbar { width: 100%; }
-      h1 { font-size: 34px; }
-      h2 { font-size: 24px; }
+    @media (max-width: 860px) {
+      .grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 620px) {
+      .shell {
+        width: min(100% - 22px, 1120px);
+        padding-top: 18px;
+      }
+
+      .hero {
+        grid-template-columns: 1fr;
+        padding: 22px;
+      }
+
+      .logo {
+        width: 76px;
+        height: 76px;
+        border-radius: 20px;
+      }
+
+      .logo img {
+        width: 62px;
+        height: 62px;
+      }
+
+      .section-head {
+        display: block;
+      }
+
+      .section-head p {
+        margin-top: 6px;
+      }
+
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    body.docu-shell-ready {
+      padding-top: 78px;
+    }
+
+    body.docu-shell-ready.docu-native-cover {
+      background:
+        radial-gradient(circle at 12% 18%, rgba(88, 215, 161, .34) 0 13rem, transparent 13.2rem),
+        radial-gradient(circle at 96% 3%, rgba(143, 205, 231, .38) 0 17rem, transparent 17.2rem),
+        radial-gradient(circle at 86% 92%, rgba(49, 125, 189, .42) 0 21rem, transparent 21.2rem),
+        linear-gradient(135deg, #115c2a 0%, #0d6267 48%, #0d4e8d 100%) !important;
+    }
+
+    body.docu-shell-ready.docu-native-cover .shell {
+      width: min(1120px, calc(100% - 32px)) !important;
+      max-width: 1120px !important;
+      margin: 0 auto !important;
+      padding: 34px 0 46px !important;
+    }
+
+    body.docu-shell-ready.docu-native-cover .hero {
+      display: grid !important;
+      grid-template-columns: auto 1fr !important;
+      gap: 22px !important;
+      align-items: center !important;
+      width: 100% !important;
+      margin: 0 !important;
+      padding: 28px !important;
+      border: 1px solid var(--line) !important;
+      border-radius: 26px !important;
+      background: rgba(255, 255, 255, .16) !important;
+      box-shadow: var(--shadow) !important;
+      backdrop-filter: blur(18px);
+    }
+
+    body.docu-shell-ready.docu-native-cover .hero .eyebrow {
+      margin: 0 0 8px !important;
+      color: #9ff0c8 !important;
+      font-size: 14px !important;
+      font-weight: 800 !important;
+      letter-spacing: .08em !important;
+      text-transform: uppercase !important;
+    }
+
+    body.docu-shell-ready.docu-native-cover .hero h1 {
+      margin: 0 !important;
+      color: #fff !important;
+      font-size: clamp(36px, 6vw, 64px) !important;
+      line-height: 1 !important;
+      font-weight: 900 !important;
+    }
+
+    body.docu-shell-ready.docu-native-cover .hero .lead {
+      max-width: 720px !important;
+      margin: 14px 0 0 !important;
+      color: rgba(255, 255, 255, .82) !important;
+      font-size: 17px !important;
+      line-height: 1.55 !important;
+      font-weight: 650 !important;
+    }
+
+    body.docu-shell-ready.docu-native-cover .hero .logo {
+      width: 92px !important;
+      height: 92px !important;
+      border-radius: 24px !important;
+      background: var(--paper) !important;
+    }
+
+    body.docu-shell-ready.docu-native-cover .hero .logo img {
+      width: 100% !important;
+      height: 100% !important;
+      object-fit: cover !important;
+    }
+
+    .doc-card {
+      width: 100%;
+      margin: 0;
+      padding: clamp(34px, 5vw, 64px);
+      border-radius: 26px;
+      background: var(--paper-strong);
+      border: 1px solid rgba(255, 255, 255, .5);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .doc-card-gap {
+      height: 48px;
+    }
+
+    .doc-card-inner {
+      width: 100%;
+      margin: 0 auto;
+      padding: 0 32px;
+    }
+
+    .doc-card h2 {
+      margin: 42px 0 14px;
+      color: var(--brand);
+      font-size: clamp(26px, 3.2vw, 38px);
+      line-height: 1.16;
+      font-weight: 900;
+    }
+
+    .doc-card > h2:first-child,
+    .doc-card .chapter:first-child h2:first-child {
+      margin-top: 0;
+    }
+
+    .doc-card h1 {
+      margin: 0 0 24px;
+      color: var(--ink);
+      font-size: clamp(34px, 5vw, 56px);
+      line-height: 1.08;
+      font-weight: 900;
+    }
+
+    .doc-card h3 {
+      margin: 30px 0 10px;
+      color: var(--brand-2);
+      font-size: 22px;
+      line-height: 1.2;
+      font-weight: 900;
+    }
+
+    .doc-card p,
+    .doc-card li {
+      color: var(--ink);
+      font-size: 17px;
+      line-height: 1.58;
+      font-weight: 550;
+    }
+
+    .doc-card p {
+      max-width: none;
+      margin: 0 0 16px;
+    }
+
+    .doc-card ul,
+    .doc-card ol {
+      max-width: none;
+      margin: 12px 0 26px;
+      padding-left: 24px;
+    }
+
+    .doc-card p,
+    .doc-card ul,
+    .doc-card ol,
+    .doc-card pre,
+    .doc-card table {
+      margin-left: 28px;
+    }
+
+    .doc-card h3 {
+      margin-left: 28px;
+    }
+
+    .doc-card li::marker {
+      color: var(--brand);
+      font-weight: 900;
+    }
+
+    .doc-card .chapter {
+      padding: 58px 0;
+      border-top: 1px solid rgba(19, 40, 58, .12);
+    }
+
+    .doc-card .chapter:first-of-type {
+      margin-top: 34px;
+    }
+
+    .chapter-kicker {
+      margin-bottom: 10px;
+      color: #1fb77d;
+      font-size: 13px;
+      font-weight: 900;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+
+    .section-rule {
+      border: 0;
+      border-top: 1px solid rgba(19, 40, 58, .12);
+      margin: 34px 0 0;
+    }
+
+    .doc-card pre {
+      max-width: 860px;
+      margin: 26px 0;
+      padding: 22px;
+      border-radius: 18px;
+      color: #eafff6;
+      background: #103949;
+      overflow: auto;
+      white-space: pre-wrap;
+    }
+
+    .doc-card code {
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: .92em;
+    }
+
+    .doc-card blockquote {
+      max-width: 900px;
+      margin: 30px 0;
+      padding: 24px 28px;
+      border-left: 6px solid var(--accent);
+      border-radius: 18px;
+      color: var(--ink);
+      background: rgba(88, 215, 161, .13);
+      font-size: 22px;
+      line-height: 1.5;
+      font-weight: 800;
+    }
+
+    .table-wrap {
+      overflow: auto;
+      margin: 26px 0;
+    }
+
+    .doc-card table {
+      width: 100%;
+      min-width: 720px;
+      border-collapse: collapse;
+    }
+
+    .doc-card th,
+    .doc-card td {
+      padding: 14px 16px;
+      text-align: left;
+      vertical-align: top;
+      border-bottom: 1px solid rgba(19, 40, 58, .12);
+    }
+
+    .doc-card th {
+      color: #fff;
+      background: var(--brand);
+      font-size: 13px;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    .doc-card .lead {
+      max-width: none !important;
+      color: var(--muted) !important;
+      font-size: 18px !important;
+      line-height: 1.58 !important;
+      font-weight: 650 !important;
+    }
+
+    .doc-card .highlight {
+      margin: 22px 0 26px 28px;
+      padding: 18px 22px;
+      border-left: 5px solid var(--brand);
+      border-radius: 18px;
+      color: var(--ink);
+      background: rgba(88, 215, 161, .13);
+    }
+
+    .doc-card .highlight strong {
+      color: var(--brand);
+    }
+
+    .doc-card .warning {
+      border-left-color: #d49a20;
+      background: rgba(242, 201, 76, .16);
+    }
+
+    .doc-card .future {
+      border-left-color: var(--brand-2);
+      background: rgba(47, 143, 210, .12);
+    }
+
+    .doc-card .diagram {
+      margin: 24px 0 28px 28px;
+      padding: 22px;
+      border-radius: 18px;
+      color: #eafff6;
+      background: #103949;
+      overflow-x: auto;
+      white-space: pre;
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 14px;
+      line-height: 1.55;
+    }
+
+    .doc-card .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+      margin: 20px 0 28px 28px;
+    }
+
+    .doc-card .card {
+      min-height: 0;
+      padding: 20px;
+      border-radius: 18px;
+      border: 1px solid rgba(19, 40, 58, .12);
+      background: rgba(255, 255, 255, .72);
+      box-shadow: none;
+    }
+
+    .doc-card .card::before {
+      display: none;
+    }
+
+    .doc-card .card h3 {
+      margin: 0 0 10px;
+      color: var(--brand);
+      font-size: 21px;
+    }
+
+    .doc-card .card p {
+      margin: 0;
+    }
+
+    .doc-card .number {
+      width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      margin-bottom: 12px;
+      border-radius: 999px;
+      color: #fff;
+      background: var(--brand);
+      font-weight: 900;
+    }
+
+    .doc-card .status-table {
+      width: calc(100% - 28px);
+      margin: 22px 0 28px 28px;
+      min-width: 720px;
+      border-collapse: collapse;
+    }
+
+    .doc-card .tag {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 10px;
+      border-radius: 999px;
+      color: var(--brand);
+      background: rgba(88, 215, 161, .14);
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .doc-card .tag-future {
+      color: #9f6b0e;
+      background: rgba(242, 201, 76, .18);
+    }
+
+    .doc-card .summary {
+      margin-left: 28px;
+      padding: 28px;
+      border-radius: 20px;
+      color: #eafff6;
+      background: #103949;
+    }
+
+    .doc-card .summary h2,
+    .doc-card .summary p {
+      color: inherit;
+    }
+
+    .doc-card .summary h2 {
+      margin-top: 0;
+    }
+
+    .doc-card .summary strong {
+      color: #9ff0c8;
+    }
+
+    .doc-card .callout {
+      margin: 22px 0 26px 28px;
+      padding: 18px 22px;
+      border-left: 5px solid var(--brand);
+      border-radius: 18px;
+      color: var(--ink);
+      background: rgba(88, 215, 161, .13);
+    }
+
+    .doc-card .callout strong {
+      color: var(--brand);
+    }
+
+    .doc-card .warning.callout {
+      border-left-color: #d49a20;
+      background: rgba(242, 201, 76, .16);
+    }
+
+    .doc-card .badge {
+      display: inline-flex;
+      align-items: center;
+      margin-right: 8px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      color: #fff;
+      background: var(--brand);
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    @media (max-width: 620px) {
+      body.docu-shell-ready.docu-native-cover .shell {
+        width: min(100% - 22px, 1120px) !important;
+        padding-top: 18px !important;
+      }
+
+      body.docu-shell-ready.docu-native-cover .hero {
+        grid-template-columns: 1fr !important;
+        padding: 22px !important;
+      }
+
+      body.docu-shell-ready.docu-native-cover .hero .logo {
+        width: 76px !important;
+        height: 76px !important;
+        border-radius: 20px !important;
+      }
+
+      body.docu-shell-ready.docu-native-cover .hero .logo img {
+        width: 100% !important;
+        height: 100% !important;
+      }
+
+      .doc-card {
+        padding: 26px 20px;
+      }
+
+      .doc-card-inner {
+        padding: 0 4px;
+      }
+
+      .doc-card-gap {
+        height: 32px;
+      }
+
+      .doc-card p,
+      .doc-card li {
+        font-size: 16px;
+      }
+
+      .doc-card .grid {
+        grid-template-columns: 1fr;
+        margin-left: 0;
+      }
+
+      .doc-card .highlight,
+      .doc-card .diagram,
+      .doc-card .summary,
+      .doc-card .callout {
+        margin-left: 0;
+      }
     }
 
     @media print {
-      body { background: #fff; color: #000; font-size: 11pt; }
-      .sidebar, .toolbar { display: none; }
-      .content { margin: 0; padding: 0; }
-      .document { width: 100%; border: 0; box-shadow: none; padding: 0; }
-      h1, h2, h3 { color: #000; break-after: avoid; }
-      pre { white-space: pre-wrap; break-inside: avoid; }
-      a { color: #000; text-decoration: none; }
+      body.docu-shell-ready.docu-native-cover .shell {
+        width: 100% !important;
+        max-width: none !important;
+        padding: 18mm 12mm !important;
+      }
+
+      body.docu-shell-ready.docu-native-cover .hero {
+        margin: 0 0 16mm !important;
+        padding: 18mm !important;
+        break-inside: avoid;
+      }
+
+      .doc-card-gap {
+        display: none !important;
+      }
+
+      .doc-card {
+        margin: 0 !important;
+        padding: 18mm !important;
+        border-radius: 14px !important;
+        box-shadow: none !important;
+        break-inside: auto;
+      }
+
+      .doc-card-inner {
+        width: 100% !important;
+        max-width: none !important;
+        margin: 0 !important;
+        padding: 0 8mm !important;
+      }
+
+      .doc-card p,
+      .doc-card li {
+        font-size: 12pt !important;
+        line-height: 1.55 !important;
+      }
+
+      .doc-card h1 {
+        font-size: 28pt !important;
+      }
+
+      .doc-card h2 {
+        font-size: 22pt !important;
+      }
     }
 
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --bg: #0c2026;
-        --surface: #122b32;
-        --surface-soft: #183b40;
-        --text: #e7f1f2;
-        --muted: #a3b7bd;
-        --line: #315058;
-        --primary: #2dd4bf;
-        --primary-dark: #5eead4;
-        --code-bg: #07191e;
-        --code-text: #e8f4f2;
-        --shadow: none;
-      }
-      h1, strong { color: #f1f7f7; }
-      .sidebar { background: #071c22; }
-      .toolbar button { background: var(--surface); color: var(--text); }
-      code { border-color: #315b5c; }
-    }
   </style>
 </head>
-<body>
-  <div class="page">
-    <aside class="sidebar" aria-label="Indice del documento">
-      <div class="brand">
-        <strong>SALDIFY</strong>
-        <span>Arquitectura de red</span>
+<body class="docu-shell-boot docu-native-cover">
+  <main class="shell">
+    <section class="hero" aria-labelledby="titulo">
+      <div class="logo">
+        <img src="images/docu_005_arquitectura_crop.png" alt="Arquitectura Saldify">
       </div>
-      <p class="toc-title">Contenido</p>
-      <ol class="toc"><li class="toc-item"><a href="#1-proposito">1. Proposito</a></li>
-<li class="toc-item"><a href="#2-concepto-principal-una-red-de-redes">2. Concepto principal: una red de redes</a></li>
-<li class="toc-item"><a href="#3-identidad-y-relacion-comercial">3. Identidad y relacion comercial</a></li>
-<li class="toc-subitem"><a href="#3-1-identidad-unica">3.1 Identidad unica</a></li>
-<li class="toc-subitem"><a href="#3-2-relacion-entre-anfitrion-e-invitado">3.2 Relacion entre Anfitrion e Invitado</a></li>
-<li class="toc-item"><a href="#4-regla-estructural-un-solo-padre-directo">4. Regla estructural: un solo padre directo</a></li>
-<li class="toc-item"><a href="#5-red-propia-y-operacion-standalone">5. Red propia y operacion standalone</a></li>
-<li class="toc-item"><a href="#6-un-invitado-puede-convertirse-en-anfitrion">6. Un Invitado puede convertirse en Anfitrion</a></li>
-<li class="toc-item"><a href="#7-integracion-actual-entre-anfitriones-raiz">7. Integracion actual entre Anfitriones raiz</a></li>
-<li class="toc-item"><a href="#8-combinaciones-de-red">8. Combinaciones de red</a></li>
-<li class="toc-subitem"><a href="#8-1-anfitrion-invita-a-un-usuario-sin-red-y-sin-padre">8.1 Anfitrion invita a un usuario sin red y sin padre</a></li>
-<li class="toc-subitem"><a href="#8-2-anfitrion-raiz-invita-a-otro-anfitrion-raiz">8.2 Anfitrion raiz invita a otro Anfitrion raiz</a></li>
-<li class="toc-subitem"><a href="#8-3-cliente-anfitrion-invita-a-un-anfitrion-raiz-independiente">8.3 Cliente-Anfitrion invita a un Anfitrion raiz independiente</a></li>
-<li class="toc-subitem"><a href="#8-4-anfitrion-invita-a-un-nodo-interno-de-otra-red">8.4 Anfitrion invita a un nodo interno de otra red</a></li>
-<li class="toc-subitem"><a href="#8-5-nodo-de-una-red-invita-a-un-nodo-de-otra-red-independiente">8.5 Nodo de una red invita a un nodo de otra red independiente</a></li>
-<li class="toc-subitem"><a href="#8-6-un-descendiente-invita-a-uno-de-sus-ancestros">8.6 Un descendiente invita a uno de sus ancestros</a></li>
-<li class="toc-subitem"><a href="#8-7-usuario-utiliza-su-propia-invitacion">8.7 Usuario utiliza su propia invitacion</a></li>
-<li class="toc-subitem"><a href="#8-8-invitacion-del-mismo-anfitrion-actual">8.8 Invitacion del mismo Anfitrion actual</a></li>
-<li class="toc-subitem"><a href="#8-9-relacion-archivada">8.9 Relacion archivada</a></li>
-<li class="toc-item"><a href="#9-comportamiento-actual-por-seguridad">9. Comportamiento actual por seguridad</a></li>
-<li class="toc-item"><a href="#10-cambio-pendiente-en-el-procedimiento-de-validacion">10. Cambio pendiente en el procedimiento de validacion</a></li>
-<li class="toc-subitem"><a href="#10-1-regla-pendiente">10.1 Regla pendiente</a></li>
-<li class="toc-subitem"><a href="#10-2-no-insertar-una-segunda-relacion">10.2 No insertar una segunda relacion</a></li>
-<li class="toc-subitem"><a href="#10-3-traslado-automatico-del-subarbol">10.3 Traslado automatico del subarbol</a></li>
-<li class="toc-item"><a href="#11-validacion-de-ciclos">11. Validacion de ciclos</a></li>
-<li class="toc-item"><a href="#12-responsabilidad-de-flutter">12. Responsabilidad de Flutter</a></li>
-<li class="toc-item"><a href="#13-efectos-del-traslado">13. Efectos del traslado</a></li>
-<li class="toc-item"><a href="#14-datos-comerciales-asociados-a-la-relacion">14. Datos comerciales asociados a la relacion</a></li>
-<li class="toc-item"><a href="#15-invariantes-obligatorios">15. Invariantes obligatorios</a></li>
-<li class="toc-item"><a href="#16-casos-de-aceptacion-para-el-cambio-pendiente">16. Casos de aceptacion para el cambio pendiente</a></li>
-<li class="toc-subitem"><a href="#caso-1-usuario-nuevo">Caso 1: usuario nuevo</a></li>
-<li class="toc-subitem"><a href="#caso-2-anfitrion-raiz-con-descendientes">Caso 2: Anfitrion raiz con descendientes</a></li>
-<li class="toc-subitem"><a href="#caso-3-usuario-ya-vinculado-al-mismo-anfitrion">Caso 3: usuario ya vinculado al mismo Anfitrion</a></li>
-<li class="toc-subitem"><a href="#caso-4-nodo-interno-cambia-a-una-red-independiente">Caso 4: nodo interno cambia a una red independiente</a></li>
-<li class="toc-subitem"><a href="#caso-4a-nodo-interno-con-saldo-pendiente">Caso 4A: nodo interno con saldo pendiente</a></li>
-<li class="toc-subitem"><a href="#caso-4b-nodo-interno-con-gestiones-pendientes">Caso 4B: nodo interno con gestiones pendientes</a></li>
-<li class="toc-subitem"><a href="#caso-5-traslado-que-produce-ciclo">Caso 5: traslado que produce ciclo</a></li>
-<li class="toc-subitem"><a href="#caso-6-auto-invitacion">Caso 6: auto invitacion</a></li>
-<li class="toc-subitem"><a href="#caso-7-relacion-archivada">Caso 7: relacion archivada</a></li>
-<li class="toc-subitem"><a href="#caso-8-error-durante-el-traslado">Caso 8: error durante el traslado</a></li>
-<li class="toc-item"><a href="#17-estado-de-implementacion">17. Estado de implementacion</a></li>
-<li class="toc-subitem"><a href="#implementado-actualmente">Implementado actualmente</a></li>
-<li class="toc-subitem"><a href="#pendiente">Pendiente</a></li>
-<li class="toc-subitem"><a href="#regla-temporal-de-seguridad">Regla temporal de seguridad</a></li>
-<li class="toc-item"><a href="#18-traslado-automatico-condicionado-por-saldo-y-gestiones">18. Traslado automatico condicionado por saldo y gestiones</a></li>
-<li class="toc-subitem"><a href="#18-1-decision-funcional">18.1 Decision funcional</a></li>
-<li class="toc-subitem"><a href="#18-2-flujo">18.2 Flujo</a></li>
-<li class="toc-subitem"><a href="#18-3-condiciones-de-una-relacion-limpia">18.3 Condiciones de una relacion limpia</a></li>
-<li class="toc-subitem"><a href="#18-4-datos-que-no-bloquean">18.4 Datos que no bloquean</a></li>
-<li class="toc-subitem"><a href="#18-5-conservacion-de-cuentas-saldos-y-movimientos">18.5 Conservacion de cuentas, saldos y movimientos</a></li>
-<li class="toc-subitem"><a href="#18-6-datos-existentes-para-validar">18.6 Datos existentes para validar</a></li>
-<li class="toc-subitem"><a href="#18-7-responsabilidad-de-add-sysuser10-sysuser11">18.7 Responsabilidad de ADD_SYSUSER10_SYSUSER11</a></li>
-<li class="toc-subitem"><a href="#18-8-codigos-y-mensajes">18.8 Codigos y mensajes</a></li>
-<li class="toc-subitem"><a href="#18-9-resultado-del-traslado">18.9 Resultado del traslado</a></li>
-<li class="toc-subitem"><a href="#18-10-concurrencia">18.10 Concurrencia</a></li>
-<li class="toc-subitem"><a href="#18-11-regla-final">18.11 Regla final</a></li>
-<li class="toc-item"><a href="#19-resumen-final">19. Resumen final</a></li></ol>
-    </aside>
-    <main class="content">
-      <div class="toolbar">
-        <button type="button" onclick="window.print()" title="Imprimir documento">Imprimir</button>
+      <div>
+        <p class="lead">Reglas estructurales, validaciones e invariantes tecnicas para sostener la Red de Redes de Saldify.</p>
+        <div class="meta">
+          <span class="pill"><span class="dot"></span>Arquitectura</span>
+          <span class="pill"><span class="dot"></span>Base de datos</span>
+          <span class="pill"><span class="dot"></span>Validaciones</span>
+          <span class="pill"><span class="dot"></span>Red</span>
+        </div>
       </div>
-      <article class="document"><h1 id="saldify-resumen-de-arquitectura-de-red"><a class="heading-link" href="#saldify-resumen-de-arquitectura-de-red" aria-label="Enlace a Saldify - Resumen de Arquitectura de Red">#</a>Saldify - Resumen de Arquitectura de Red</h1>
-<p>Ultima revision: 2026-07-25</p>
-<h2 id="1-proposito"><a class="heading-link" href="#1-proposito" aria-label="Enlace a 1. Proposito">#</a>1. Proposito</h2>
+    </section>
+
+    <div class="doc-card-gap" aria-hidden="true"></div>
+
+    <section class="doc-card" aria-label="Contenido de Arquitectura">
+      <div class="doc-card-inner">
+<h2 id="1-proposito">1. Proposito</h2>
 <p>Este documento describe especificamente el modelo de red de Saldify, la relacion entre Anfitrion e Invitado, las combinaciones permitidas actualmente y el cambio pendiente para trasladar una red completa cuando un usuario acepta la invitacion de un Anfitrion diferente.</p>
 <p>El objetivo es dejar claramente separado:</p>
 <ul>
@@ -298,7 +826,7 @@
 <li><code>ARCHITECTURE_RESUMEN_03.md</code>;</li>
 <li><code>ARCHITECTURE_CLIENTE.md</code>.</li>
 </ul>
-<h2 id="2-concepto-principal-una-red-de-redes"><a class="heading-link" href="#2-concepto-principal-una-red-de-redes" aria-label="Enlace a 2. Concepto principal: una red de redes">#</a>2. Concepto principal: una red de redes</h2>
+<h2 id="2-concepto-principal-una-red-de-redes">2. Concepto principal: una red de redes</h2>
 <p>Saldify permite que una misma persona o empresa participe con dos roles:</p>
 <ul>
 <li>Anfitrion de sus propios clientes;</li>
@@ -318,8 +846,8 @@
 <li>B y C son Invitados directos de A.</li>
 </ul>
 <p>Por eso A puede entrar a Saldify como Invitado para consultar su relacion con Z y tambien como Anfitrion para administrar su propia red.</p>
-<h2 id="3-identidad-y-relacion-comercial"><a class="heading-link" href="#3-identidad-y-relacion-comercial" aria-label="Enlace a 3. Identidad y relacion comercial">#</a>3. Identidad y relacion comercial</h2>
-<h3 id="3-1-identidad-unica"><a class="heading-link" href="#3-1-identidad-unica" aria-label="Enlace a 3.1 Identidad unica">#</a>3.1 Identidad unica</h3>
+<h2 id="3-identidad-y-relacion-comercial">3. Identidad y relacion comercial</h2>
+<h3 id="3-1-identidad-unica">3.1 Identidad unica</h3>
 <p>La identidad principal vive en:</p>
 <pre><code class="language-text">SYSUSER10_CAB_MOVIL</code></pre>
 <p>Un usuario no debe duplicarse por:</p>
@@ -330,7 +858,7 @@
 <li>trasladar su red a un nuevo Anfitrion.</li>
 </ul>
 <p>Google autentica la identidad, pero no determina el rol comercial.</p>
-<h3 id="3-2-relacion-entre-anfitrion-e-invitado"><a class="heading-link" href="#3-2-relacion-entre-anfitrion-e-invitado" aria-label="Enlace a 3.2 Relacion entre Anfitrion e Invitado">#</a>3.2 Relacion entre Anfitrion e Invitado</h3>
+<h3 id="3-2-relacion-entre-anfitrion-e-invitado">3.2 Relacion entre Anfitrion e Invitado</h3>
 <p>La relacion comercial vive en:</p>
 <pre><code class="language-text">SYSUSER11_DET_CONTACTOS</code></pre>
 <p>Campos estructurales principales:</p>
@@ -342,7 +870,7 @@ SYSUSER11_STATUS_ACCION    = responsable de administrar los datos</code></pre>
 <p>La relacion se interpreta como una arista del arbol:</p>
 <pre><code class="language-text">RELA_SYSUSER10_ANFITRION -&gt; RELA_SYSUSER10</code></pre>
 <p>Un usuario que solamente actua como Anfitrion raiz puede tener clientes debajo sin tener una fila propia como Invitado en <code>SYSUSER11</code>.</p>
-<h2 id="4-regla-estructural-un-solo-padre-directo"><a class="heading-link" href="#4-regla-estructural-un-solo-padre-directo" aria-label="Enlace a 4. Regla estructural: un solo padre directo">#</a>4. Regla estructural: un solo padre directo</h2>
+<h2 id="4-regla-estructural-un-solo-padre-directo">4. Regla estructural: un solo padre directo</h2>
 <p>Cada usuario puede tener como maximo un Anfitrion directo. La base lo protege con la restriccion unica sobre:</p>
 <pre><code class="language-text">SYSUSER11_DET_CONTACTOS.RELA_SYSUSER10</code></pre>
 <p>Esta regla garantiza que:</p>
@@ -353,7 +881,7 @@ SYSUSER11_STATUS_ACCION    = responsable de administrar los datos</code></pre>
 <li>cada recorrido ascendente tenga una sola ruta;</li>
 <li>la red pueda representarse como un arbol.</li>
 </ul>
-<h2 id="5-red-propia-y-operacion-standalone"><a class="heading-link" href="#5-red-propia-y-operacion-standalone" aria-label="Enlace a 5. Red propia y operacion standalone">#</a>5. Red propia y operacion standalone</h2>
+<h2 id="5-red-propia-y-operacion-standalone">5. Red propia y operacion standalone</h2>
 <p>Un Anfitrion puede trabajar de forma independiente o standalone.</p>
 <p>Puede:</p>
 <ul>
@@ -372,7 +900,7 @@ SYSUSER11_STATUS_ACCION    = responsable de administrar los datos</code></pre>
 ├── C
 └── D</code></pre>
 <p>A es Anfitrion raiz. B, C y D son sus clientes directos.</p>
-<h2 id="6-un-invitado-puede-convertirse-en-anfitrion"><a class="heading-link" href="#6-un-invitado-puede-convertirse-en-anfitrion" aria-label="Enlace a 6. Un Invitado puede convertirse en Anfitrion">#</a>6. Un Invitado puede convertirse en Anfitrion</h2>
+<h2 id="6-un-invitado-puede-convertirse-en-anfitrion">6. Un Invitado puede convertirse en Anfitrion</h2>
 <p>Un cliente puede crear o administrar su propia red sin dejar de ser Invitado de su Anfitrion superior.</p>
 <p>Ejemplo:</p>
 <pre><code class="language-text">A
@@ -385,7 +913,7 @@ SYSUSER11_STATUS_ACCION    = responsable de administrar los datos</code></pre>
 <li>es Anfitrion de C y D.</li>
 </ul>
 <p>A puede consultar la red descendente de B desde <code>Mi red de Venta</code>. Esa consulta es recursiva y permite visualizar los siguientes niveles. Ver los descendientes no convierte a C y D en clientes directos de A. B conserva la administracion directa de sus propios clientes.</p>
-<h2 id="7-integracion-actual-entre-anfitriones-raiz"><a class="heading-link" href="#7-integracion-actual-entre-anfitriones-raiz" aria-label="Enlace a 7. Integracion actual entre Anfitriones raiz">#</a>7. Integracion actual entre Anfitriones raiz</h2>
+<h2 id="7-integracion-actual-entre-anfitriones-raiz">7. Integracion actual entre Anfitriones raiz</h2>
 <p>Actualmente se permite que un Anfitrion raiz acepte la invitacion de otro Anfitrion raiz.</p>
 <p>Situacion inicial:</p>
 <pre><code class="language-text">A
@@ -405,8 +933,8 @@ Z
     ├── B
     └── C</code></pre>
 <p>B y C no se copian, no se reinvitan y no cambian de padre. Permanecen debajo de A. Por eso toda la red de A queda integrada naturalmente debajo de Z.</p>
-<h2 id="8-combinaciones-de-red"><a class="heading-link" href="#8-combinaciones-de-red" aria-label="Enlace a 8. Combinaciones de red">#</a>8. Combinaciones de red</h2>
-<h3 id="8-1-anfitrion-invita-a-un-usuario-sin-red-y-sin-padre"><a class="heading-link" href="#8-1-anfitrion-invita-a-un-usuario-sin-red-y-sin-padre" aria-label="Enlace a 8.1 Anfitrion invita a un usuario sin red y sin padre">#</a>8.1 Anfitrion invita a un usuario sin red y sin padre</h3>
+<h2 id="8-combinaciones-de-red">8. Combinaciones de red</h2>
+<h3 id="8-1-anfitrion-invita-a-un-usuario-sin-red-y-sin-padre">8.1 Anfitrion invita a un usuario sin red y sin padre</h3>
 <p>Se crea una relacion directa nueva.</p>
 <pre><code class="language-text">Antes:
 A       B
@@ -414,7 +942,7 @@ A       B
 Despues:
 A
 └── B</code></pre>
-<h3 id="8-2-anfitrion-raiz-invita-a-otro-anfitrion-raiz"><a class="heading-link" href="#8-2-anfitrion-raiz-invita-a-otro-anfitrion-raiz" aria-label="Enlace a 8.2 Anfitrion raiz invita a otro Anfitrion raiz">#</a>8.2 Anfitrion raiz invita a otro Anfitrion raiz</h3>
+<h3 id="8-2-anfitrion-raiz-invita-a-otro-anfitrion-raiz">8.2 Anfitrion raiz invita a otro Anfitrion raiz</h3>
 <p>Se integra el segundo Anfitrion con toda su red.</p>
 <pre><code class="language-text">Antes:
 A       B
@@ -427,7 +955,7 @@ A
     ├── C
     └── D</code></pre>
 <p>Este comportamiento ya es compatible con el procedimiento actual porque B no tiene otro padre directo.</p>
-<h3 id="8-3-cliente-anfitrion-invita-a-un-anfitrion-raiz-independiente"><a class="heading-link" href="#8-3-cliente-anfitrion-invita-a-un-anfitrion-raiz-independiente" aria-label="Enlace a 8.3 Cliente-Anfitrion invita a un Anfitrion raiz independiente">#</a>8.3 Cliente-Anfitrion invita a un Anfitrion raiz independiente</h3>
+<h3 id="8-3-cliente-anfitrion-invita-a-un-anfitrion-raiz-independiente">8.3 Cliente-Anfitrion invita a un Anfitrion raiz independiente</h3>
 <p>Tambien es estructuralmente valido.</p>
 <pre><code class="language-text">Antes:
 A
@@ -444,7 +972,7 @@ A
         ├── N
         └── P</code></pre>
 <p>M deja de ser raiz, se convierte en Invitado de B y conserva su red.</p>
-<h3 id="8-4-anfitrion-invita-a-un-nodo-interno-de-otra-red"><a class="heading-link" href="#8-4-anfitrion-invita-a-un-nodo-interno-de-otra-red" aria-label="Enlace a 8.4 Anfitrion invita a un nodo interno de otra red">#</a>8.4 Anfitrion invita a un nodo interno de otra red</h3>
+<h3 id="8-4-anfitrion-invita-a-un-nodo-interno-de-otra-red">8.4 Anfitrion invita a un nodo interno de otra red</h3>
 <p>Esta es la combinacion que falta habilitar.</p>
 <p>Situacion inicial:</p>
 <pre><code class="language-text">A
@@ -462,7 +990,7 @@ X
     └── D</code></pre>
 <p>A pierde a B y toda la rama encabezada por B. B conserva a C y D.</p>
 <p>La operacion no mueve individualmente a C y D. Solo cambia el padre directo de B. El subarbol se traslada completo porque sus relaciones internas permanecen intactas.</p>
-<h3 id="8-5-nodo-de-una-red-invita-a-un-nodo-de-otra-red-independiente"><a class="heading-link" href="#8-5-nodo-de-una-red-invita-a-un-nodo-de-otra-red-independiente" aria-label="Enlace a 8.5 Nodo de una red invita a un nodo de otra red independiente">#</a>8.5 Nodo de una red invita a un nodo de otra red independiente</h3>
+<h3 id="8-5-nodo-de-una-red-invita-a-un-nodo-de-otra-red-independiente">8.5 Nodo de una red invita a un nodo de otra red independiente</h3>
 <p>Ejemplo:</p>
 <pre><code class="language-text">A
 ├── B
@@ -486,7 +1014,7 @@ R
 
 R</code></pre>
 <p>R pierde la rama de Y. Y pasa a depender de D y conserva M, N y P.</p>
-<h3 id="8-6-un-descendiente-invita-a-uno-de-sus-ancestros"><a class="heading-link" href="#8-6-un-descendiente-invita-a-uno-de-sus-ancestros" aria-label="Enlace a 8.6 Un descendiente invita a uno de sus ancestros">#</a>8.6 Un descendiente invita a uno de sus ancestros</h3>
+<h3 id="8-6-un-descendiente-invita-a-uno-de-sus-ancestros">8.6 Un descendiente invita a uno de sus ancestros</h3>
 <p>Debe rechazarse porque generaria un ciclo.</p>
 <pre><code class="language-text">A
 └── B
@@ -494,15 +1022,15 @@ R</code></pre>
 <p>Si C invita a A, el resultado propuesto seria:</p>
 <pre><code class="language-text">C -&gt; A -&gt; B -&gt; C</code></pre>
 <p>Ese ciclo produciria recorridos infinitos y una red invalida. La invitacion no debe consolidarse.</p>
-<h3 id="8-7-usuario-utiliza-su-propia-invitacion"><a class="heading-link" href="#8-7-usuario-utiliza-su-propia-invitacion" aria-label="Enlace a 8.7 Usuario utiliza su propia invitacion">#</a>8.7 Usuario utiliza su propia invitacion</h3>
+<h3 id="8-7-usuario-utiliza-su-propia-invitacion">8.7 Usuario utiliza su propia invitacion</h3>
 <p>Debe rechazarse siempre.</p>
 <pre><code class="language-text">A -&gt; A</code></pre>
 <p>Una relacion consigo mismo no representa una vinculacion comercial valida.</p>
-<h3 id="8-8-invitacion-del-mismo-anfitrion-actual"><a class="heading-link" href="#8-8-invitacion-del-mismo-anfitrion-actual" aria-label="Enlace a 8.8 Invitacion del mismo Anfitrion actual">#</a>8.8 Invitacion del mismo Anfitrion actual</h3>
+<h3 id="8-8-invitacion-del-mismo-anfitrion-actual">8.8 Invitacion del mismo Anfitrion actual</h3>
 <p>Si el usuario ya pertenece al mismo Anfitrion, la relacion puede consolidarse sin crear otra fila. El procedimiento puede actualizar estado y responsable de datos conforme a las reglas actuales.</p>
-<h3 id="8-9-relacion-archivada"><a class="heading-link" href="#8-9-relacion-archivada" aria-label="Enlace a 8.9 Relacion archivada">#</a>8.9 Relacion archivada</h3>
+<h3 id="8-9-relacion-archivada">8.9 Relacion archivada</h3>
 <p>Una relacion archivada no debe reactivarse silenciosamente. La politica de reactivacion debe mantenerse explicita y separada del traslado normal de red.</p>
-<h2 id="9-comportamiento-actual-por-seguridad"><a class="heading-link" href="#9-comportamiento-actual-por-seguridad" aria-label="Enlace a 9. Comportamiento actual por seguridad">#</a>9. Comportamiento actual por seguridad</h2>
+<h2 id="9-comportamiento-actual-por-seguridad">9. Comportamiento actual por seguridad</h2>
 <p>En el estado actual, <code>ADD_SYSUSER10_SYSUSER11</code> permite:</p>
 <ul>
 <li>crear una relacion cuando el Invitado no tiene padre;</li>
@@ -525,12 +1053,12 @@ y su Anfitrion actual es diferente del Anfitrion que invita</code></pre>
 <li>no se crea una segunda relacion.</li>
 </ul>
 <p>Por lo tanto, en esta etapa solo los Anfitriones raiz, es decir, usuarios sin padre directo, pueden integrarse a otra red conservando su subarbol.</p>
-<h2 id="10-cambio-pendiente-en-el-procedimiento-de-validacion"><a class="heading-link" href="#10-cambio-pendiente-en-el-procedimiento-de-validacion" aria-label="Enlace a 10. Cambio pendiente en el procedimiento de validacion">#</a>10. Cambio pendiente en el procedimiento de validacion</h2>
+<h2 id="10-cambio-pendiente-en-el-procedimiento-de-validacion">10. Cambio pendiente en el procedimiento de validacion</h2>
 <p>Debe modificarse el procedimiento:</p>
 <pre><code class="language-text">ADD_SYSUSER10_SYSUSER11</code></pre>
 <p>El objetivo pendiente es permitir que un usuario que ya pertenece a otra red pueda aceptar la invitacion de un nuevo Anfitrion y trasladarse junto con toda su red descendente.</p>
 <p>Flutter ya ejecuta este procedimiento despues de validar la invitacion. No se requiere duplicar el flujo en Flutter ni crear otra identidad.</p>
-<h3 id="10-1-regla-pendiente"><a class="heading-link" href="#10-1-regla-pendiente" aria-label="Enlace a 10.1 Regla pendiente">#</a>10.1 Regla pendiente</h3>
+<h3 id="10-1-regla-pendiente">10.1 Regla pendiente</h3>
 <p>Cuando el Invitado ya tiene un Anfitrion diferente:</p>
 <ol>
 <li>Recuperar la relacion actual del Invitado.</li>
@@ -550,10 +1078,10 @@ SET RELA_SYSUSER10_ANFITRION = :V_ID_ANFITRION,
     SYSUSER11_STATUS_ACCION = &#x27;I&#x27;
 WHERE ID_SYSUSER11 = :V_ID_RELACION;</code></pre>
 <p>Este SQL es una referencia de arquitectura. La implementacion final debe integrarse en el procedimiento con validaciones, manejo de estados y resultado transaccional.</p>
-<h3 id="10-2-no-insertar-una-segunda-relacion"><a class="heading-link" href="#10-2-no-insertar-una-segunda-relacion" aria-label="Enlace a 10.2 No insertar una segunda relacion">#</a>10.2 No insertar una segunda relacion</h3>
+<h3 id="10-2-no-insertar-una-segunda-relacion">10.2 No insertar una segunda relacion</h3>
 <p>Si el Invitado ya tiene una fila en <code>SYSUSER11</code>, no debe insertarse otra. La restriccion unica sobre <code>RELA_SYSUSER10</code> lo impide y protege la regla de un solo padre.</p>
 <p>El cambio correcto es actualizar el Anfitrion de la relacion existente.</p>
-<h3 id="10-3-traslado-automatico-del-subarbol"><a class="heading-link" href="#10-3-traslado-automatico-del-subarbol" aria-label="Enlace a 10.3 Traslado automatico del subarbol">#</a>10.3 Traslado automatico del subarbol</h3>
+<h3 id="10-3-traslado-automatico-del-subarbol">10.3 Traslado automatico del subarbol</h3>
 <p>No se actualizan los descendientes.</p>
 <p>Ejemplo:</p>
 <pre><code class="language-text">A -&gt; B -&gt; C
@@ -562,7 +1090,7 @@ WHERE ID_SYSUSER11 = :V_ID_RELACION;</code></pre>
 <pre><code class="language-text">X -&gt; B -&gt; C
      B -&gt; D</code></pre>
 <p>C y D siguen apuntando a B. Por eso la red completa se traslada sin copiar ni reescribir cada nivel.</p>
-<h2 id="11-validacion-de-ciclos"><a class="heading-link" href="#11-validacion-de-ciclos" aria-label="Enlace a 11. Validacion de ciclos">#</a>11. Validacion de ciclos</h2>
+<h2 id="11-validacion-de-ciclos">11. Validacion de ciclos</h2>
 <p>Antes de cambiar el padre de un usuario se debe comprobar que el nuevo Anfitrion no sea descendiente del usuario que se mueve.</p>
 <p>Regla:</p>
 <pre><code class="language-text">No se puede mover B debajo de X si X ya esta dentro del subarbol de B.</code></pre>
@@ -574,7 +1102,7 @@ WHERE ID_SYSUSER11 = :V_ID_RELACION;</code></pre>
 <li>Anfitriones con red propia;</li>
 <li>clientes sin descendientes.</li>
 </ul>
-<h2 id="12-responsabilidad-de-flutter"><a class="heading-link" href="#12-responsabilidad-de-flutter" aria-label="Enlace a 12. Responsabilidad de Flutter">#</a>12. Responsabilidad de Flutter</h2>
+<h2 id="12-responsabilidad-de-flutter">12. Responsabilidad de Flutter</h2>
 <p>El flujo actual de Flutter ya contiene las piezas necesarias:</p>
 <pre><code class="language-text">Link o codigo de invitacion
   -&gt; autenticacion
@@ -597,7 +1125,7 @@ SYSUSER11_STATUS
 CON_CATALOGO
 SYSUSER11_FAPL</code></pre>
 <p><code>MENSAJE = &#x27;OK&#x27;</code> permite continuar al dashboard. Cualquier otro mensaje se muestra como estado o validacion de la invitacion.</p>
-<h2 id="13-efectos-del-traslado"><a class="heading-link" href="#13-efectos-del-traslado" aria-label="Enlace a 13. Efectos del traslado">#</a>13. Efectos del traslado</h2>
+<h2 id="13-efectos-del-traslado">13. Efectos del traslado</h2>
 <p>Cuando un usuario cambia de red:</p>
 <ul>
 <li>el Anfitrion anterior pierde a ese cliente;</li>
@@ -618,7 +1146,7 @@ SYSUSER11_FAPL</code></pre>
 <li>permisos o vistas dependientes de la red;</li>
 <li>indicadores de clientes y acciones pendientes.</li>
 </ul>
-<h2 id="14-datos-comerciales-asociados-a-la-relacion"><a class="heading-link" href="#14-datos-comerciales-asociados-a-la-relacion" aria-label="Enlace a 14. Datos comerciales asociados a la relacion">#</a>14. Datos comerciales asociados a la relacion</h2>
+<h2 id="14-datos-comerciales-asociados-a-la-relacion">14. Datos comerciales asociados a la relacion</h2>
 <p>El traslado conserva la misma identidad y el mismo <code>ID_SYSUSER11</code>. Por eso el usuario trasladado mantiene toda la informacion asociada a su relacion:</p>
 <ul>
 <li>configuracion de credito;</li>
@@ -630,7 +1158,7 @@ SYSUSER11_FAPL</code></pre>
 <p>Nada se borra, reinicia, copia ni vuelve a crear. Solamente cambia <code>RELA_SYSUSER10_ANFITRION</code> en la relacion existente.</p>
 <p>La condicion de saldo cero y ausencia de gestiones abiertas determina si el cambio puede realizarse en ese momento. No elimina ni reinicia informacion. Una vez realizado el traslado, todos los datos y estados permanecen con el usuario que cambia de Anfitrion.</p>
 <p>Los saldos y operaciones de los descendientes no bloquean el traslado. Esas relaciones pertenecen al usuario que encabeza el subarbol y viajan con su red. Solo debe estar limpia la relacion directa entre el usuario trasladado y su Anfitrion actual.</p>
-<h2 id="15-invariantes-obligatorios"><a class="heading-link" href="#15-invariantes-obligatorios" aria-label="Enlace a 15. Invariantes obligatorios">#</a>15. Invariantes obligatorios</h2>
+<h2 id="15-invariantes-obligatorios">15. Invariantes obligatorios</h2>
 <p>Toda alta, consolidacion o traslado debe garantizar:</p>
 <ol>
 <li>El Anfitrion existe.</li>
@@ -645,28 +1173,28 @@ SYSUSER11_FAPL</code></pre>
 <li>La operacion completa es transaccional.</li>
 <li>El procedimiento devuelve un mensaje util y no deja cambios parciales.</li>
 </ol>
-<h2 id="16-casos-de-aceptacion-para-el-cambio-pendiente"><a class="heading-link" href="#16-casos-de-aceptacion-para-el-cambio-pendiente" aria-label="Enlace a 16. Casos de aceptacion para el cambio pendiente">#</a>16. Casos de aceptacion para el cambio pendiente</h2>
+<h2 id="16-casos-de-aceptacion-para-el-cambio-pendiente">16. Casos de aceptacion para el cambio pendiente</h2>
 <p>Antes de habilitar el traslado entre redes deben verificarse al menos estos casos:</p>
-<h3 id="caso-1-usuario-nuevo"><a class="heading-link" href="#caso-1-usuario-nuevo" aria-label="Enlace a Caso 1: usuario nuevo">#</a>Caso 1: usuario nuevo</h3>
+<h3 id="caso-1-usuario-nuevo">Caso 1: usuario nuevo</h3>
 <ul>
 <li>El Invitado no tiene padre.</li>
 <li>Se crea la relacion con el Anfitrion que invita.</li>
 <li>Resultado: <code>OK</code>.</li>
 </ul>
-<h3 id="caso-2-anfitrion-raiz-con-descendientes"><a class="heading-link" href="#caso-2-anfitrion-raiz-con-descendientes" aria-label="Enlace a Caso 2: Anfitrion raiz con descendientes">#</a>Caso 2: Anfitrion raiz con descendientes</h3>
+<h3 id="caso-2-anfitrion-raiz-con-descendientes">Caso 2: Anfitrion raiz con descendientes</h3>
 <ul>
 <li>El Invitado no tiene padre y tiene clientes.</li>
 <li>Se crea la relacion con el nuevo Anfitrion.</li>
 <li>Sus clientes permanecen debajo.</li>
 <li>Resultado: <code>OK</code>.</li>
 </ul>
-<h3 id="caso-3-usuario-ya-vinculado-al-mismo-anfitrion"><a class="heading-link" href="#caso-3-usuario-ya-vinculado-al-mismo-anfitrion" aria-label="Enlace a Caso 3: usuario ya vinculado al mismo Anfitrion">#</a>Caso 3: usuario ya vinculado al mismo Anfitrion</h3>
+<h3 id="caso-3-usuario-ya-vinculado-al-mismo-anfitrion">Caso 3: usuario ya vinculado al mismo Anfitrion</h3>
 <ul>
 <li>Se reutiliza la relacion.</li>
 <li>No se inserta otra fila.</li>
 <li>Resultado: <code>OK</code> conforme a estado.</li>
 </ul>
-<h3 id="caso-4-nodo-interno-cambia-a-una-red-independiente"><a class="heading-link" href="#caso-4-nodo-interno-cambia-a-una-red-independiente" aria-label="Enlace a Caso 4: nodo interno cambia a una red independiente">#</a>Caso 4: nodo interno cambia a una red independiente</h3>
+<h3 id="caso-4-nodo-interno-cambia-a-una-red-independiente">Caso 4: nodo interno cambia a una red independiente</h3>
 <ul>
 <li>El Invitado tiene otro padre.</li>
 <li>El nuevo Anfitrion no pertenece a su subarbol.</li>
@@ -678,43 +1206,43 @@ SYSUSER11_FAPL</code></pre>
 <li>El usuario conserva cuentas, credito, compras, pagos, estados e historial.</li>
 <li>Resultado: <code>OK</code>.</li>
 </ul>
-<h3 id="caso-4a-nodo-interno-con-saldo-pendiente"><a class="heading-link" href="#caso-4a-nodo-interno-con-saldo-pendiente" aria-label="Enlace a Caso 4A: nodo interno con saldo pendiente">#</a>Caso 4A: nodo interno con saldo pendiente</h3>
+<h3 id="caso-4a-nodo-interno-con-saldo-pendiente">Caso 4A: nodo interno con saldo pendiente</h3>
 <ul>
 <li>No se modifica la relacion.</li>
 <li>Debe liquidar el saldo antes de cambiar de Anfitrion.</li>
 </ul>
-<h3 id="caso-4b-nodo-interno-con-gestiones-pendientes"><a class="heading-link" href="#caso-4b-nodo-interno-con-gestiones-pendientes" aria-label="Enlace a Caso 4B: nodo interno con gestiones pendientes">#</a>Caso 4B: nodo interno con gestiones pendientes</h3>
+<h3 id="caso-4b-nodo-interno-con-gestiones-pendientes">Caso 4B: nodo interno con gestiones pendientes</h3>
 <ul>
 <li>Existe una compra solicitada o pendiente, un pago sin confirmar u otra</li>
 <p>gestion abierta.</p>
 <li>No se modifica la relacion.</li>
 <li>Debe resolver sus operaciones antes de cambiar de Anfitrion.</li>
 </ul>
-<h3 id="caso-5-traslado-que-produce-ciclo"><a class="heading-link" href="#caso-5-traslado-que-produce-ciclo" aria-label="Enlace a Caso 5: traslado que produce ciclo">#</a>Caso 5: traslado que produce ciclo</h3>
+<h3 id="caso-5-traslado-que-produce-ciclo">Caso 5: traslado que produce ciclo</h3>
 <ul>
 <li>El nuevo Anfitrion pertenece al subarbol del Invitado.</li>
 <li>No se modifica la relacion.</li>
 <li>Se devuelve un mensaje de ciclo.</li>
 </ul>
-<h3 id="caso-6-auto-invitacion"><a class="heading-link" href="#caso-6-auto-invitacion" aria-label="Enlace a Caso 6: auto invitacion">#</a>Caso 6: auto invitacion</h3>
+<h3 id="caso-6-auto-invitacion">Caso 6: auto invitacion</h3>
 <ul>
 <li>Anfitrion e Invitado son el mismo usuario.</li>
 <li>No se modifica la relacion.</li>
 <li>Se devuelve un mensaje de validacion.</li>
 </ul>
-<h3 id="caso-7-relacion-archivada"><a class="heading-link" href="#caso-7-relacion-archivada" aria-label="Enlace a Caso 7: relacion archivada">#</a>Caso 7: relacion archivada</h3>
+<h3 id="caso-7-relacion-archivada">Caso 7: relacion archivada</h3>
 <ul>
 <li>No se reactiva automaticamente.</li>
 <li>Se aplica la politica explicita de reactivacion.</li>
 </ul>
-<h3 id="caso-8-error-durante-el-traslado"><a class="heading-link" href="#caso-8-error-durante-el-traslado" aria-label="Enlace a Caso 8: error durante el traslado">#</a>Caso 8: error durante el traslado</h3>
+<h3 id="caso-8-error-durante-el-traslado">Caso 8: error durante el traslado</h3>
 <ul>
 <li>La transaccion se revierte completa.</li>
 <li>El usuario conserva su padre anterior.</li>
 <li>No quedan cambios parciales.</li>
 </ul>
-<h2 id="17-estado-de-implementacion"><a class="heading-link" href="#17-estado-de-implementacion" aria-label="Enlace a 17. Estado de implementacion">#</a>17. Estado de implementacion</h2>
-<h3 id="implementado-actualmente"><a class="heading-link" href="#implementado-actualmente" aria-label="Enlace a Implementado actualmente">#</a>Implementado actualmente</h3>
+<h2 id="17-estado-de-implementacion">17. Estado de implementacion</h2>
+<h3 id="implementado-actualmente">Implementado actualmente</h3>
 <ul>
 <li>Identidad unica por usuario.</li>
 <li>Roles de Anfitrion e Invitado sobre la misma identidad.</li>
@@ -727,7 +1255,7 @@ SYSUSER11_FAPL</code></pre>
 <li>Validacion de ciclos para relaciones nuevas.</li>
 <li>Rechazo de una segunda relacion directa.</li>
 </ul>
-<h3 id="pendiente"><a class="heading-link" href="#pendiente" aria-label="Enlace a Pendiente">#</a>Pendiente</h3>
+<h3 id="pendiente">Pendiente</h3>
 <ul>
 <li>Modificar <code>ADD_SYSUSER10_SYSUSER11</code> para permitir el cambio de padre cuando</li>
 <p>el Invitado ya pertenece a un Anfitrion diferente.</p>
@@ -739,11 +1267,11 @@ SYSUSER11_FAPL</code></pre>
 <li>Notificar al Anfitrion anterior despues del traslado.</li>
 <li>Probar el movimiento completo entre redes independientes.</li>
 </ul>
-<h3 id="regla-temporal-de-seguridad"><a class="heading-link" href="#regla-temporal-de-seguridad" aria-label="Enlace a Regla temporal de seguridad">#</a>Regla temporal de seguridad</h3>
+<h3 id="regla-temporal-de-seguridad">Regla temporal de seguridad</h3>
 <p>Hasta implementar y validar el cambio pendiente, solamente un Anfitrion raiz sin padre directo puede aceptar la invitacion de otro Anfitrion e integrar toda su red.</p>
 <p>Un usuario que ya pertenece a otra red recibe una validacion y permanece con su Anfitrion actual.</p>
-<h2 id="18-traslado-automatico-condicionado-por-saldo-y-gestiones"><a class="heading-link" href="#18-traslado-automatico-condicionado-por-saldo-y-gestiones" aria-label="Enlace a 18. Traslado automatico condicionado por saldo y gestiones">#</a>18. Traslado automatico condicionado por saldo y gestiones</h2>
-<h3 id="18-1-decision-funcional"><a class="heading-link" href="#18-1-decision-funcional" aria-label="Enlace a 18.1 Decision funcional">#</a>18.1 Decision funcional</h3>
+<h2 id="18-traslado-automatico-condicionado-por-saldo-y-gestiones">18. Traslado automatico condicionado por saldo y gestiones</h2>
+<h3 id="18-1-decision-funcional">18.1 Decision funcional</h3>
 <p>El usuario puede cambiar de red automaticamente cuando haya cerrado sus obligaciones directas con el Anfitrion actual.</p>
 <p>La regla es segura, automatica y democratica:</p>
 <ul>
@@ -752,7 +1280,7 @@ SYSUSER11_FAPL</code></pre>
 <li>el cambio conserva un solo padre y evita ciclos;</li>
 <li>el usuario trasladado conserva toda su informacion y su subarbol.</li>
 </ul>
-<h3 id="18-2-flujo"><a class="heading-link" href="#18-2-flujo" aria-label="Enlace a 18.2 Flujo">#</a>18.2 Flujo</h3>
+<h3 id="18-2-flujo">18.2 Flujo</h3>
 <pre><code class="language-text">Sin Anfitrion actual
   -&gt; integrar inmediatamente
 
@@ -767,7 +1295,7 @@ Con otro Anfitrion y relacion limpia
 Con otro Anfitrion y obligaciones pendientes
   -&gt; mantener la red actual
   -&gt; devolver el motivo del bloqueo</code></pre>
-<h3 id="18-3-condiciones-de-una-relacion-limpia"><a class="heading-link" href="#18-3-condiciones-de-una-relacion-limpia" aria-label="Enlace a 18.3 Condiciones de una relacion limpia">#</a>18.3 Condiciones de una relacion limpia</h3>
+<h3 id="18-3-condiciones-de-una-relacion-limpia">18.3 Condiciones de una relacion limpia</h3>
 <p>Deben cumplirse todas:</p>
 <ol>
 <li>Saldo directo igual a cero.</li>
@@ -789,7 +1317,7 @@ SYSUSER50_STATUS
   1 = pago confirmado
   2 = pago rechazado</code></pre>
 <p>Una compra abierta tiene estado 0 o 1. Un pago abierto tiene estado 0.</p>
-<h3 id="18-4-datos-que-no-bloquean"><a class="heading-link" href="#18-4-datos-que-no-bloquean" aria-label="Enlace a 18.4 Datos que no bloquean">#</a>18.4 Datos que no bloquean</h3>
+<h3 id="18-4-datos-que-no-bloquean">18.4 Datos que no bloquean</h3>
 <p>No bloquean el traslado:</p>
 <ul>
 <li>credito aprobado sin utilizar;</li>
@@ -801,7 +1329,7 @@ SYSUSER50_STATUS
 <li>saldos entre el usuario trasladado y sus propios clientes.</li>
 </ul>
 <p>Solo se valida la relacion directa que se rompe con el Anfitrion anterior.</p>
-<h3 id="18-5-conservacion-de-cuentas-saldos-y-movimientos"><a class="heading-link" href="#18-5-conservacion-de-cuentas-saldos-y-movimientos" aria-label="Enlace a 18.5 Conservacion de cuentas, saldos y movimientos">#</a>18.5 Conservacion de cuentas, saldos y movimientos</h3>
+<h3 id="18-5-conservacion-de-cuentas-saldos-y-movimientos">18.5 Conservacion de cuentas, saldos y movimientos</h3>
 <p>El usuario cambia de Anfitrion, pero mantiene el mismo <code>ID_SYSUSER11</code>. Por eso conserva:</p>
 <pre><code class="language-text">SYSUSER12_DEP_CLIENTES
 SYSUSER40_DET_COMPRAS
@@ -811,7 +1339,7 @@ credito, cuentas, saldos, compras, pagos, estados e historial</code></pre>
 <pre><code class="language-sql">UPDATE SYSUSER11_DET_CONTACTOS
 SET RELA_SYSUSER10_ANFITRION = :V_ID_ANFITRION
 WHERE ID_SYSUSER11 = :V_ID_RELACION;</code></pre>
-<h3 id="18-6-datos-existentes-para-validar"><a class="heading-link" href="#18-6-datos-existentes-para-validar" aria-label="Enlace a 18.6 Datos existentes para validar">#</a>18.6 Datos existentes para validar</h3>
+<h3 id="18-6-datos-existentes-para-validar">18.6 Datos existentes para validar</h3>
 <p>El modelo ya dispone de:</p>
 <pre><code class="language-text">SYSUSER11_DET_CONTACTOS
   relacion actual y Anfitrion directo
@@ -841,7 +1369,7 @@ RETURNS
   PAGOS_PENDIENTES
   CODIGO_RESULTADO
   MENSAJE</code></pre>
-<h3 id="18-7-responsabilidad-de-add-sysuser10-sysuser11"><a class="heading-link" href="#18-7-responsabilidad-de-add-sysuser10-sysuser11" aria-label="Enlace a 18.7 Responsabilidad de ADD_SYSUSER10_SYSUSER11">#</a>18.7 Responsabilidad de ADD_SYSUSER10_SYSUSER11</h3>
+<h3 id="18-7-responsabilidad-de-add-sysuser10-sysuser11">18.7 Responsabilidad de ADD_SYSUSER10_SYSUSER11</h3>
 <p>Cuando el Invitado pertenece a otro Anfitrion, el SP debe:</p>
 <ol>
 <li>Recuperar la relacion y el Anfitrion actuales.</li>
@@ -858,7 +1386,7 @@ RETURNS
 <li>Devolver <code>MENSAJE = &#x27;OK&#x27;</code>.</li>
 <li>Ejecutar todo en una sola transaccion.</li>
 </ol>
-<h3 id="18-8-codigos-y-mensajes"><a class="heading-link" href="#18-8-codigos-y-mensajes" aria-label="Enlace a 18.8 Codigos y mensajes">#</a>18.8 Codigos y mensajes</h3>
+<h3 id="18-8-codigos-y-mensajes">18.8 Codigos y mensajes</h3>
 <p>Codigos conceptuales:</p>
 <pre><code class="language-text">OK
 SALDO_PENDIENTE
@@ -874,7 +1402,7 @@ Anfitrion actual. Liquida tu saldo y vuelve a aceptar la invitacion.</code></pre
 <pre><code class="language-text">No puedes cambiar de Anfitrion mientras tengas compras, pagos o gestiones
 pendientes. Resuelve tus operaciones y vuelve a aceptar la invitacion.</code></pre>
 <p>Flutter deberia decidir por un codigo estable, no comparando el texto.</p>
-<h3 id="18-9-resultado-del-traslado"><a class="heading-link" href="#18-9-resultado-del-traslado" aria-label="Enlace a 18.9 Resultado del traslado">#</a>18.9 Resultado del traslado</h3>
+<h3 id="18-9-resultado-del-traslado">18.9 Resultado del traslado</h3>
 <pre><code class="language-text">Antes:
 
 A
@@ -893,7 +1421,7 @@ X
     ├── C
     └── D</code></pre>
 <p>A pierde la rama de B. X recibe la rama completa. B conserva sus clientes y toda su informacion comercial. El Anfitrion anterior no autoriza el cambio, pero puede recibir una notificacion informativa despues de completarse.</p>
-<h3 id="18-10-concurrencia"><a class="heading-link" href="#18-10-concurrencia" aria-label="Enlace a 18.10 Concurrencia">#</a>18.10 Concurrencia</h3>
+<h3 id="18-10-concurrencia">18.10 Concurrencia</h3>
 <p>La validacion y el cambio deben ocurrir en la misma transaccion. Antes del <code>UPDATE</code> se vuelve a comprobar:</p>
 <ol>
 <li>El Invitado sigue con el Anfitrion detectado.</li>
@@ -904,7 +1432,7 @@ X
 <li>No existe otro traslado concurrente.</li>
 </ol>
 <p>Las restricciones unicas permanecen como ultima defensa.</p>
-<h3 id="18-11-regla-final"><a class="heading-link" href="#18-11-regla-final" aria-label="Enlace a 18.11 Regla final">#</a>18.11 Regla final</h3>
+<h3 id="18-11-regla-final">18.11 Regla final</h3>
 <pre><code class="language-text">Usuario libre de obligaciones
   -&gt; cambia de red automaticamente
 
@@ -918,13 +1446,14 @@ Anfitrion anterior
 Usuario trasladado
   -&gt; conserva cuentas, credito, saldos, compras, pagos e historial
   -&gt; conserva todos sus clientes y descendientes</code></pre>
-<h2 id="19-resumen-final"><a class="heading-link" href="#19-resumen-final" aria-label="Enlace a 19. Resumen final">#</a>19. Resumen final</h2>
+<h2 id="19-resumen-final">19. Resumen final</h2>
 <p>Saldify ya posee el modelo de datos necesario para una red de redes. Un usuario puede ser Invitado de un Anfitrion y, al mismo tiempo, Anfitrion de sus propios clientes.</p>
 <p>El traslado de una red no requiere copiar usuarios ni actualizar todos los descendientes. Solo requiere cambiar el padre directo del usuario que encabeza el subarbol, despues de validar que el nuevo Anfitrion no genere un ciclo.</p>
 <p>Actualmente, por seguridad, el procedimiento permite integrar redes solamente cuando el usuario invitado es raiz y no tiene otro padre. Falta modificar <code>ADD_SYSUSER10_SYSUSER11</code> para que un usuario perteneciente a otra red pueda aceptar la invitacion, cambiar de Anfitrion y conservar todos sus clientes y descendientes.</p>
-<p>Flutter ya consume el procedimiento y puede mantener su flujo actual siempre que la base conserve el mismo contrato de salida.</p></article>
-      <p class="footer">Generado desde ARCHITECTURE_RESUMEN_RED.md.</p>
-    </main>
-  </div>
+<p>Flutter ya consume el procedimiento y puede mantener su flujo actual siempre que la base conserve el mismo contrato de salida.</p>
+</div>
+    </section>
+  </main>
+  <script src="docu_shell.js" defer></script>
 </body>
 </html>

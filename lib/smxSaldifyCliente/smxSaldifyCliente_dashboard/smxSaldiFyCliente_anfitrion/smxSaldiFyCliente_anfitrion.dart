@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:venture_saldify/smxLayout/smxColors.dart';
 import 'package:venture_saldify/smxLayout/smxBackgrounds/saldify_circles_background.dart';
+import 'package:venture_saldify/smxSaldifyAssistant/smxSaldifyAssistant.dart';
 import 'package:venture_widgets/smxCallBaseStateful.dart';
 import 'package:venture_widgets/smxController/smxControllerSendData.dart';
 
@@ -77,7 +78,7 @@ class _SmxSaldiFyClienteAnfitrionView extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.all(14),
             child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Container(
                   width: 64,
@@ -187,7 +188,56 @@ class _SmxSaldiFyClienteAnfitrionView extends StatelessWidget {
               ],
             ),
           ),
+          Positioned(
+            right: 26,
+            top: 0,
+            bottom: 20,
+            child: Builder(
+              builder: (context) {
+                final openAssistant = SmxSaldifyAssistantScope.maybeOpenOf(
+                  context,
+                );
+                if (openAssistant == null) {
+                  return const SizedBox.shrink();
+                }
+
+                return _AnfitrionAssistantButton(onTap: openAssistant);
+              },
+            ),
+          ),
         ],
+      ),
+    );
+  }
+}
+
+class _AnfitrionAssistantButton extends StatelessWidget {
+  final VoidCallback onTap;
+
+  const _AnfitrionAssistantButton({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: 'Ayuda Saldify',
+      child: Material(
+        color: SmxColors.white,
+        shape: const CircleBorder(),
+        elevation: 6,
+        shadowColor: SmxColors.blackAlpha(.18),
+        child: InkWell(
+          customBorder: const CircleBorder(),
+          onTap: onTap,
+          child: const SizedBox(
+            width: 38,
+            height: 38,
+            child: Icon(
+              Icons.smart_toy_rounded,
+              color: SmxColors.brandPrimary,
+              size: 21,
+            ),
+          ),
+        ),
       ),
     );
   }

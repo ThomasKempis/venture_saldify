@@ -145,6 +145,8 @@ class _SmxSaldiFyClienteMetricasView extends StatelessWidget {
                   : 0,
               saldoEnDeuda:
                   hasMetricas && rstMetricas.getValue('SYSUSER12_DEUDOR') > 0,
+              comprasLabel: 'Compras',
+              pagosLabel: 'Pagos',
             );
           },
         ),

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:venture_saldify/smxLayout/smx_message_dialog.dart';
 import 'package:flutter/services.dart';
 import 'package:venture_saldify/smxApis/smxConstants.dart';
+import 'package:venture_saldify/smxLayout/smx_message_dialog.dart';
 import 'package:venture_widgets/smxShowDialog/smxShowDialogs.dart';
 
 import 'smxSaldiFy_invita_clientes_models.dart';
@@ -10,29 +10,14 @@ import 'smxSaldiFy_invita_service.dart';
 class SmxSaldifyInvitaCopy {
   const SmxSaldifyInvitaCopy._();
 
-  static Future<void> copyInvitadoRegistradoLink({
+  static Future<void> copyInvitacionLink({
     required BuildContext context,
-    required String uuidInvitado,
     bool closeContextOnSuccess = false,
   }) async {
-    if (uuidInvitado.trim().isEmpty) {
-      showSmxValidDialog(
-        context,
-        mensaje: 'El cliente no tiene UUID para generar invitacion.',
-      );
-      return;
-    }
-
     SmxSaldiFyInvitacionGenerada? invitacion;
 
     await showDialogWait(context, () async {
-      invitacion = await SmxSaldifyInvitaService.crearInvitacion(
-        controller: SmxConstants.controllerMain,
-        parametros: SmxSaldifyInvitacionParametros.invitadoRegistrado(
-          uuidAnfitrion: SmxConstants.controllerMain.getUuid(),
-          uuidInvitado: uuidInvitado,
-        ),
-      );
+      invitacion = await SmxSaldifyInvitaService.crearInvitacion();
     });
 
     final error = SmxConstants.controllerMain.jsonSend.getError();

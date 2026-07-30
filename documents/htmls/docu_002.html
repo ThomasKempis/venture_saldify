@@ -1,0 +1,975 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Saldify: propuesta comercial, potencial de mercado, modelos SaaS, white-label y alternativas de negociacion.">
+  <title>Saldify - Propuesta comercial</title>
+  <link rel="stylesheet" href="docu_shell.css">
+  <style>
+:root {
+      color-scheme: light;
+      --ink: #13283a;
+      --muted: #607386;
+      --brand: #146b54;
+      --brand-2: #0f5f8d;
+      --accent: #58d7a1;
+      --paper: rgba(255, 255, 255, .88);
+      --paper-strong: rgba(255, 255, 255, .96);
+      --line: rgba(255, 255, 255, .22);
+      --shadow: 0 24px 70px rgba(10, 37, 64, .22);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+      background:
+        radial-gradient(circle at 12% 18%, rgba(88, 215, 161, .34) 0 13rem, transparent 13.2rem),
+        radial-gradient(circle at 96% 3%, rgba(143, 205, 231, .38) 0 17rem, transparent 17.2rem),
+        radial-gradient(circle at 86% 92%, rgba(49, 125, 189, .42) 0 21rem, transparent 21.2rem),
+        linear-gradient(135deg, #115c2a 0%, #0d6267 48%, #0d4e8d 100%);
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .shell {
+      width: min(1120px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 34px 0 46px;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 22px;
+      align-items: center;
+      padding: 28px;
+      border: 1px solid var(--line);
+      border-radius: 26px;
+      background: rgba(255, 255, 255, .16);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+    }
+
+    .logo {
+      width: 92px;
+      height: 92px;
+      display: grid;
+      place-items: center;
+      border-radius: 24px;
+      background: var(--paper);
+      overflow: hidden;
+    }
+
+    .logo img {
+      width: 74px;
+      height: 74px;
+      object-fit: contain;
+    }
+
+    .eyebrow {
+      margin: 0 0 8px;
+      color: #9ff0c8;
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      color: #fff;
+      font-size: clamp(36px, 6vw, 64px);
+      line-height: 1;
+      font-weight: 900;
+    }
+
+    .lead {
+      max-width: 720px;
+      margin: 14px 0 0;
+      color: rgba(255, 255, 255, .82);
+      font-size: 17px;
+      line-height: 1.55;
+      font-weight: 650;
+    }
+
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 22px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      color: #fff;
+      background: rgba(255, 255, 255, .14);
+      border: 1px solid rgba(255, 255, 255, .18);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--accent);
+    }
+
+    .section-head {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 20px;
+      margin: 34px 0 16px;
+      color: #fff;
+    }
+
+    .section-head h2 {
+      margin: 0;
+      font-size: 25px;
+      font-weight: 900;
+    }
+
+    .section-head p {
+      margin: 0;
+      color: rgba(255, 255, 255, .7);
+      font-size: 13px;
+      font-weight: 750;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .card {
+      position: relative;
+      min-height: 232px;
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+      border-radius: 22px;
+      background: var(--paper-strong);
+      border: 1px solid rgba(255, 255, 255, .5);
+      box-shadow: 0 18px 44px rgba(8, 37, 64, .18);
+      overflow: hidden;
+      transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      background: #fff;
+      box-shadow: 0 22px 58px rgba(8, 37, 64, .24);
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: auto -28px -42px auto;
+      width: 142px;
+      height: 142px;
+      border-radius: 999px;
+      background: color-mix(in srgb, var(--tone) 22%, transparent);
+    }
+
+    .tag {
+      width: fit-content;
+      padding: 7px 10px;
+      border-radius: 999px;
+      color: color-mix(in srgb, var(--tone) 80%, #15283a);
+      background: color-mix(in srgb, var(--tone) 14%, white);
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .card h3 {
+      margin: 18px 0 10px;
+      font-size: 22px;
+      line-height: 1.12;
+      color: var(--ink);
+      font-weight: 900;
+    }
+
+    .card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.45;
+      font-weight: 650;
+    }
+
+    .open {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: auto;
+      padding-top: 24px;
+      color: color-mix(in srgb, var(--tone) 74%, #102b3d);
+      font-size: 14px;
+      font-weight: 900;
+    }
+
+    .arrow {
+      width: 24px;
+      height: 24px;
+      display: grid;
+      place-items: center;
+      border-radius: 999px;
+      color: #fff;
+      background: var(--tone);
+    }
+
+    .footer {
+      margin-top: 24px;
+      padding: 18px 20px;
+      color: rgba(255, 255, 255, .78);
+      border: 1px solid rgba(255, 255, 255, .16);
+      border-radius: 18px;
+      background: rgba(255, 255, 255, .1);
+      font-size: 13px;
+      font-weight: 700;
+      backdrop-filter: blur(14px);
+    }
+
+    @media (max-width: 860px) {
+      .grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 620px) {
+      .shell {
+        width: min(100% - 22px, 1120px);
+        padding-top: 18px;
+      }
+
+      .hero {
+        grid-template-columns: 1fr;
+        padding: 22px;
+      }
+
+      .logo {
+        width: 76px;
+        height: 76px;
+        border-radius: 20px;
+      }
+
+      .logo img {
+        width: 62px;
+        height: 62px;
+      }
+
+      .section-head {
+        display: block;
+      }
+
+      .section-head p {
+        margin-top: 6px;
+      }
+
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    body.docu-shell-ready {
+      padding-top: 78px;
+    }
+
+    body.docu-shell-ready.docu-native-cover {
+      background:
+        radial-gradient(circle at 12% 18%, rgba(88, 215, 161, .34) 0 13rem, transparent 13.2rem),
+        radial-gradient(circle at 96% 3%, rgba(143, 205, 231, .38) 0 17rem, transparent 17.2rem),
+        radial-gradient(circle at 86% 92%, rgba(49, 125, 189, .42) 0 21rem, transparent 21.2rem),
+        linear-gradient(135deg, #115c2a 0%, #0d6267 48%, #0d4e8d 100%) !important;
+    }
+
+    body.docu-shell-ready.docu-native-cover .shell {
+      width: min(1120px, calc(100% - 32px)) !important;
+      max-width: 1120px !important;
+      margin: 0 auto !important;
+      padding: 34px 0 46px !important;
+    }
+
+    body.docu-shell-ready.docu-native-cover .hero {
+      display: grid !important;
+      grid-template-columns: auto 1fr !important;
+      gap: 22px !important;
+      align-items: center !important;
+      width: 100% !important;
+      margin: 0 !important;
+      padding: 28px !important;
+      border: 1px solid var(--line) !important;
+      border-radius: 26px !important;
+      background: rgba(255, 255, 255, .16) !important;
+      box-shadow: var(--shadow) !important;
+      backdrop-filter: blur(18px);
+    }
+
+    body.docu-shell-ready.docu-native-cover .hero .eyebrow {
+      margin: 0 0 8px !important;
+      color: #9ff0c8 !important;
+      font-size: 14px !important;
+      font-weight: 800 !important;
+      letter-spacing: .08em !important;
+      text-transform: uppercase !important;
+    }
+
+    body.docu-shell-ready.docu-native-cover .hero h1 {
+      margin: 0 !important;
+      color: #fff !important;
+      font-size: clamp(36px, 6vw, 64px) !important;
+      line-height: 1 !important;
+      font-weight: 900 !important;
+    }
+
+    body.docu-shell-ready.docu-native-cover .hero .lead {
+      max-width: 720px !important;
+      margin: 14px 0 0 !important;
+      color: rgba(255, 255, 255, .82) !important;
+      font-size: 17px !important;
+      line-height: 1.55 !important;
+      font-weight: 650 !important;
+    }
+
+    body.docu-shell-ready.docu-native-cover .hero .logo {
+      width: 92px !important;
+      height: 92px !important;
+      border-radius: 24px !important;
+      background: var(--paper) !important;
+    }
+
+    body.docu-shell-ready.docu-native-cover .hero .logo img {
+      width: 100% !important;
+      height: 100% !important;
+      object-fit: cover !important;
+    }
+
+    .doc-card {
+      width: 100%;
+      margin: 0;
+      padding: clamp(34px, 5vw, 64px);
+      border-radius: 26px;
+      background: var(--paper-strong);
+      border: 1px solid rgba(255, 255, 255, .5);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .doc-card-gap {
+      height: 48px;
+    }
+
+    .doc-card-inner {
+      width: 100%;
+      margin: 0 auto;
+      padding: 0 32px;
+    }
+
+    .doc-card h2 {
+      margin: 42px 0 14px;
+      color: var(--brand);
+      font-size: clamp(26px, 3.2vw, 38px);
+      line-height: 1.16;
+      font-weight: 900;
+    }
+
+    .doc-card > h2:first-child,
+    .doc-card .chapter:first-child h2:first-child {
+      margin-top: 0;
+    }
+
+    .doc-card h1 {
+      margin: 0 0 24px;
+      color: var(--ink);
+      font-size: clamp(34px, 5vw, 56px);
+      line-height: 1.08;
+      font-weight: 900;
+    }
+
+    .doc-card h3 {
+      margin: 30px 0 10px;
+      color: var(--brand-2);
+      font-size: 22px;
+      line-height: 1.2;
+      font-weight: 900;
+    }
+
+    .doc-card p,
+    .doc-card li {
+      color: var(--ink);
+      font-size: 17px;
+      line-height: 1.58;
+      font-weight: 550;
+    }
+
+    .doc-card p {
+      max-width: none;
+      margin: 0 0 16px;
+    }
+
+    .doc-card ul,
+    .doc-card ol {
+      max-width: none;
+      margin: 12px 0 26px;
+      padding-left: 24px;
+    }
+
+    .doc-card p,
+    .doc-card ul,
+    .doc-card ol,
+    .doc-card pre,
+    .doc-card table {
+      margin-left: 28px;
+    }
+
+    .doc-card h3 {
+      margin-left: 28px;
+    }
+
+    .doc-card li::marker {
+      color: var(--brand);
+      font-weight: 900;
+    }
+
+    .doc-card .chapter {
+      padding: 58px 0;
+      border-top: 1px solid rgba(19, 40, 58, .12);
+    }
+
+    .doc-card .chapter:first-of-type {
+      margin-top: 34px;
+    }
+
+    .chapter-kicker {
+      margin-bottom: 10px;
+      color: #1fb77d;
+      font-size: 13px;
+      font-weight: 900;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+
+    .section-rule {
+      border: 0;
+      border-top: 1px solid rgba(19, 40, 58, .12);
+      margin: 34px 0 0;
+    }
+
+    .doc-card pre {
+      max-width: 860px;
+      margin: 26px 0;
+      padding: 22px;
+      border-radius: 18px;
+      color: #eafff6;
+      background: #103949;
+      overflow: auto;
+      white-space: pre-wrap;
+    }
+
+    .doc-card code {
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: .92em;
+    }
+
+    .doc-card blockquote {
+      max-width: 900px;
+      margin: 30px 0;
+      padding: 24px 28px;
+      border-left: 6px solid var(--accent);
+      border-radius: 18px;
+      color: var(--ink);
+      background: rgba(88, 215, 161, .13);
+      font-size: 22px;
+      line-height: 1.5;
+      font-weight: 800;
+    }
+
+    .table-wrap {
+      overflow: auto;
+      margin: 26px 0;
+    }
+
+    .doc-card table {
+      width: 100%;
+      min-width: 720px;
+      border-collapse: collapse;
+    }
+
+    .doc-card th,
+    .doc-card td {
+      padding: 14px 16px;
+      text-align: left;
+      vertical-align: top;
+      border-bottom: 1px solid rgba(19, 40, 58, .12);
+    }
+
+    .doc-card th {
+      color: #fff;
+      background: var(--brand);
+      font-size: 13px;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    @media (max-width: 620px) {
+      body.docu-shell-ready.docu-native-cover .shell {
+        width: min(100% - 22px, 1120px) !important;
+        padding-top: 18px !important;
+      }
+
+      body.docu-shell-ready.docu-native-cover .hero {
+        grid-template-columns: 1fr !important;
+        padding: 22px !important;
+      }
+
+      body.docu-shell-ready.docu-native-cover .hero .logo {
+        width: 76px !important;
+        height: 76px !important;
+        border-radius: 20px !important;
+      }
+
+      body.docu-shell-ready.docu-native-cover .hero .logo img {
+        width: 100% !important;
+        height: 100% !important;
+      }
+
+      .doc-card {
+        padding: 26px 20px;
+      }
+
+      .doc-card-inner {
+        padding: 0 4px;
+      }
+
+      .doc-card-gap {
+        height: 32px;
+      }
+
+      .doc-card p,
+      .doc-card li {
+        font-size: 16px;
+      }
+    }
+
+    @media print {
+      body.docu-shell-ready.docu-native-cover .shell {
+        width: 100% !important;
+        max-width: none !important;
+        padding: 18mm 12mm !important;
+      }
+
+      body.docu-shell-ready.docu-native-cover .hero {
+        margin: 0 0 16mm !important;
+        padding: 18mm !important;
+        break-inside: avoid;
+      }
+
+      .doc-card-gap {
+        display: none !important;
+      }
+
+      .doc-card {
+        margin: 0 !important;
+        padding: 18mm !important;
+        border-radius: 14px !important;
+        box-shadow: none !important;
+        break-inside: auto;
+      }
+
+      .doc-card-inner {
+        width: 100% !important;
+        max-width: none !important;
+        margin: 0 !important;
+        padding: 0 8mm !important;
+      }
+
+      .doc-card p,
+      .doc-card li {
+        font-size: 12pt !important;
+        line-height: 1.55 !important;
+      }
+
+      .doc-card h1 {
+        font-size: 28pt !important;
+      }
+
+      .doc-card h2 {
+        font-size: 22pt !important;
+      }
+    }
+
+  </style>
+</head>
+<body class="docu-shell-boot docu-native-cover">
+  <main class="shell">
+    <section class="hero" aria-labelledby="titulo">
+      <div class="logo">
+        <img src="images/docu_002_propuesta_comercial_crop.png" alt="Propuesta comercial Saldify">
+      </div>
+      <div>
+        <p class="lead">Una propuesta comercial para posicionar Saldify como producto SaaS, white-label o alianza estrategica.</p>
+        <div class="meta">
+          <span class="pill"><span class="dot"></span>SaaS</span>
+          <span class="pill"><span class="dot"></span>White-label</span>
+          <span class="pill"><span class="dot"></span>Alianzas</span>
+          <span class="pill"><span class="dot"></span>Revenue share</span>
+        </div>
+      </div>
+    </section>
+
+    <div class="doc-card-gap" aria-hidden="true"></div>
+
+    <section class="doc-card" aria-label="Contenido de Propuesta comercial">
+      <div class="doc-card-inner">
+<h2>1. Resumen Ejecutivo</h2>
+<p>SaldiFY es una plataforma digital para administrar redes comerciales de anfitriones, vendedores, clientes e invitados, con control de credito, compras, pagos, carrito, catalogo, historial, invitaciones y seguimiento operativo. El producto fue desarrollado con apoyo de inteligencia artificial aplicada al analisis funcional, diseno de interfaz, generacion asistida de codigo, documentacion y validacion de flujos. La solucion no parte de una plantilla generica: se construyo sobre una plataforma propietaria Venture/SMX con mas de 17 anos de evolucion, actualmente llevada a Flutter y conectada a un servidor propio de servicios web. El objetivo comercial de SaldiFY es ofrecer a negocios, distribuidores, mayoristas, vendedores independientes y redes comerciales una herramienta para organizar su operacion diaria de credito y ventas sin depender de hojas de calculo, mensajes sueltos o controles manuales.</p>
+<h2>2. Potencial Comercial</h2>
+<p>SaldiFY atiende una necesidad muy comun en Mexico y Latinoamerica: redes de venta, credito y cobranza que operan de manera informal o semiestructurada. Muchos negocios venden a credito, trabajan con distribuidores, revendedores, clientes frecuentes o grupos de vendedores externos. Sin embargo, suelen llevar el control en libretas, Excel, WhatsApp o sistemas administrativos que no entienden la relacion de red. SaldiFY esta pensado para ese espacio:</p>
+<ul>
+<li>un anfitrion puede administrar clientes;</li>
+<li>un cliente puede participar como invitado;</li>
+<li>ese mismo cliente puede convertirse en anfitrion de su propia red;</li>
+<li>una red puede crecer por invitaciones;</li>
+<li>un anfitrion/cliente puede cambiar de red conservando su arbol descendente;</li>
+<li>el credito, las compras, pagos, carrito, productos e historial se mantienen</li>
+</ul>
+<p>dentro de la relacion comercial correspondiente. Esto abre potencial para modelos SaaS de bajo costo mensual, white-label para empresas de software, integracion a portafolios existentes o comercializacion por alianzas con despachos, distribuidores, comercios, redes de venta directa y proveedores de sistemas administrativos.</p>
+<h2>3. Diferenciador Frente al Mercado</h2>
+<p>Existen productos de punto de venta, ERP, CRM, cobranza, catalogos digitales, carritos y sistemas de facturacion. Sin embargo, SaldiFY combina en una sola logica varios elementos que normalmente estan separados:</p>
+<ul>
+<li>red comercial de anfitrion, cliente e invitado;</li>
+<li>usuario con doble rol: cliente de una red y anfitrion de otra;</li>
+<li>arbol de vendedores/clientes con descendientes;</li>
+<li>traslado de red conservando el subarbol;</li>
+<li>credito asignado por relacion;</li>
+<li>compras y pagos ligados a la relacion comercial;</li>
+<li>compra manual, compra por carrito y catalogo;</li>
+<li>catalogo propio, libre o heredado por decision del anfitrion/cliente;</li>
+<li>reputacion visual por estrellas en el dashboard;</li>
+<li>invitaciones por codigo o enlace;</li>
+<li>historial de movimientos;</li>
+<li>administracion por anfitrion o por invitado segun el estado de la relacion.</li>
+</ul>
+<p>El valor principal no esta solo en las pantallas, sino en la combinacion de:</p>
+<pre><code>red comercial + credito + pagos + compras + catalogo + invitaciones + operaciones</code></pre>
+<p>Esa combinacion hace que SaldiFY pueda funcionar como producto independiente o como modulo especializado dentro del portafolio de una empresa de software.</p>
+<h2>4. Valores Diferenciales del Producto</h2>
+<h3>4.1 Compra Multimodal</h3>
+<p>SaldiFY no obliga al usuario a comprar de una sola forma. La plataforma permite operar distintos estilos de compra segun la realidad del negocio:</p>
+<ul>
+<li>compra manual por requerimiento del invitado o cliente;</li>
+<li>captura de concepto, cantidad e importe cuando el cliente ya sabe lo que</li>
+</ul>
+<p>necesita y cuanto cuesta;</p>
+<ul>
+<li>posibilidad de adjuntar imagen o evidencia;</li>
+<li>compra por carrito cuando existe catalogo de productos;</li>
+<li>compra asistida por el anfitrion cuando el negocio administra la operacion</li>
+</ul>
+<p>por cuenta del cliente. Esto permite atender negocios estructurados y tambien operaciones reales donde la venta inicia por una solicitud libre, una foto, un mensaje o un acuerdo directo entre cliente y anfitrion.</p>
+<h3>4.2 Catalogo Propio, Libre o Heredado</h3>
+<p>El catalogo no es una imposicion vertical. Cada anfitrion puede operar de tres formas:</p>
+<ul>
+<li>sin catalogo, usando compra manual/libre;</li>
+<li>con catalogo propio;</li>
+<li>heredando el catalogo de su anfitrion superior.</li>
+</ul>
+<p>Lo mas importante es que un cliente que tambien actua como anfitrion puede decidir si hereda o no el catalogo de su anfitrion. Si decide heredarlo, ese catalogo puede propagarse por su red descendente, siempre que los siguientes anfitriones tambien lo adopten. Esto convierte el catalogo en una herramienta de expansion comercial. Un mayorista puede ofrecer productos; un distribuidor puede decidir adoptar ese catalogo; y su red puede vender usando la misma base de productos sin duplicar captura ni perder trazabilidad.</p>
+<h3>4.3 Red Democratica y No Impositiva</h3>
+<p>La red de SaldiFY esta disenada para que el usuario conserve autonomia. El anfitrion superior no condiciona de forma absoluta al cliente/anfitrion que esta debajo. Un cliente puede:</p>
+<ul>
+<li>pertenecer a una red como invitado;</li>
+<li>operar su propia red como anfitrion;</li>
+<li>decidir si usa catalogo propio, libre o heredado;</li>
+<li>decidir si cambia a otra red cuando la operacion comercial lo permite;</li>
+<li>conservar su arbol descendente cuando se mueve a otra red.</li>
+</ul>
+<p>Esto hace que la red sea mas cercana a una estructura comercial viva que a una jerarquia rigida. La decision final sobre su operacion la conserva el cliente/anfitrion, no necesariamente el anfitrion principal.</p>
+<h3>4.4 Ranking y Valorizacion del Anfitrion</h3>
+<p>SaldiFY incorpora una logica de valorizacion visual del anfitrion mediante estrellas en el dashboard. La idea es similar a una reputacion comercial: entre mas fuerte sea la red y mejor sea su comportamiento operativo, mayor sera la valorizacion del anfitrion. Los indicadores que pueden alimentar esa valorizacion incluyen:</p>
+<ul>
+<li>tamano de la red;</li>
+<li>crecimiento de clientes;</li>
+<li>credito total asignado;</li>
+<li>volumen de compras;</li>
+<li>volumen de pagos;</li>
+<li>saldo y disponible;</li>
+<li>comportamiento de cobranza;</li>
+<li>calidad de cartera;</li>
+<li>actividad operativa de la red.</li>
+</ul>
+<p>La app puede calcular estos indicadores automaticamente a partir de las metricas de la red. Esto convierte el dashboard en algo mas que una pantalla administrativa: tambien funciona como indicador de reputacion, solidez y potencial comercial del anfitrion.</p>
+<h2>5. Plataforma Tecnologica</h2>
+<p>SaldiFY reutiliza y extiende una plataforma propietaria Venture/SMX con mas de 17 anos de evolucion. Esta plataforma funciona como base de arquitectura, comunicacion, datos y metodologia. La capa actual usa Flutter para la experiencia visual y componentes moviles/web, pero no se comporta como una app Flutter generica. Trabaja sobre una metodologia propia basada en:</p>
+<ul>
+<li>`SmxController`;</li>
+<li>`SmxRowSet`;</li>
+<li>aliases de consulta;</li>
+<li>rowsets transaccionales;</li>
+<li>webservices propietarios;</li>
+<li>estructura de base de datos con nomenclatura `SYSUSERxx`;</li>
+<li>stored procedures y queries especializadas;</li>
+<li>widgets ligados directamente a campos del rowset;</li>
+<li>orquestacion por JSON de `SmxRowSet`.</li>
+</ul>
+<p>La base de datos conserva la nomenclatura, reglas y estructura. El JSON del `SmxRowSet` opera como orquestador entre la app, los widgets, los controladores, el servidor de servicios web y la base de datos. Arquitectura conceptual:</p>
+<pre><code>Base de datos
+  -&gt; tablas SYSUSERxx / QRY_ / ADD_ / UPDATE_
+  -&gt; reglas de negocio y rowsets
+
+Servidor propietario de servicios web
+  -&gt; recibe solicitudes
+  -&gt; ejecuta consultas/transacciones
+  -&gt; devuelve JSON de SmxRowSet
+
+Flutter / SaldiFY
+  -&gt; SmxController
+  -&gt; SmxRowSet
+  -&gt; widgets SMX
+  -&gt; pantallas, flujos y experiencia de usuario</code></pre>
+<p>Esta arquitectura reduce la duplicacion de modelos, evita resolver reglas complejas en la interfaz y permite que la base sea la fuente principal de verdad.</p>
+<h2>6. Valor Agregado de Haber Sido Desarrollado con IA</h2>
+<p>SaldiFY se desarrollo con asistencia de inteligencia artificial en distintas fases del proceso:</p>
+<ul>
+<li>conceptualizacion de flujos anfitrion/cliente;</li>
+<li>exploracion de UX y diseno de interfaces;</li>
+<li>creacion de mockups iniciales;</li>
+<li>implementacion asistida de pantallas;</li>
+<li>revision de consistencia entre controladores, rowsets y widgets;</li>
+<li>documentacion tecnica y funcional;</li>
+<li>analisis de reglas de red comercial;</li>
+<li>depuracion de escenarios de invitacion, credito, pagos y catalogo;</li>
+<li>generacion de documentacion para asistente interno de ayuda.</li>
+</ul>
+<p>La IA no reemplazo la plataforma propietaria ni la experiencia de negocio. Su valor fue acelerar el analisis, reducir iteraciones, documentar decisiones y ayudar a convertir ideas funcionales en codigo y arquitectura. El resultado es un producto construido en aproximadamente mes y medio, pero con un esfuerzo equivalente considerablemente mayor si se hubiera desarrollado de forma individual, manual, con diseno, pruebas, control de calidad y documentacion completa.</p>
+<h2>7. Alcance Funcional Actual</h2>
+<p>SaldiFY contempla los siguientes modulos y capacidades:</p>
+<ul>
+<li>logon y acceso por Google;</li>
+<li>modo anfitrion;</li>
+<li>modo invitado/cliente;</li>
+<li>dashboard anfitrion;</li>
+<li>dashboard cliente;</li>
+<li>perfil anfitrion/cliente;</li>
+<li>invitaciones por codigo o enlace;</li>
+<li>clientes activos;</li>
+<li>clientes pendientes;</li>
+<li>clientes archivados;</li>
+<li>red de venta / arbol de invitados;</li>
+<li>credito por relacion;</li>
+<li>plan de pago y corte;</li>
+<li>compras manuales;</li>
+<li>compras por carrito;</li>
+<li>solicitud libre con concepto, importe y evidencia;</li>
+<li>pagos;</li>
+<li>confirmacion y rechazo de movimientos;</li>
+<li>historial;</li>
+<li>catalogo de productos;</li>
+<li>catalogo propio o heredado;</li>
+<li>propagacion de catalogo por red cuando el anfitrion/cliente decide heredarlo;</li>
+<li>ranking/valorizacion visual por estrellas;</li>
+<li>metricas de credito, compras, pagos, saldo y disponible;</li>
+<li>documentacion de pantallas para asistente de IA;</li>
+<li>arquitectura documentada para continuidad tecnica.</li>
+</ul>
+<h2>8. Modelo SaaS Potencial</h2>
+<p>Para usuario final, el precio de mercado mas razonable en Mexico estaria en un rango bajo de suscripcion mensual. El cliente invitado deberia entrar gratis para no frenar la viralidad de la red. Modelo sugerido:</p>
+<pre><code>Invitado / cliente final: gratis
+Anfitrion basico: $99 MXN / mes
+Anfitrion Pro: $149 MXN / mes
+Negocio / multiusuario: $249 - $399 MXN / mes
+White-label / empresa: precio especial o revenue share</code></pre>
+<p>La estrategia recomendada es cobrar al anfitrion, porque es quien obtiene el beneficio administrativo directo: control de clientes, credito, compras, pagos, carrito, catalogo e historial.</p>
+<h2>9. Punto de Equilibrio Comercial</h2>
+<p>Con un precio principal de $149 MXN mensuales por anfitrion, el punto de equilibrio depende del costo de adquisicion de cliente, soporte, servidores, equipo tecnico y marketing. Estimacion operativa:</p>
+<pre><code>Precio mensual por anfitrion: $149 MXN
+Costo variable estimado: $15 - $30 MXN
+Margen bruto estimado: $119 - $134 MXN por anfitrion</code></pre>
+<p>Clientes pagos requeridos para equilibrio mensual:</p>
+<table><thead><tr><th>Gasto fijo mensual</th><th>Anfitriones pagos aproximados</th></tr></thead><tbody>
+<tr><td>$250,000 MXN</td><td>2,000</td></tr>
+<tr><td>$400,000 MXN</td><td>3,200</td></tr>
+<tr><td>$600,000 MXN</td><td>4,800</td></tr>
+<tr><td>$1,000,000 MXN</td><td>8,000</td></tr>
+</tbody></table>
+<p>Si el costo de adquisicion por anfitrion se mantiene entre $100 y $300 MXN, el negocio puede recuperar la inversion comercial rapidamente y reinvertir su propio flujo. Si el costo de adquisicion sube por encima de $800 MXN, la expansion requeriria mayor capital y un ciclo de recuperacion mas largo.</p>
+<h2>10. Alternativas Comerciales</h2>
+<p>Las siguientes alternativas consideran un escenario en el que una empresa desea integrar SaldiFY a su portafolio de productos con su imagen, logo, paleta de colores y comunicacion comercial. Todas las opciones deben formalizarse por contrato.</p>
+<h3>Opcion 1: Sociedad Comercial 60/40</h3>
+<p>Modelo recomendado cuando el socio comercial quiere impulsarlo activamente como producto propio dentro de su portafolio. Condiciones propuestas:</p>
+<ul>
+<li>El producto se publica con marca, imagen, logo y paleta del socio comercial.</li>
+<li>Rebranding inicial: $100,000 MXN + IVA.</li>
+<li>Reparto comercial: 60% socio comercial / 40% desarrollador.</li>
+<li>Base de calculo: ingresos efectivamente cobrados menos IVA.</li>
+<li>No se descuentan gastos internos de ventas, nomina, publicidad,</li>
+</ul>
+<p>administracion ni soporte comercial del socio, salvo acuerdo expreso.</p>
+<ul>
+<li>El desarrollador conserva la propiedad tecnologica del producto base.</li>
+<li>El socio comercial opera ventas, facturacion, cobranza y atencion comercial.</li>
+<li>El desarrollador mantiene soporte tecnico del producto base.</li>
+<li>Cuota mensual de infraestructura/plataforma: $15,000 a $25,000 MXN + IVA,</li>
+</ul>
+<p>mientras el producto opere sobre servidores y webservices Venture/SMX del desarrollador.</p>
+<ul>
+<li>Modificaciones nuevas, integraciones o funcionalidades no existentes se</li>
+</ul>
+<p>cotizan aparte. Recomendacion: Si se otorga exclusividad, debe existir un minimo garantizado de ventas o de ingresos. Si no se cumple, la exclusividad se pierde.</p>
+<h3>Opcion 2: Venta o Licencia Amplia del Producto</h3>
+<p>Modelo recomendado cuando el comprador quiere adquirir el producto con mayor control comercial, sin depender de un reparto mensual. Rango propuesto:</p>
+<pre><code>$650,000 a $800,000 MXN + IVA</code></pre>
+<p>Condiciones sugeridas:</p>
+<ul>
+<li>Incluye rebranding inicial basico.</li>
+<li>Incluye entrega del producto para integrarlo al portafolio comercial.</li>
+<li>Incluye transferencia tecnica limitada.</li>
+<li>Incluye soporte tecnico inicial por 30 a 60 dias.</li>
+<li>Cuota mensual de infraestructura/plataforma: $15,000 a $25,000 MXN + IVA,</li>
+</ul>
+<p>mientras el producto opere sobre servidores y webservices Venture/SMX del desarrollador.</p>
+<ul>
+<li>Modificaciones nuevas se cotizan aparte.</li>
+<li>La propiedad del core Venture/SMX, librerias propietarias o componentes base</li>
+</ul>
+<p>no se transfiere salvo contrato especifico. Nota: Si el comprador solicita propiedad total, exclusividad, derecho de sublicenciar o control completo del codigo fuente como activo propio, el valor debe subir por encima de este rango.</p>
+<h3>Opcion 3: White-label de Entrada + Revenue Share 80/20</h3>
+<p>Modelo recomendado para reducir la barrera de entrada del socio comercial sin regalar el producto. Condiciones propuestas:</p>
+<ul>
+<li>Licencia white-label inicial: $200,000 MXN + IVA.</li>
+<li>Incluye marca, logo, paleta de colores y despliegue inicial.</li>
+<li>Reparto comercial: 80% socio comercial / 20% desarrollador.</li>
+<li>Base de calculo: ingresos efectivamente cobrados menos IVA.</li>
+<li>El desarrollador conserva la propiedad del codigo y producto base.</li>
+<li>Cuota mensual de infraestructura/plataforma: $15,000 a $25,000 MXN + IVA,</li>
+</ul>
+<p>mientras el producto opere sobre servidores y webservices Venture/SMX del desarrollador.</p>
+<ul>
+<li>Modificaciones nuevas se cotizan aparte.</li>
+<li>Soporte comercial y atencion al cliente final quedan a cargo del socio</li>
+</ul>
+<p>comercial, salvo acuerdo distinto. Recomendacion: Esta opcion no debe incluir exclusividad libre. Si el socio comercial pide exclusividad, debe existir minimo garantizado mensual o anual. Si no se cumple, la licencia puede continuar, pero sin exclusividad.</p>
+<h2>11. Condiciones Comunes Recomendadas</h2>
+<p>Para cualquiera de las opciones anteriores, se recomienda establecer:</p>
+<ol>
+<li>Que se entiende por ingresos cobrados.</li>
+<li>Que impuestos se excluyen antes de calcular porcentajes.</li>
+<li>Que devoluciones o cancelaciones se pueden descontar.</li>
+<li>Si las comisiones de pasarela de pago se descuentan o no.</li>
+<li>Quien factura al cliente final.</li>
+<li>Quien da soporte comercial.</li>
+<li>Quien da soporte tecnico.</li>
+<li>Quien paga infraestructura.</li>
+<li>Que cambios estan incluidos y cuales se cotizan aparte.</li>
+<li>Si existe exclusividad.</li>
+<li>En que territorio o segmento aplica la exclusividad.</li>
+<li>Que minimo de ventas mantiene la exclusividad.</li>
+<li>Si el socio puede sublicenciar.</li>
+<li>Si puede venderlo como activo propio.</li>
+<li>Que ocurre al terminar el contrato.</li>
+</ol>
+<p>Regla recomendada para porcentajes:</p>
+<pre><code>Los porcentajes se calculan sobre ingresos efectivamente cobrados y conciliados,
+menos IVA, devoluciones y, si se acuerda, comisiones directas de pasarela de
+pago.</code></pre>
+<p>No se recomienda calcular porcentajes sobre utilidad neta si no existe una definicion contable muy estricta y auditable.</p>
+<h2>12. Cuota Mensual de Infraestructura y Plataforma</h2>
+<p>La cuota mensual de infraestructura es independiente del precio de venta, licencia, rebranding, revenue share, soporte comercial o desarrollos nuevos. Esta cuota aplica cuando SaldiFY opera sobre la infraestructura propietaria Venture/SMX del desarrollador. Conceptos incluidos:</p>
+<ul>
+<li>servidor propietario de servicios web;</li>
+<li>operacion de webservices Venture/SMX;</li>
+<li>conexion y disponibilidad de base de datos;</li>
+<li>administracion tecnica basica del ambiente;</li>
+<li>almacenamiento operativo de datos e imagenes/evidencias dentro del uso</li>
+</ul>
+<p>normal;</p>
+<ul>
+<li>respaldos basicos;</li>
+<li>monitoreo operativo inicial;</li>
+<li>certificados, configuracion y continuidad tecnica del servicio.</li>
+</ul>
+<p>Rango sugerido inicial:</p>
+<pre><code>$15,000 a $25,000 MXN + IVA mensuales</code></pre>
+<p>Este rango corresponde a una operacion inicial o moderada. Si el producto escala en usuarios, almacenamiento, transacciones, imagenes, respaldos, disponibilidad o ambientes separados, la cuota debe ajustarse por volumen. Escalamiento recomendado:</p>
+<ul>
+<li>ambiente inicial: $15,000 a $25,000 MXN + IVA mensuales;</li>
+<li>ambiente con mayor uso o mas clientes: cotizacion por consumo y capacidad;</li>
+<li>alta disponibilidad, replicas, respaldos avanzados o ambientes separados:</li>
+</ul>
+<p>cotizacion adicional;</p>
+<ul>
+<li>migracion a infraestructura del socio comercial: cotizacion independiente.</li>
+</ul>
+<p>Si el socio comercial decide operar SaldiFY en su propia infraestructura, la cuota mensual de plataforma puede eliminarse, pero la instalacion, migracion, configuracion, pruebas, documentacion y transferencia tecnica deben cotizarse por separado.</p>
+<h2>13. Exclusividad</h2>
+<p>La exclusividad aumenta el valor comercial del acuerdo porque limita la capacidad del desarrollador de vender, licenciar o explotar el producto con otros socios. Por esa razon, una exclusividad debe incluir:</p>
+<ul>
+<li>periodo definido;</li>
+<li>territorio definido;</li>
+<li>segmento definido;</li>
+<li>minimo garantizado;</li>
+<li>reportes de ventas;</li>
+<li>derecho de auditoria;</li>
+<li>perdida automatica de exclusividad si no se cumple el minimo.</li>
+</ul>
+<p>Ejemplo:</p>
+<pre><code>Exclusividad comercial por Mexico durante 12 meses, condicionada a un minimo de
+ingresos mensuales o anuales. Si el minimo no se cumple, el socio conserva su
+licencia, pero pierde exclusividad.</code></pre>
+<h2>14. Riesgo de Producto Dormido</h2>
+<p>Existe un riesgo comercial importante: que el socio agregue SaldiFY a su pagina o portafolio, pero no lo impulse activamente. Para evitar que el producto quede detenido, cualquier acuerdo exclusivo debe tener compromisos minimos:</p>
+<ul>
+<li>fecha de lanzamiento;</li>
+<li>pagina comercial publicada;</li>
+<li>campana inicial;</li>
+<li>metas de clientes;</li>
+<li>metas de facturacion;</li>
+<li>reuniones mensuales de seguimiento;</li>
+<li>reporte de leads, conversiones y clientes activos.</li>
+</ul>
+<p>Si el socio no cumple, el desarrollador debe conservar el derecho de buscar otros canales.</p>
+<h2>15. Recomendacion de Negociacion</h2>
+<p>La opcion mas equilibrada depende del compromiso real del socio comercial. Si el socio tiene cartera, marca y capacidad real de ventas, la mejor opcion puede ser la sociedad 60/40 con rebranding pagado y metas minimas. Si el socio quiere control sin compartir ingresos, la venta/licencia amplia debe cerrarse entre $650,000 y $800,000 MXN + IVA como base, subiendo si solicita exclusividad o derechos amplios. Si el socio quiere probar el producto con menor inversion inicial, la opcion de licencia white-label por $200,000 MXN + IVA mas 80/20 permite iniciar, pero debe proteger la propiedad del producto y evitar exclusividad sin minimo garantizado.</p>
+<h2>16. Posicionamiento Sugerido</h2>
+<p>SaldiFY puede presentarse comercialmente como:</p>
+<pre><code>Plataforma para administrar redes de venta, credito, compras y pagos entre
+anfitriones, vendedores y clientes.</code></pre>
+<p>Mensaje corto:</p>
+<pre><code>Controla tu red de vendedores y clientes, asigna credito, registra compras,
+recibe pagos y da seguimiento a cada relacion desde una sola plataforma.</code></pre>
+<p>Mensaje ampliado:</p>
+<pre><code>Vende con catalogo propio o heredado, permite compras manuales o por carrito,
+administra credito y pagos, y deja que cada anfitrion haga crecer su propia red
+con reputacion comercial visible.</code></pre>
+<p>Mensaje para portafolio white-label:</p>
+<pre><code>Una solucion en la nube para negocios que venden a credito, trabajan con
+distribuidores o administran redes de clientes y vendedores.</code></pre>
+<h2>17. Conclusion</h2>
+<p>SaldiFY no debe valorarse solo como una app Flutter. Es un producto digital construido sobre una plataforma propietaria madura, con una metodologia propia de datos, controladores, rowsets, webservices y base de datos. Su mayor valor esta en resolver una operacion comercial real: redes de venta y credito con clientes que tambien pueden convertirse en anfitriones de su propia red. Por eso cualquier acuerdo comercial debe cuidar tres elementos:</p>
+<ol>
+<li>No regalar la propiedad tecnologica.</li>
+<li>No aceptar porcentajes calculados sobre utilidad indefinida.</li>
+<li>No otorgar exclusividad sin metas, minimos y derecho de salida.</li>
+</ol>
+<p>La propuesta debe buscar un equilibrio: permitir que el socio comercial gane y haga crecer el producto, pero conservando el valor real de la tecnologia, arquitectura, conocimiento y trabajo invertido en SaldiFY.</p></div>
+    </section>
+  </main>
+  <script src="docu_shell.js" defer></script>
+</body>
+</html>

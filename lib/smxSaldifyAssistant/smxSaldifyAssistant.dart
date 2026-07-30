@@ -16,6 +16,7 @@ class SmxSaldifyAssistantHost extends StatelessWidget {
   final SmxSaldifyAssistantRole role;
   final SmxSaldifyAssistantScreen screen;
   final bool isMobile;
+  final bool showFloatingLauncher;
 
   const SmxSaldifyAssistantHost({
     super.key,
@@ -23,6 +24,7 @@ class SmxSaldifyAssistantHost extends StatelessWidget {
     required this.role,
     required this.screen,
     required this.isMobile,
+    this.showFloatingLauncher = true,
   });
 
   @override
@@ -38,9 +40,31 @@ class SmxSaldifyAssistantHost extends StatelessWidget {
         role: role,
         screen: screen,
         isMobile: isMobile,
+        showFloatingLauncher: showFloatingLauncher,
         child: child,
       ),
     );
+  }
+}
+
+class SmxSaldifyAssistantScope extends InheritedWidget {
+  final VoidCallback openAssistant;
+
+  const SmxSaldifyAssistantScope({
+    super.key,
+    required this.openAssistant,
+    required super.child,
+  });
+
+  static VoidCallback? maybeOpenOf(BuildContext context) {
+    return context
+        .dependOnInheritedWidgetOfExactType<SmxSaldifyAssistantScope>()
+        ?.openAssistant;
+  }
+
+  @override
+  bool updateShouldNotify(SmxSaldifyAssistantScope oldWidget) {
+    return openAssistant != oldWidget.openAssistant;
   }
 }
 
@@ -50,6 +74,7 @@ class _AssistantSurface extends StatelessWidget {
   final SmxSaldifyAssistantRole role;
   final SmxSaldifyAssistantScreen screen;
   final bool isMobile;
+  final bool showFloatingLauncher;
 
   const _AssistantSurface({
     required this.controller,
@@ -57,24 +82,30 @@ class _AssistantSurface extends StatelessWidget {
     required this.role,
     required this.screen,
     required this.isMobile,
+    required this.showFloatingLauncher,
   });
 
   @override
   Widget build(BuildContext context) {
     final bottomInset = SmxLayout.bottomContentInset(context);
+    final scopedChild = SmxSaldifyAssistantScope(
+      openAssistant: () => _openAssistant(context),
+      child: child,
+    );
 
     return Stack(
       fit: StackFit.expand,
       children: [
-        child,
-        Positioned(
-          left: isMobile ? 16 : 24,
-          bottom: bottomInset + (isMobile ? 18 : 24),
-          child: _AssistantLauncher(
-            isMobile: isMobile,
-            onPressed: () => _openAssistant(context),
+        scopedChild,
+        if (showFloatingLauncher)
+          Positioned(
+            left: isMobile ? 16 : 24,
+            bottom: bottomInset + (isMobile ? 18 : 24),
+            child: _AssistantLauncher(
+              isMobile: isMobile,
+              onPressed: () => _openAssistant(context),
+            ),
           ),
-        ),
       ],
     );
   }

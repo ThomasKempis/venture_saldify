@@ -140,7 +140,8 @@ class SmxAuth with ChangeNotifier {
     required bool forceAccountSelection,
   }) async {
     if (!forceAccountSelection) {
-      final currentUser = await _googleRepository.getCurrentUser();
+      //final currentUser = await _googleRepository.getCurrentUser();
+      final currentUser = _googleRepository.getCurrentUser();
       if (currentUser != null) {
         return _createGoogleAuthUser(currentUser);
       }

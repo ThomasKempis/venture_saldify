@@ -5,12 +5,14 @@ class SmxSaldiFyClientSearchField extends StatelessWidget {
   final TextEditingController controller;
   final String query;
   final ValueChanged<String> onChanged;
+  final String hintText;
 
   const SmxSaldiFyClientSearchField({
     super.key,
     required this.controller,
     required this.query,
     required this.onChanged,
+    this.hintText = 'Buscar por nombre, correo o telefono',
   });
 
   @override
@@ -25,7 +27,7 @@ class SmxSaldiFyClientSearchField extends StatelessWidget {
         fontWeight: FontWeight.w600,
       ),
       decoration: InputDecoration(
-        hintText: 'Buscar por nombre, correo o telefono',
+        hintText: hintText,
         hintStyle: TextStyle(color: SmxColors.textMuted.withValues(alpha: .8)),
         prefixIcon: const Icon(Icons.search_rounded),
         suffixIcon: query.isEmpty

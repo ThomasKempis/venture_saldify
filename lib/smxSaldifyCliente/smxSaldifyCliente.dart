@@ -120,6 +120,8 @@ class _SmxSaldiFyClienteState extends State<SmxSaldiFyCliente> {
       role: SmxSaldifyAssistantRole.invitado,
       screen: screen,
       isMobile: layout.isMobile,
+      showFloatingLauncher:
+          screen != SmxSaldifyAssistantScreen.dashboardCliente,
       child: page,
     );
   }

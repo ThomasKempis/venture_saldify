@@ -552,10 +552,7 @@ class _ClientCard extends StatelessWidget {
   }
 
   Future<void> _copyInvitationLink(BuildContext context) async {
-    await SmxSaldifyInvitaCopy.copyInvitadoRegistradoLink(
-      context: context,
-      uuidInvitado: uuidInvitado,
-    );
+    await SmxSaldifyInvitaCopy.copyInvitacionLink(context: context);
   }
 }
 

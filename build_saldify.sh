@@ -45,6 +45,17 @@ if [ $? -eq 0 ]; then
         echo "🎨 Favicon oficial copiado a la raíz (/favicon.png)."
     fi
 
+    echo "📚 Preparando documentación HTML..."
+    rm -rf build/web/htmls
+    cp -R documents/htmls build/web/htmls
+    cp -fv build/web/htmls/docu.html build/web/docu.html
+    rm -f build/web/htmls/docu.html
+    sed -i '' 's|href="docu_|href="htmls/docu_|g' build/web/docu.html
+    sed -i '' 's|../../assets/images/saldify/logo.png|assets/assets/images/saldify/logo.png|g' build/web/docu.html
+    sed -i '' "s|'../assets/images/saldify/logo.png'|'../assets/assets/images/saldify/logo.png'|g" build/web/htmls/docu_shell.js
+
+    echo "📚 Documentación lista en /docu.html y /htmls/."
+
     echo "✨ ¡Branding aplicado correctamente!"
     echo "🏁 Todo listo en: build/web/"
 else

@@ -137,9 +137,8 @@ class _ClienteActionsSheet extends StatelessWidget {
   }
 
   Future<void> _copyInvitationLink(BuildContext context) async {
-    await SmxSaldifyInvitaCopy.copyInvitadoRegistradoLink(
+    await SmxSaldifyInvitaCopy.copyInvitacionLink(
       context: context,
-      uuidInvitado: client.uuidInvitado,
       closeContextOnSuccess: true,
     );
   }

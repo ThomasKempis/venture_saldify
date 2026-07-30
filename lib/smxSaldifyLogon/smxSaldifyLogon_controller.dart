@@ -1,119 +1,85 @@
 import 'package:flutter/material.dart';
-import 'package:venture_saldify/smxLayout/smx_message_dialog.dart';
 import 'package:flutter/services.dart';
 import 'package:venture_core_connect/smxConstants_core.dart';
 import 'package:venture_saldify/smxApis/smxConfig.dart';
 import 'package:venture_widgets/smxClassDrivers.dart';
 import 'package:venture_widgets/smxController/smxController.dart';
-import 'package:venture_widgets/smxShowDialog/smxShowDialogs.dart';
-import 'package:universal_html/html.dart' as html;
 
 import '../../smxApis/smxConstants.dart';
-import '../smxSaldify/smxSaldify_dashboard/smxSaldiFy_invita_clientes/smxSaldiFy_invita_service.dart';
 
 class SmxSaldifyLogonController extends SmxController {
-  static const welcomeAsset = 'assets/images/saldify_invitation_welcome.png';
-  static const welcomeAssetHd =
-      'assets/images/saldify_invitation_welcome_hd.png';
-  static const _codigoStorageKey = 'saldify_codigo_invitado';
-  static const _uuidAnfitrionStorageKey = 'saldify_uuid_anfitrion';
-  static const _correoInvitadoStorageKey = 'saldify_correo_invitado';
-  static const _uuidInvitadoStorageKey = 'saldify_uuid_invitado';
-
-  late final TextEditingController codigoController;
-
   String? codigoError;
-  String? _precachedWelcomeAsset;
+  Image? welcomeImage;
+  bool? _precachedWelcomeHd;
   bool contentReady = false;
   bool _disposed = false;
-  bool hasCodigoInicialValido = false;
   bool _validandoCodigo = false;
+  String _uuidAnfitrionValidado = '';
 
-  SmxSaldifyLogonController({
-    required super.alias,
-    required super.data,
-    String codigoInicial = '',
-  }) {
+  SmxSaldifyLogonController({required super.alias, required super.data}) {
     SmxConstants_core.instancia = "SALDIFY";
     resetJsonSend();
-
-    hasCodigoInicialValido = SmxCodeInvitado.isValid(codigoInicial);
-
-    final codigoInicialTmp = hasCodigoInicialValido
-        ? SmxCodeInvitado.normalizar(codigoInicial)
-        : _codigoGuardado;
-
-    codigoController = TextEditingController(text: codigoInicialTmp);
   }
 
   static Future<void> warmUpAssets() async {
     await Future.wait([
       rootBundle.load(SmxConfig.logoPath),
-      rootBundle.load(welcomeAsset),
+      SmxConfig.invitationWelcomeImage(hd: false),
     ]);
-  }
-
-  String getWelcomeAsset(double width) {
-    return width < 900 ? welcomeAsset : welcomeAssetHd;
   }
 
   Future<void> precacheAssets(BuildContext context) async {
-    final welcomeAsset = getWelcomeAsset(MediaQuery.sizeOf(context).width);
+    final welcomeHd = MediaQuery.sizeOf(context).width >= 900;
 
-    if (_precachedWelcomeAsset == welcomeAsset) return;
+    if (_precachedWelcomeHd == welcomeHd) return;
 
-    _precachedWelcomeAsset = welcomeAsset;
+    _precachedWelcomeHd = welcomeHd;
     contentReady = false;
     _notify();
 
-    await Future.wait([
-      precacheImage(AssetImage(SmxConfig.logoPath), context),
-      precacheImage(AssetImage(welcomeAsset), context),
-    ]);
+    final logoFuture = precacheImage(AssetImage(SmxConfig.logoPath), context);
+    final resolvedWelcomeImage = await SmxConfig.invitationWelcomeImage(
+      hd: welcomeHd,
+      fit: BoxFit.contain,
+    );
 
-    if (_disposed || _precachedWelcomeAsset != welcomeAsset) return;
+    final futures = <Future<void>>[logoFuture];
+    if (resolvedWelcomeImage != null) {
+      if (!context.mounted) return;
+      futures.add(precacheImage(resolvedWelcomeImage.image, context));
+    }
 
+    await Future.wait(futures);
+
+    if (_disposed || _precachedWelcomeHd != welcomeHd) return;
+
+    welcomeImage = resolvedWelcomeImage;
     contentReady = true;
     _notify();
   }
 
-  void clearCodigoError() {
-    if (codigoError == null) return;
-    codigoError = null;
-    _notify();
+  bool get isInvitacionUrlValida => SmxConstants.urlValidator.isValida();
+
+  String get codigoUrl {
+    return SmxConstants.urlValidator.codigo;
   }
 
-  String? validarFormatoCodigo() {
-    final codigo = SmxCodeInvitado.normalizar(codigoController.text);
+  String get uuidAnfitrionValidado => _uuidAnfitrionValidado;
 
-    if (!SmxCodeInvitado.isValid(codigo)) {
-      codigoError = 'Ingresa un código válido';
-      _notify();
-      return null;
-    }
-
-    codigoController.text = codigo;
-    codigoError = null;
-    _notify();
-    return codigo;
-  }
-
-  Future<bool> validarCodigoAutenticado(
-    String codigo,
+  Future<bool> validarInvitacionUrl(
     String correoGoogle, {
     required String uuidUsuario,
   }) async {
     if (_validandoCodigo) return false;
     _validandoCodigo = true;
+    _uuidAnfitrionValidado = '';
 
     try {
-      await showDialogWait(data.context!, () async {
-        codigoError = await isValidaIntoDataBase(
-          codigo,
-          correoGoogle: correoGoogle,
-          uuidUsuario: uuidUsuario,
-        );
-      });
+      codigoError = await _actualizarInvitacion(
+        codigo: codigoUrl,
+        correoGoogle: correoGoogle,
+        uuidUsuario: uuidUsuario,
+      );
     } finally {
       _validandoCodigo = false;
     }
@@ -126,47 +92,16 @@ class SmxSaldifyLogonController extends SmxController {
     return false;
   }
 
-  bool cargarInvitadoGuardado(BuildContext context) {
-    final codigo = _codigoGuardado;
-    final uuidAnfitrion =
-        html.window.localStorage[_uuidAnfitrionStorageKey]?.trim() ?? '';
-    final correoInvitado =
-        html.window.localStorage[_correoInvitadoStorageKey]?.trim() ?? '';
-    final uuidInvitado =
-        html.window.localStorage[_uuidInvitadoStorageKey]?.trim() ?? '';
-
-    if (codigo.isEmpty ||
-        uuidAnfitrion.isEmpty ||
-        (correoInvitado.isEmpty && uuidInvitado.isEmpty) ||
-        (correoInvitado.isNotEmpty && uuidInvitado.isNotEmpty)) {
-      SmxConstants.clearClienteInvitado();
-      showSmxValidDialog(
-        context,
-        mensaje: 'No hay datos de cliente invitado guardados.',
-      );
-      return false;
-    }
-
-    SmxConstants.setClienteInvitado(
-      uuidAnfitrion: uuidAnfitrion,
-      correoInvitado: correoInvitado,
-      uuidInvitado: uuidInvitado,
-    );
-    return true;
-  }
-
-  Future<String?> isValidaIntoDataBase(
-    String codigo, {
-    String? correoGoogle,
-    String? uuidUsuario,
+  Future<String?> _actualizarInvitacion({
+    required String codigo,
+    required String correoGoogle,
+    required String uuidUsuario,
   }) async {
     final alias = 'SYSUSER90';
-    final codigoNormalizado = SmxCodeInvitado.normalizar(codigo);
-    final codigoSql = _sql(codigoNormalizado);
-    final uuidSql = _sql(uuidUsuario?.trim() ?? '');
-    final correoSql = _sql(correoGoogle?.trim().toLowerCase() ?? '');
+    final codigoSql = _sql(codigo);
+    final uuidSql = _sql(uuidUsuario.trim());
+    final correoSql = _sql(correoGoogle.trim().toLowerCase());
 
-    SmxConstants.clearClienteInvitado();
     removeSql(alias);
 
     addSTrans(
@@ -191,47 +126,25 @@ class SmxSaldifyLogonController extends SmxController {
 
       rst.first();
 
-      final uuidAnfitrion =
-          rst.getValue('SYSUSER90_ANFITRION_UUID')?.toString().trim() ?? '';
-      final correoInvitado =
-          rst.getValue('SYSUSER90_INVITADO_CORREO')?.toString().trim() ?? '';
-      final uuidInvitado =
-          rst.getValue('SYSUSER90_INVITADO_UUID')?.toString().trim() ?? '';
+      final uuidAnfitrion = rst.getValue('SYSUSER90_ANFITRION_UUID');
+      final correoInvitado = rst.getValue('SYSUSER90_INVITADO_CORREO');
+      final uuidInvitado = rst.getValue('SYSUSER90_INVITADO_UUID');
 
-      final correoAutenticado = correoGoogle?.trim().toLowerCase() ?? '';
-
-      if (correoInvitado.isNotEmpty &&
-          correoAutenticado.isNotEmpty &&
-          correoInvitado.toLowerCase() != correoAutenticado) {
-        SmxConstants.clearClienteInvitado();
-        return 'El código no corresponde a la cuenta de Google seleccionada';
-      }
-
-      final uuidAutenticado = uuidUsuario?.trim().toLowerCase() ?? '';
-      if (uuidInvitado.isNotEmpty &&
-          uuidAutenticado.isNotEmpty &&
-          uuidInvitado.toLowerCase() != uuidAutenticado) {
-        SmxConstants.clearClienteInvitado();
-        return 'El código no corresponde al usuario autenticado';
-      }
-
-      if (uuidAnfitrion.isEmpty ||
-          (correoInvitado.isEmpty && uuidInvitado.isEmpty)) {
-        SmxConstants.clearClienteInvitado();
+      if (!(uuidAnfitrion.isNotEmpty &&
+          correoInvitado.isNotEmpty &&
+          uuidInvitado.isNotEmpty)) {
         return 'El código de invitación no tiene datos válidos';
       }
 
-      SmxConstants.setClienteInvitado(
-        uuidAnfitrion: uuidAnfitrion,
-        correoInvitado: correoInvitado,
-        uuidInvitado: uuidInvitado,
-      );
-      _guardarInvitado(
-        codigo: codigoNormalizado,
-        uuidAnfitrion: uuidAnfitrion,
-        correoInvitado: correoInvitado,
-        uuidInvitado: uuidInvitado,
-      );
+      if (correoInvitado.toLowerCase() != correoGoogle.trim().toLowerCase()) {
+        return 'El código no corresponde a la cuenta de Google seleccionada';
+      }
+
+      if (uuidInvitado.toLowerCase() != uuidUsuario.trim().toLowerCase()) {
+        return 'El código no corresponde al usuario autenticado';
+      }
+
+      _uuidAnfitrionValidado = uuidAnfitrion;
 
       return null;
     } catch (e) {
@@ -259,32 +172,13 @@ class SmxSaldifyLogonController extends SmxController {
     notifyListeners();
   }
 
-  static String get _codigoGuardado {
-    final codigo = html.window.localStorage[_codigoStorageKey] ?? '';
-    if (!SmxCodeInvitado.isValid(codigo)) return '';
-    return SmxCodeInvitado.normalizar(codigo);
-  }
-
   static String _sql(String value) {
     return value.replaceAll("'", "''");
-  }
-
-  static void _guardarInvitado({
-    required String codigo,
-    required String uuidAnfitrion,
-    required String correoInvitado,
-    required String uuidInvitado,
-  }) {
-    html.window.localStorage[_codigoStorageKey] = codigo;
-    html.window.localStorage[_uuidAnfitrionStorageKey] = uuidAnfitrion;
-    html.window.localStorage[_correoInvitadoStorageKey] = correoInvitado;
-    html.window.localStorage[_uuidInvitadoStorageKey] = uuidInvitado;
   }
 
   @override
   void dispose() {
     _disposed = true;
-    codigoController.dispose();
     super.dispose();
   }
 }

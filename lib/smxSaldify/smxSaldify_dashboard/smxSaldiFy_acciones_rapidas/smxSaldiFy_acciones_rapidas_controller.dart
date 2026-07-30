@@ -29,6 +29,7 @@ class SmxSaldiFyAccionesRapidasController extends SmxController {
     return switch (iconKey) {
       'CLIENTE' => Icons.add_rounded,
       'PRODUCTOS' => Icons.inventory_2_rounded,
+      'REPORTES' => Icons.receipt_long_rounded,
       'COBRANZA' => Icons.bar_chart_rounded,
       'ARCHIVADOS' => Icons.archive_outlined,
       _ => Icons.touch_app_rounded,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:venture_core_connect/smxDataBase/smxRowSet.dart';
+import 'package:venture_saldify/smxSaldify/smxSaldify_dashboard/smx_saldify_client_search.dart';
 import 'package:venture_saldify/smxLayout/smxColors.dart';
 import 'package:venture_saldify/smxLayout/smxBackgrounds/cliente_movimiento_bg.dart';
 import 'package:venture_widgets/smxCallBaseStateful.dart';
@@ -28,6 +29,14 @@ class SmxSaldiFyClienteHistorial extends StatefulWidget {
 class _SmxSaldiFyClienteHistorialState
     extends State<SmxSaldiFyClienteHistorial> {
   bool _showAllMovimientos = false;
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -46,9 +55,16 @@ class _SmxSaldiFyClienteHistorialState
         isDesktop: widget.isDesktop,
         controller: controller,
         showAllMovimientos: _showAllMovimientos,
+        searchController: _searchController,
+        searchQuery: _searchQuery,
         onShowAllMovimientosChanged: (value) {
           setState(() {
             _showAllMovimientos = value;
+          });
+        },
+        onSearchChanged: (value) {
+          setState(() {
+            _searchQuery = value;
           });
         },
       ),
@@ -61,14 +77,20 @@ class _SmxSaldiFyClienteHistorialView extends StatelessWidget {
   final bool isDesktop;
   final SmxSaldiFyClienteHistorialController controller;
   final bool showAllMovimientos;
+  final TextEditingController searchController;
+  final String searchQuery;
   final ValueChanged<bool> onShowAllMovimientosChanged;
+  final ValueChanged<String> onSearchChanged;
 
   const _SmxSaldiFyClienteHistorialView({
     required this.isMobile,
     required this.isDesktop,
     required this.controller,
     required this.showAllMovimientos,
+    required this.searchController,
+    required this.searchQuery,
     required this.onShowAllMovimientosChanged,
+    required this.onSearchChanged,
   });
 
   @override
@@ -86,14 +108,25 @@ class _SmxSaldiFyClienteHistorialView extends StatelessWidget {
         const SizedBox(height: 12),
         if (!hasMovimientos)
           const _HistorialEmptyState()
-        else
+        else ...[
+          if (showAllMovimientos) ...[
+            SmxSaldiFyClientSearchField(
+              controller: searchController,
+              query: searchQuery,
+              hintText: 'Buscar pago, compra, folio, producto o referencia',
+              onChanged: onSearchChanged,
+            ),
+            const SizedBox(height: 12),
+          ],
           _MovimientoCards(
             isMobile: isMobile,
             isDesktop: isDesktop,
             historial: controller.rstHistorial,
             controller: controller,
             showAll: showAllMovimientos,
+            searchQuery: searchQuery,
           ),
+        ],
       ],
     );
   }
@@ -151,6 +184,7 @@ class _MovimientoCards extends StatelessWidget {
   final SmxRowSet historial;
   final SmxSaldiFyClienteHistorialController controller;
   final bool showAll;
+  final String searchQuery;
 
   const _MovimientoCards({
     required this.isMobile,
@@ -158,15 +192,18 @@ class _MovimientoCards extends StatelessWidget {
     required this.historial,
     required this.controller,
     required this.showAll,
+    required this.searchQuery,
   });
 
   @override
   Widget build(BuildContext context) {
-    final visibleCount = showAll
-        ? historial.getRowCount()
-        : historial.getRowCount().clamp(0, 5).toInt();
+    final visibleIndexes = _visibleIndexes();
+    if (visibleIndexes.isEmpty) {
+      return const _MovimientoSearchEmpty();
+    }
+
     final cards = [
-      for (var index = 0; index < visibleCount; index++)
+      for (final index in visibleIndexes)
         _MovimientoCard(
           movimientoId: _getMovimientoId(index),
           folio: _getMovimientoValue(index, controller.getMovimientoFolio),
@@ -203,6 +240,52 @@ class _MovimientoCards extends StatelessWidget {
       physics: const NeverScrollableScrollPhysics(),
       children: cards,
     );
+  }
+
+  List<int> _visibleIndexes() {
+    final rowCount = historial.getRowCount();
+    if (!showAll) {
+      return List<int>.generate(rowCount.clamp(0, 5).toInt(), (index) => index);
+    }
+
+    final normalizedQuery = smxNormalizeClientSearch(searchQuery);
+    if (normalizedQuery.isEmpty) {
+      return List<int>.generate(rowCount, (index) => index);
+    }
+
+    return [
+      for (var index = 0; index < rowCount; index++)
+        if (smxNormalizeClientSearch(
+          _getMovimientoSearchText(index),
+        ).contains(normalizedQuery))
+          index,
+    ];
+  }
+
+  String _getMovimientoSearchText(int index) {
+    historial.index(index);
+    final tipo = controller.getMovimientoTipo();
+    final status = controller.getMovimientoStatus();
+    final movimientoId = controller.getMovimientoId();
+    final statusData = _MovimientoStatusData.from(
+      tipo: tipo,
+      status: status,
+      movimientoId: movimientoId,
+    );
+
+    return [
+      tipo,
+      statusData.typeLabel,
+      statusData.statusLabel,
+      controller.getMovimientoFolio(),
+      controller.getMovimientoConcepto(),
+      controller.getMovimientoImporte(),
+      controller.getMovimientoCalculo(),
+      controller.getMovimientoFecha(),
+      controller.getMovimientoMotivo(),
+      controller.getMovimientoSearchExtra(),
+      movimientoId.toString(),
+    ].join(' ');
   }
 
   String _getMovimientoValue(int index, String Function() getValue) {
@@ -664,6 +747,30 @@ class _HistorialEmptyState extends StatelessWidget {
           color: SmxColors.white70,
           fontSize: 13,
           fontWeight: FontWeight.w800,
+        ),
+      ),
+    );
+  }
+}
+
+class _MovimientoSearchEmpty extends StatelessWidget {
+  const _MovimientoSearchEmpty();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+      decoration: BoxDecoration(
+        color: SmxColors.whiteAlpha(.9),
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: const Text(
+        'No se encontraron movimientos.',
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          color: SmxColors.textMuted,
+          fontSize: 15,
+          fontWeight: FontWeight.w700,
         ),
       ),
     );

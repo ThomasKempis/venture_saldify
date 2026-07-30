@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 enum SmxBrand { saldify, redventas, redcontrol }
 
 abstract class SmxConfig {
+  static const String _invitationWelcomeFile = 'saldify_invitation_welcome.png';
+  static const String _invitationWelcomeHdFile =
+      'saldify_invitation_welcome_hd.png';
+  static final Map<String, Future<bool>> _assetExistsCache = {};
+
   /// Detecta el modo de la aplicación inyectado durante la compilación.
   /// Ejemplo: flutter build web --dart-define=APP_MODE=redventas
   static const String appModeConst = String.fromEnvironment(
@@ -23,6 +29,31 @@ abstract class SmxConfig {
   /// Rutas dinámicas (String) para casos donde se necesite el path directamente
   static String get logoPath => 'assets/images/$appModeConst/logo.png';
   static String get logoCabPath => 'assets/images/$appModeConst/logo_cab.png';
+
+  static Future<Image?> invitationWelcomeImage({
+    required bool hd,
+    BoxFit fit = BoxFit.contain,
+    double? width,
+    double? height,
+  }) async {
+    final file = hd ? _invitationWelcomeHdFile : _invitationWelcomeFile;
+    final path = 'assets/images/$appModeConst/$file';
+
+    if (!await _assetExists(path)) return null;
+
+    return Image.asset(path, fit: fit, width: width, height: height);
+  }
+
+  static Future<bool> _assetExists(String path) {
+    return _assetExistsCache.putIfAbsent(path, () async {
+      try {
+        await rootBundle.load(path);
+        return true;
+      } catch (_) {
+        return false;
+      }
+    });
+  }
 
   /// Widget de Logo principal ya configurado
   static Widget logo({
