@@ -745,10 +745,10 @@ packages:
     dependency: transitive
     description:
       name: jni
-      sha256: "5bc9a9daac5ccfbd6a758377600b9f7fdce13d93f26e8012a8941014a5d978d1"
+      sha256: f038e58b4dc2c9037f50e233175086337e0b305e356d28211bf55f21c504cbd3
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.2"
+    version: "1.0.3"
   jni_flutter:
     dependency: transitive
     description:
@@ -1359,16 +1359,16 @@ packages:
     description:
       path: "packages/venture_core_connect"
       ref: main
-      resolved-ref: ecff2e5ca99b46b077e4e5a9393a653d9f82eb01
+      resolved-ref: "4ce4b8316ddb89cc902c375517a37153f60befa5"
       url: "https://github.com/ThomasKempis/venture.git"
     source: git
-    version: "2.0.17"
+    version: "2.0.18"
   venture_widgets:
     dependency: "direct main"
     description:
       path: "packages/venture_widgets"
       ref: main
-      resolved-ref: "72cc634dd794b01782dae63e76966dccd49c80ed"
+      resolved-ref: "4ce4b8316ddb89cc902c375517a37153f60befa5"
       url: "https://github.com/ThomasKempis/venture.git"
     source: git
     version: "2.0.16"
