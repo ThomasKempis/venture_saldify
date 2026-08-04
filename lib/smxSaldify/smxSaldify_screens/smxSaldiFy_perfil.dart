@@ -9,15 +9,15 @@ import '../../smxAuth/smxLogonMovil.dart';
 
 class SmxSaldiFyPerfil extends StatelessWidget {
   final SmxLogonMovil controllerMain = SmxConstants.controllerMain;
-  final VoidCallback onNavigateToHome;
+  final VoidCallback onBackToHome;
+  final VoidCallback onAcceptToHome;
   final SmxLayoutSize layout;
-  final Widget? menuButton;
 
   SmxSaldiFyPerfil({
     super.key,
-    required this.onNavigateToHome,
+    required this.onBackToHome,
+    required this.onAcceptToHome,
     required this.layout,
-    this.menuButton,
   });
 
   @override
@@ -45,13 +45,13 @@ class SmxSaldiFyPerfil extends StatelessWidget {
                       layout.saldifyPagePadding.right,
                       0,
                     ),
-                    child: _SaldifyPerfilHeader(menuButton: menuButton),
+                    child: _SaldifyPerfilHeader(onBackPressed: onBackToHome),
                   ),
                   const SizedBox(height: 18),
                   Expanded(
                     child: Padding(
                       padding: EdgeInsets.only(bottom: bottomContentInset),
-                      child: SmxPerfil(onNavigateToHome: onNavigateToHome),
+                      child: SmxPerfil(onNavigateToHome: onAcceptToHome),
                     ),
                   ),
                 ],
@@ -65,15 +65,20 @@ class SmxSaldiFyPerfil extends StatelessWidget {
 }
 
 class _SaldifyPerfilHeader extends StatelessWidget {
-  final Widget? menuButton;
+  final VoidCallback onBackPressed;
 
-  const _SaldifyPerfilHeader({this.menuButton});
+  const _SaldifyPerfilHeader({required this.onBackPressed});
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        if (menuButton != null) ...[menuButton!, const SizedBox(width: 14)],
+        SmxSaldifyHeaderIconButton(
+          tooltip: 'Regresar',
+          icon: Icons.arrow_back_rounded,
+          onPressed: onBackPressed,
+        ),
+        const SizedBox(width: 14),
         ClipRRect(
           borderRadius: BorderRadius.circular(10),
           child: SizedBox(

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:venture_saldify/smxApis/smxConstants.dart';
 import 'package:venture_saldify/smxLayout/smxColors.dart';
 import 'package:venture_saldify/smxLayout/smxLayout.dart';
+import 'package:venture_saldify/smxLayout/smxScreenTmp.dart';
 import '../smxAuth/smxLogonMovil.dart';
 import '../smxSaldifyAssistant/smxSaldifyAssistant.dart';
 import '../smxSaldifyAssistant/smxSaldifyAssistant_context.dart';
@@ -81,25 +82,37 @@ class _SmxSaldiFy extends State<SmxSaldiFy> {
     required SmxLayoutSize layout,
     Widget? menuButton,
   }) {
-    final screen = _selectedIndex == 0
+    final pageIndex = _selectedIndex >= 0 && _selectedIndex <= 2
+        ? _selectedIndex
+        : 0;
+    final page = IndexedStack(
+      index: pageIndex,
+      children: [
+        SmxSaldiFyDashboard(
+          key: ValueKey('saldify-dashboard-$_dashboardRefreshRevision'),
+          adminName: adminName,
+          layout: layout,
+          menuButton: menuButton,
+          onRefresh: _refreshDashboard,
+        ),
+        SmxSaldiFyPerfil(
+          onBackToHome: () => _selectPage(0),
+          onAcceptToHome: _selectHomeAndRefreshDashboard,
+          layout: layout,
+        ),
+        SmxSaldiFyScreenTmp(
+          title: 'Clientes : ${adminName.toUpperCase()}',
+          onMenuBackPressed: () => _selectPage(0),
+        ),
+      ],
+    );
+
+    // Sirve solo para el ChatBot
+    final screen = pageIndex == 0
         ? SmxSaldifyAssistantScreen.dashboardAnfitrion
         : SmxSaldifyAssistantScreen.perfilAnfitrion;
-    final page = _selectedIndex == 0
-        ? SmxSaldiFyDashboard(
-            key: ValueKey('saldify-dashboard-$_dashboardRefreshRevision'),
-            adminName: adminName,
-            layout: layout,
-            menuButton: menuButton,
-            onRefresh: _refreshDashboard,
-          )
-        : SmxSaldiFyPerfil(
-            onNavigateToHome: () => _selectPage(0),
-            layout: layout,
-            menuButton: menuButton,
-          );
 
     return SmxSaldifyAssistantHost(
-      key: ValueKey(screen),
       role: SmxSaldifyAssistantRole.anfitrion,
       screen: screen,
       isMobile: layout.isMobile,
@@ -121,12 +134,24 @@ class _SmxSaldiFy extends State<SmxSaldiFy> {
     });
   }
 
+  void _selectHomeAndRefreshDashboard() {
+    setState(() {
+      _selectedIndex = 0;
+      _dashboardRefreshRevision++;
+    });
+  }
+
   String _getAdminName() {
     try {
       final fullName = widget.controllerMain.getNombres().trim();
       if (fullName.isEmpty) return 'Administrador';
 
-      return fullName.split(RegExp(r'\s+')).first;
+      return fullName
+          .toLowerCase()
+          .split(RegExp(r'\s+'))
+          .where((word) => word.isNotEmpty)
+          .map((word) => word[0].toUpperCase() + word.substring(1))
+          .join(' ');
     } catch (_) {
       return 'Administrador';
     }

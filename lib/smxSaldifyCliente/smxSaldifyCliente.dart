@@ -96,27 +96,32 @@ class _SmxSaldiFyClienteState extends State<SmxSaldiFyCliente> {
     required SmxLayoutSize layout,
     Widget? menuButton,
   }) {
-    final screen = _selectedIndex == 0
+    final pageIndex = _selectedIndex >= 0 && _selectedIndex <= 1
+        ? _selectedIndex
+        : 0;
+    final page = IndexedStack(
+      index: pageIndex,
+      children: [
+        SmxSaldiFyClienteDashboard(
+          key: ValueKey('saldify-cliente-dashboard-$_dashboardRefreshRevision'),
+          controller: controller,
+          layout: layout,
+          menuButton: menuButton,
+          onRefresh: _refreshDashboard,
+        ),
+        SmxSaldiFyPerfil(
+          onBackToHome: () => _selectPage(0),
+          onAcceptToHome: _selectHomeAndRefreshDashboard,
+          layout: layout,
+        ),
+      ],
+    );
+
+    final screen = pageIndex == 0
         ? SmxSaldifyAssistantScreen.dashboardCliente
         : SmxSaldifyAssistantScreen.perfilCliente;
-    final page = _selectedIndex == 0
-        ? SmxSaldiFyClienteDashboard(
-            key: ValueKey(
-              'saldify-cliente-dashboard-$_dashboardRefreshRevision',
-            ),
-            controller: controller,
-            layout: layout,
-            menuButton: menuButton,
-            onRefresh: _refreshDashboard,
-          )
-        : SmxSaldiFyPerfil(
-            onNavigateToHome: () => _selectPage(0),
-            layout: layout,
-            menuButton: menuButton,
-          );
 
     return SmxSaldifyAssistantHost(
-      key: ValueKey(screen),
       role: SmxSaldifyAssistantRole.invitado,
       screen: screen,
       isMobile: layout.isMobile,
@@ -138,5 +143,12 @@ class _SmxSaldiFyClienteState extends State<SmxSaldiFyCliente> {
     });
 
     await Future<void>.delayed(const Duration(milliseconds: 350));
+  }
+
+  void _selectHomeAndRefreshDashboard() {
+    setState(() {
+      _selectedIndex = 0;
+      _dashboardRefreshRevision++;
+    });
   }
 }

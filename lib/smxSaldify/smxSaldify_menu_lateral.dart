@@ -73,21 +73,23 @@ class SmxSaldiFyNavigationPanel extends StatelessWidget {
                 const Divider(color: SmxColors.white24, height: 32),
                 _NavigationItem(
                   icon: Icons.groups_rounded,
-                  label: 'Clientes',
+                  label: 'Clientes Vip',
                   expanded: expanded,
                   enabled: false,
+                  //selected: selectedIndex == 2,
+                  //onTap: () => onSelect(2),
                 ),
                 const SizedBox(height: 8),
                 _NavigationItem(
                   icon: Icons.qr_code_2_rounded,
-                  label: 'Invitar',
+                  label: 'Eventos',
                   expanded: expanded,
                   enabled: false,
                 ),
                 const SizedBox(height: 8),
                 _NavigationItem(
-                  icon: Icons.payments_rounded,
-                  label: 'Pagos',
+                  icon: Icons.workspace_premium_rounded,
+                  label: 'Programa de recompensas',
                   expanded: expanded,
                   enabled: false,
                 ),
@@ -211,16 +213,26 @@ class SmxSaldiFyDrawer extends StatelessWidget {
                 ),
                 const Divider(color: SmxColors.white24, height: 28),
                 const _DisabledDrawerItem(
+                  icon: Icons.qr_code_2_rounded,
+                  label: 'Clientes Vip',
+                ),
+                /*
+                _DrawerItem(
                   icon: Icons.groups_rounded,
                   label: 'Clientes',
-                ),
+                  selected: selectedIndex == 2,
+                  onTap: () {
+                    Navigator.of(context).pop();
+                    onSelect(2);
+                  },
+                ),*/
                 const _DisabledDrawerItem(
                   icon: Icons.qr_code_2_rounded,
-                  label: 'Invitar clientes',
+                  label: 'Eventos',
                 ),
                 const _DisabledDrawerItem(
-                  icon: Icons.payments_rounded,
-                  label: 'Pagos',
+                  icon: Icons.workspace_premium_rounded,
+                  label: 'Programa de recompensas',
                 ),
                 const Spacer(),
                 const Padding(

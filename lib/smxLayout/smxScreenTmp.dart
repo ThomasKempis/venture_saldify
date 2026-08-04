@@ -6,6 +6,7 @@ class SmxSaldiFyScreenTmp extends StatelessWidget {
   final String title;
   final String mensaje;
   final bool btoBack;
+  final VoidCallback? onMenuBackPressed;
 
   const SmxSaldiFyScreenTmp({
     super.key,
@@ -13,6 +14,7 @@ class SmxSaldiFyScreenTmp extends StatelessWidget {
     this.mensaje =
         'Este modulo esta preparado para conectar su controller y flujo operativo.',
     this.btoBack = true,
+    this.onMenuBackPressed,
   });
 
   @override
@@ -50,7 +52,9 @@ class SmxSaldiFyScreenTmp extends StatelessWidget {
                             children: [
                               if (btoBack)
                                 _BackButton(
-                                  onPressed: () => Navigator.of(context).pop(),
+                                  onPressed:
+                                      onMenuBackPressed ??
+                                      () => Navigator.of(context).pop(),
                                 ),
                               const SizedBox(width: 14),
                               Expanded(
