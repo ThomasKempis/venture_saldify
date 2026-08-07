@@ -63,13 +63,16 @@ class _SmxInvitacionUrlValidator {
   const _SmxInvitacionUrlValidator(this.params);
 
   bool isValida() {
-    final codigo = params[codigoInvitacionKey]?.trim() ?? '';
     return SmxGenCodeSeguridad.isValid(codigo);
+  }
+
+  SmxSaldiFyInvitaStatus? getUrlTipo() {
+    return SmxGenCodeSeguridad.getUrlTipo(codigo);
   }
 
   String get codigoKey => codigoInvitacionKey;
 
   String get codigo {
-    return params[codigoInvitacionKey]?.trim() ?? '';
+    return params[codigoInvitacionKey]?.trim().toUpperCase() ?? '';
   }
 }

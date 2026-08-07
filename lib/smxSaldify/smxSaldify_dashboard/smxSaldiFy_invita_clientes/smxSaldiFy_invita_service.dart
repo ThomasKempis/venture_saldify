@@ -5,19 +5,22 @@ import '../../../smxApis/smxCodeSegu.dart';
 import 'smxSaldiFy_invita_clientes_models.dart';
 
 class SmxSaldifyInvitaService {
-  static const String aliasAddCodigo = 'ADD_SYSUSER90_SALDIFY';
+  static const String aliasAddCodigo = 'ADD_CODIGO_INVITACION';
   static const int maxIntentosCodigo = 5;
 
   const SmxSaldifyInvitaService._();
 
-  static Future<SmxSaldiFyInvitacionGenerada?> crearInvitacion() async {
+  static Future<SmxSaldiFyInvitacionGenerada?> crearInvitacion({
+    required SmxSaldiFyInvitaStatus prefijo
+  }) async {
     final controller = SmxConstants.controllerMain;
     final uuidAnfitrion = controller.getUuid().trim();
     if (uuidAnfitrion.isEmpty) return null;
 
     for (var intento = 0; intento < maxIntentosCodigo; intento++) {
-      final codigo = SmxGenCodeSeguridad.generar();
+      final codigo = SmxGenCodeSeguridad.generar(prefijo: prefijo);
       final status = await _reservarCodigoInvitacion(
+        prefijo: prefijo,
         codigo: codigo,
         uuidAnfitrion: uuidAnfitrion,
       );
@@ -41,16 +44,31 @@ class SmxSaldifyInvitaService {
   }
 
   static Future<String> _reservarCodigoInvitacion({
+    required SmxSaldiFyInvitaStatus prefijo,
     required String codigo,
     required String uuidAnfitrion,
   }) async {
     final controller = SmxConstants.controllerMain;
+    String sqlSTans = '';
+
+    if (prefijo == SmxSaldiFyInvitaStatus.SF) {
+      sqlSTans = "select * from ADD_SYSUSER90_SALDIFY("
+                 "'${_sql(codigo)}', "
+                 "'${_sql(uuidAnfitrion)}')";
+
+    } else if (prefijo == SmxSaldiFyInvitaStatus.SY) {
+      sqlSTans = "select * from ADD_SYSUSER91_SALDIFY("
+                 "'${_sql(codigo)}', "
+                 "'${_sql(uuidAnfitrion)}')";
+
+    } else {
+      return '';
+
+    }
 
     controller.addSTrans(
       aliasAddCodigo,
-      "select * from ADD_SYSUSER90_SALDIFY("
-      "'${_sql(codigo)}', "
-      "'${_sql(uuidAnfitrion)}')",
+      sqlSTans,
     );
 
     await controller.getCallWS();

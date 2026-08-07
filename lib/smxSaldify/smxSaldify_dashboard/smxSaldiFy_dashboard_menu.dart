@@ -3,6 +3,7 @@ import 'package:venture_saldify/smxApis/smxConfig.dart';
 import 'package:venture_saldify/smxLayout/smxColors.dart';
 import 'package:venture_saldify/smxLayout/smxBackgrounds/cliente_actions_bg.dart';
 
+import '../../smxApis/smxCodeSegu.dart';
 import 'smxSaldiFy_clientes/smxSaldiFy_clientes.dart';
 import 'smxSaldiFy_invita_clientes/smxSaldiFy_invita_copy.dart';
 
@@ -139,6 +140,7 @@ class _ClienteActionsSheet extends StatelessWidget {
   Future<void> _copyInvitationLink(BuildContext context) async {
     await SmxSaldifyInvitaCopy.copyInvitacionLink(
       context: context,
+      prefijo: SmxSaldiFyInvitaStatus.SF,
       closeContextOnSuccess: true,
     );
   }

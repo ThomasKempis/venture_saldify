@@ -7,6 +7,7 @@ import 'package:venture_saldify/smxLayout/smx_decision_dialog.dart';
 import 'package:venture_saldify/smxLayout/smxBackgrounds/saldify_circles_background.dart';
 import 'package:venture_widgets/smxController/smxControllerSendData.dart';
 
+import '../../../smxApis/smxCodeSegu.dart';
 import '../smxSaldiFy_clientes/smxSaldiFy_clientes.dart';
 import '../smxSaldiFy_invita_clientes/smxSaldiFy_invita_copy.dart';
 import '../smx_saldify_client_search.dart';
@@ -552,7 +553,7 @@ class _ClientCard extends StatelessWidget {
   }
 
   Future<void> _copyInvitationLink(BuildContext context) async {
-    await SmxSaldifyInvitaCopy.copyInvitacionLink(context: context);
+    await SmxSaldifyInvitaCopy.copyInvitacionLink(context: context, prefijo: SmxSaldiFyInvitaStatus.SF);
   }
 }
 

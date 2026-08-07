@@ -132,7 +132,7 @@ class SmxSaldiFyClienteController extends SmxController {
       final fullName = controllerMain.getNombres().trim();
       if (fullName.isEmpty) return 'Cliente';
 
-      return fullName.split(RegExp(r'\s+')).first;
+      return fullName;
     } catch (_) {
       return 'Cliente';
     }

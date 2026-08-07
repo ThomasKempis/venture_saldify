@@ -2,7 +2,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:venture_saldify/smxLayout/smx_message_dialog.dart';
 import 'package:venture_widgets/smxTmpScreen.dart';
 import 'dart:typed_data';
-import 'package:venture_widgets/smxShowDialog/smxShowDialogs.dart';
 import 'package:venture_widgets/smxTextField/smxTextField.dart';
 import 'package:venture_widgets/smxViewMap/smxLocationReporter.dart';
 
@@ -28,9 +27,7 @@ class SmxPerfil_controller extends SmxTmpCtl {
       accion: 'PERFIL',
     );
 
-    await showDialogWait(context, () async {
-      await callTroncalSave(controllerMain.rstSysUser10);
-    });
+    await callTroncalSave(controllerMain.rstSysUser10);
   }
 
   Future<Uint8List> getImagen() async {
@@ -50,9 +47,21 @@ class SmxPerfil_controller extends SmxTmpCtl {
   }
 
   bool showValida() {
+    /*
     final mensajeValidar = getValidateOnlyMessage();
     if (mensajeValidar != null) {
       showSmxValidDialog(context, mensaje: mensajeValidar);
+      return false;
+    }
+    */
+
+    if (getText('SYSUSER10_NOMBRES').isEmpty) {
+      showSmxValidDialog(context, mensaje: "Debe ingresar Nombres válidos");
+      return false;
+    }
+
+    if (getText('SYSUSER10_APELLIDOS').isEmpty) {
+      showSmxValidDialog(context, mensaje: "Debe ingresar Apellidos válidos");
       return false;
     }
 

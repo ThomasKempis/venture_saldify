@@ -9,6 +9,7 @@ import 'package:venture_widgets/smxTmpScreen.dart';
 import 'package:venture_core_connect/smxDataBase/smxRowSet.dart';
 import 'package:venture_widgets/smxViewMap/smxLocationReporter.dart';
 
+import '../smxApis/smxCodeSegu.dart';
 import '../smxSaldify/smxSaldify.dart';
 import '../smxSaldifyCliente/smxSaldifyCliente.dart';
 import '../smxSaldifyLogon/smxSaldifyAccessSession.dart';
@@ -49,15 +50,22 @@ class SmxLogonMovil extends SmxTmpCtl {
     final nombresSql = _sql(authUser.displayName.toUpperCase());
     final correoSql = _sql(getCorreo());
     final geolocalizacionSql = SmxConstants_core.geoLocalizacion;
+    final codigoLealtad = (SmxConstants.urlValidator.isValida() &&
+                           SmxConstants.urlValidator.getUrlTipo() == SmxSaldiFyInvitaStatus.SY)
+                            ? SmxConstants.urlValidator.codigo
+                            : ''; // Enviamos vacío si no es un SY válido
+
 
     removeSql('SYSUSER10');
     addSTrans(
       'SYSUSER10',
       "select * from ADD_SYSUSER10("
+          "'$codigoLealtad', "
           "'$nombresSql', "
           "'$correoSql', "
           "'$geolocalizacionSql')",
     );
+
 
     await getCallWS();
 

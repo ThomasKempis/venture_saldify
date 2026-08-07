@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:venture_saldify/smxApis/smxCodeSegu.dart';
 import 'package:venture_saldify/smxApis/smxConstants.dart';
 import 'package:venture_saldify/smxLayout/smx_message_dialog.dart';
 import 'package:venture_widgets/smxShowDialog/smxShowDialogs.dart';
@@ -12,12 +13,13 @@ class SmxSaldifyInvitaCopy {
 
   static Future<void> copyInvitacionLink({
     required BuildContext context,
+    required SmxSaldiFyInvitaStatus prefijo,
     bool closeContextOnSuccess = false,
   }) async {
     SmxSaldiFyInvitacionGenerada? invitacion;
 
     await showDialogWait(context, () async {
-      invitacion = await SmxSaldifyInvitaService.crearInvitacion();
+      invitacion = await SmxSaldifyInvitaService.crearInvitacion(prefijo: prefijo);
     });
 
     final error = SmxConstants.controllerMain.jsonSend.getError();

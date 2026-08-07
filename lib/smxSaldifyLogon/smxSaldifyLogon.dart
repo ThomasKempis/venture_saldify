@@ -11,9 +11,13 @@ import 'package:venture_saldify/smxLayout/smx_message_dialog.dart';
 import 'package:venture_saldify/smxSaldifyAssistant/smxSaldifyAssistant.dart';
 import 'package:venture_saldify/smxSaldifyAssistant/smxSaldifyAssistant_context.dart';
 import 'package:venture_saldify/smxLayout/smxBackgrounds/logon_access_bg.dart';
+import 'package:venture_saldify/smxSaldifyLogon/screens/anfitrionOptionCard.dart';
+import 'package:venture_saldify/smxSaldifyLogon/screens/invitacionLealtadOptionCard.dart';
+import 'package:venture_saldify/smxSaldifyLogon/screens/invitadoOptionCard.dart';
 import 'package:venture_widgets/smxCallBaseStateful.dart';
 import 'package:venture_widgets/smxController/smxControllerSendData.dart';
 
+import '../smxApis/smxCodeSegu.dart';
 import 'smxSaldifyAccessSession.dart';
 import 'smxSaldifyLogon_controller.dart';
 
@@ -281,13 +285,10 @@ class _SmxSaldifyLogonBodyState extends State<_SmxSaldifyLogonBody> {
                                             Transform.translate(
                                               offset: Offset(
                                                 0,
-
-                                                ///compact ? -32 : -24,
-                                                ///compact ? -54 : -44
                                                 welcomeImage != null
                                                     ? compact
-                                                          ? -64
-                                                          : -54
+                                                          ? -84
+                                                          : -74
                                                     : compact
                                                     ? 16
                                                     : 24,
@@ -299,25 +300,13 @@ class _SmxSaldifyLogonBodyState extends State<_SmxSaldifyLogonBody> {
                                                 children: [
                                                   _WelcomeCard(
                                                     compact: compact,
-                                                    isInvitacionUrlValida: widget
-                                                        .controller
-                                                        .isInvitacionUrlValida,
-                                                    codigo: widget
-                                                        .controller
-                                                        .codigoUrl,
-                                                    codigoError: widget
-                                                        .controller
-                                                        .codigoError,
-                                                    onAnfitrionTap:
-                                                        _onAnfitrionTap,
-                                                    onCambiarCuentaAnfitrionTap:
-                                                        _onCambiarCuentaAnfitrionTap,
-                                                    forceNextAnfitrionAccountSelection:
-                                                        _forceNextAnfitrionAccountSelection,
-                                                    onInvitadoTap:
-                                                        _onInvitadoTap,
-                                                    onInvitadoCodigoTap:
-                                                        _onInvitacionUrlTap,
+                                                    controller: widget.controller,
+                                                    onAnfitrionTap: _onAnfitrionTap,
+                                                    onAnfitrionLealtadTap: _onAnfitrionTap,
+                                                    onInvitadoTap: _onInvitadoTap,
+                                                    onInvitadoCodigoTap: _onInvitacionUrlTap,
+                                                    onCambiarCuentaAnfitrionTap: _onCambiarCuentaAnfitrionTap,
+                                                    forceNextAnfitrionAccountSelection: _forceNextAnfitrionAccountSelection,
                                                   ),
                                                   SizedBox(
                                                     height: compact ? 12 : 14,
@@ -515,23 +504,27 @@ class _DocumentationLink extends StatelessWidget {
 
 class _WelcomeCard extends StatelessWidget {
   final bool compact;
-  final bool isInvitacionUrlValida;
-  final String codigo;
-  final String? codigoError;
+  final SmxSaldifyLogonController controller;
   final VoidCallback? onAnfitrionTap;
+  final VoidCallback? onAnfitrionLealtadTap;
   final VoidCallback onCambiarCuentaAnfitrionTap;
   final bool forceNextAnfitrionAccountSelection;
   final VoidCallback? onInvitadoTap;
   final VoidCallback onInvitadoCodigoTap;
 
+  // En lugar de variables 'late', usa getters que apunten al controller
+  bool get isInvitacionUrlValida => controller.isInvitacionUrlValida;
+  SmxSaldiFyInvitaStatus? get urlTipoInvitacion => controller.urlTipoInvitacion;
+  String get codigo => controller.codigoUrl;
+  String? get codigoError => controller.codigoError;
+
   const _WelcomeCard({
     required this.compact,
-    required this.isInvitacionUrlValida,
-    required this.codigo,
-    required this.codigoError,
-    required this.onAnfitrionTap,
+    required this.controller,
     required this.onCambiarCuentaAnfitrionTap,
     required this.forceNextAnfitrionAccountSelection,
+    required this.onAnfitrionTap,
+    required this.onAnfitrionLealtadTap,
     required this.onInvitadoTap,
     required this.onInvitadoCodigoTap,
   });
@@ -633,47 +626,29 @@ class _WelcomeCard extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        if (isInvitacionUrlValida) ...[
-                          _InvitadoOptionCard(
+                        if (isInvitacionUrlValida && urlTipoInvitacion == SmxSaldiFyInvitaStatus.SF) ...[
+                          InvitadoOptionCard(
                             compact: compact,
                             codigo: codigo,
                             codigoError: codigoError,
                             onInvitadoCodigoTap: onInvitadoCodigoTap,
                           ),
+
+                        ] else if (isInvitacionUrlValida && urlTipoInvitacion == SmxSaldiFyInvitaStatus.SY) ...[
+                          InvitacionLealtadOptioncard(
+                            compact: compact,
+                            onTap: onAnfitrionLealtadTap,
+                          )
+
                         ] else ...[
-                          _AccessOptionCard(
+                          AnfitrionOptionCard(
                             compact: compact,
-                            icon: Icons.storefront_rounded,
-                            title: 'Anfitrión (Empresa)',
-                            subtitle: 'Gestiona créditos y clientes',
-                            accentColor: SmxColors.successForeground,
-                            backgroundColor: compact
-                                ? SmxColors.white
-                                : const Color(0xFFEAF8F0),
-                            borderColor: const Color(0xFFC7E9D9),
-                            onTap: onAnfitrionTap,
+                            onAnfitrionTap: onAnfitrionTap,
+                            onInvitadoTap: onInvitadoTap,
+                            onCambiarCuentaAnfitrionTap: onCambiarCuentaAnfitrionTap,
+                            forceNextAnfitrionAccountSelection: forceNextAnfitrionAccountSelection,
                           ),
-                          SizedBox(height: compact ? 8 : 10),
-                          _ChangeHostAccountAction(
-                            compact: compact,
-                            active: forceNextAnfitrionAccountSelection,
-                            enabled: true,
-                            onTap: onCambiarCuentaAnfitrionTap,
-                          ),
-                          SizedBox(height: compact ? 12 : 14),
-                          _AccessOptionCard(
-                            compact: compact,
-                            icon: Icons.person_pin_circle_rounded,
-                            title: 'Invitado (Cliente)',
-                            subtitle:
-                                'Ingresa con el ultimo link de invitacion validado',
-                            accentColor: const Color(0xFF1454B8),
-                            backgroundColor: compact
-                                ? SmxColors.white
-                                : const Color(0xFFF5FBFF),
-                            borderColor: const Color(0xFFCFE0F6),
-                            onTap: onInvitadoTap,
-                          ),
+
                         ],
                       ],
                     ),
@@ -906,279 +881,6 @@ class _AccessInfoItem extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-class _AccessOptionCard extends StatelessWidget {
-  final bool compact;
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final Color accentColor;
-  final Color backgroundColor;
-  final Color borderColor;
-  final VoidCallback? onTap;
-
-  const _AccessOptionCard({
-    required this.compact,
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-    required this.accentColor,
-    required this.backgroundColor,
-    required this.borderColor,
-    this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final radius = compact ? 16.0 : 20.0;
-
-    return Material(
-      color: backgroundColor,
-      borderRadius: BorderRadius.circular(radius),
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(radius),
-          border: Border.all(color: borderColor, width: compact ? 1.4 : 1),
-        ),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(radius),
-          onTap: onTap,
-          child: Opacity(
-            opacity: onTap == null ? 0.5 : 1.0,
-            child: Padding(
-              padding: EdgeInsets.all(compact ? 12 : 16),
-              child: Row(
-                children: [
-                  _OptionIcon(compact: compact, icon: icon, color: accentColor),
-                  SizedBox(width: compact ? 12 : 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          title,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            color: SmxColors.textDark,
-                            fontSize: compact ? 16 : 18,
-                            fontWeight: FontWeight.w900,
-                            height: 1.05,
-                          ),
-                        ),
-                        SizedBox(height: compact ? 5 : 6),
-                        Text(
-                          subtitle,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            color: SmxColors.textMuted,
-                            fontSize: compact ? 13 : 14,
-                            fontWeight: FontWeight.w700,
-                            height: 1.18,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Icon(
-                    Icons.chevron_right_rounded,
-                    color: accentColor,
-                    size: compact ? 28 : 32,
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _ChangeHostAccountAction extends StatelessWidget {
-  final bool compact;
-  final bool active;
-  final bool enabled;
-  final VoidCallback onTap;
-
-  const _ChangeHostAccountAction({
-    required this.compact,
-    required this.active,
-    required this.enabled,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final color = active ? SmxColors.successForeground : SmxColors.textMuted;
-    final disabledColor = SmxColors.textMuted.withValues(alpha: .45);
-
-    return Align(
-      alignment: Alignment.centerRight,
-      child: Material(
-        color: SmxColors.transparent,
-        borderRadius: BorderRadius.circular(14),
-        child: InkWell(
-          onTap: enabled ? onTap : null,
-          borderRadius: BorderRadius.circular(14),
-          child: Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: compact ? 8 : 10,
-              vertical: compact ? 6 : 7,
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  active
-                      ? Icons.check_circle_outline_rounded
-                      : Icons.switch_account_rounded,
-                  color: enabled ? color : disabledColor,
-                  size: compact ? 18 : 19,
-                ),
-                const SizedBox(width: 7),
-                Text(
-                  active
-                      ? 'Se elegirá otra cuenta de Google'
-                      : 'Cambiar cuenta de google',
-                  style: TextStyle(
-                    color: enabled ? color : disabledColor,
-                    fontSize: compact ? 12 : 13,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _InvitadoOptionCard extends StatelessWidget {
-  final bool compact;
-  final String codigo;
-  final String? codigoError;
-  final VoidCallback onInvitadoCodigoTap;
-
-  const _InvitadoOptionCard({
-    required this.compact,
-    required this.codigo,
-    required this.codigoError,
-    required this.onInvitadoCodigoTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    const cardBgColor = Color(0xFFF0F4F7);
-    const cardBorderColor = Color(0xFFDDE4EB);
-    final radius = compact ? 16.0 : 20.0;
-
-    return Material(
-      color: cardBgColor,
-      borderRadius: BorderRadius.circular(radius),
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(radius),
-          border: Border.all(
-            color: cardBorderColor,
-            width: compact ? 1.4 : 1.4,
-          ),
-        ),
-        child: Padding(
-          padding: EdgeInsets.all(compact ? 12 : 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              TextFormField(
-                initialValue: codigo,
-                enabled: false,
-                decoration: InputDecoration(
-                  hintText: 'Código de invitación',
-                  errorText: codigoError,
-                  filled: true,
-                  fillColor: const Color(0xFFE8EEF2),
-                  contentPadding: EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: compact ? 12 : 15,
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(compact ? 13 : 16),
-                    borderSide: const BorderSide(color: Color(0xFFD1DAE4)),
-                  ),
-                  disabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(compact ? 13 : 16),
-                    borderSide: const BorderSide(color: Color(0xFFD1DAE4)),
-                  ),
-                  prefixIcon: const Icon(
-                    Icons.confirmation_number_outlined,
-                    color: Color(0xFF1454B8),
-                  ),
-                ),
-                style: TextStyle(
-                  color: SmxColors.textMuted,
-                  fontSize: compact ? 15 : 17,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: 1,
-                ),
-              ),
-              SizedBox(height: compact ? 10 : 12),
-              SizedBox(
-                height: compact ? 46 : 52,
-                child: ElevatedButton.icon(
-                  onPressed: onInvitadoCodigoTap,
-                  icon: compact
-                      ? const SizedBox.shrink()
-                      : const Icon(Icons.check_circle_outline_rounded),
-                  label: const Text('Continuar'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF0647B7),
-                    foregroundColor: SmxColors.white,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(compact ? 13 : 16),
-                    ),
-                    textStyle: TextStyle(
-                      fontSize: compact ? 15 : 16,
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _OptionIcon extends StatelessWidget {
-  final bool compact;
-  final IconData icon;
-  final Color color;
-
-  const _OptionIcon({
-    required this.compact,
-    required this.icon,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: compact ? 42 : 48,
-      height: compact ? 42 : 48,
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: compact ? .10 : .12),
-        borderRadius: BorderRadius.circular(compact ? 14 : 16),
-      ),
-      child: Icon(icon, color: color, size: compact ? 27 : 29),
     );
   }
 }

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:venture_saldify/smxLayout/smxColors.dart';
 import 'package:venture_saldify/smxPerfil/smxPerfil_controller.dart';
 import 'package:venture_widgets/smxDatePicker/smxDatePicker.dart';
+import 'package:venture_widgets/smxShowDialog/smxShowDialogs.dart';
 import 'package:venture_widgets/smxTextField/smxTextField.dart';
 
 class SmxPerfil extends StatefulWidget {
@@ -22,26 +23,13 @@ class SmxPerfil extends StatefulWidget {
 }
 
 class _SmxPerfil extends State<SmxPerfil> {
-  static const _profileFields = [
-    'SYSUSER10_NOMBRES',
-    'SYSUSER10_APELLIDOS',
-    'SYSUSER10_TELEFONO',
-    'SYSUSER10_FECHA',
-    'SYSUSER10_CORREO_01',
-  ];
-
   late final SmxPerfil_controller controller;
-  late final Map<String, dynamic> _originalValues;
   int _formVersion = 0;
 
   @override
   void initState() {
     super.initState();
     controller = SmxPerfil_controller(context);
-    _originalValues = {
-      for (final field in _profileFields)
-        field: controller.controllerMain.rstSysUser10.getValue(field),
-    };
   }
 
   void refresh() {
@@ -185,14 +173,15 @@ class _SmxPerfil extends State<SmxPerfil> {
             child: InkWell(
               onTap: () async {
                 if (!controller.showValida()) {
-                  _restoreOriginalValues();
                   return;
                 }
 
-                await controller.save();
-                if (!mounted) return;
+                await showDialogWait(context, () async {
+                  await controller.save();
+                  if (!mounted) return;
 
-                widget.onNavigateToHome();
+                  widget.onNavigateToHome();
+                });
               },
               child: const Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -214,22 +203,6 @@ class _SmxPerfil extends State<SmxPerfil> {
         ),
       ),
     );
-  }
-
-  void _restoreOriginalValues() {
-    for (final entry in _originalValues.entries) {
-      controller.controllerMain.rstSysUser10.update(entry.key, entry.value);
-
-      if (entry.value is DateTime) {
-        controller.setDate(entry.key, entry.value as DateTime);
-      } else {
-        controller.setText(entry.key, entry.value?.toString() ?? '');
-      }
-    }
-
-    setState(() {
-      _formVersion++;
-    });
   }
 
   Widget _buildProfileHeader(BuildContext context) {

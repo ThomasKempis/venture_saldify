@@ -6,6 +6,7 @@ import 'package:venture_widgets/smxClassDrivers.dart';
 import 'package:venture_widgets/smxController/smxController.dart';
 
 import '../../smxApis/smxConstants.dart';
+import '../smxApis/smxCodeSegu.dart';
 
 class SmxSaldifyLogonController extends SmxController {
   String? codigoError;
@@ -59,6 +60,7 @@ class SmxSaldifyLogonController extends SmxController {
   }
 
   bool get isInvitacionUrlValida => SmxConstants.urlValidator.isValida();
+  SmxSaldiFyInvitaStatus? get urlTipoInvitacion  => SmxConstants.urlValidator.getUrlTipo();
 
   String get codigoUrl {
     return SmxConstants.urlValidator.codigo;

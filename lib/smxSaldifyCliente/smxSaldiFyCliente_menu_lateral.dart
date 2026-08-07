@@ -70,6 +70,14 @@ class SmxSaldiFyClienteNavigationPanel extends StatelessWidget {
                   selected: selectedIndex == 1,
                   onTap: () => onSelect(1),
                 ),
+                const SizedBox(height: 8),
+                _NavigationItem(
+                  icon: Icons.workspace_premium_rounded,
+                  label: 'Programa de lealtad',
+                  expanded: expanded,
+                  selected: selectedIndex == 2,
+                  onTap: () => onSelect(2),
+                ),
                 const Divider(color: SmxColors.white24, height: 32),
                 _NavigationItem(
                   icon: Icons.receipt_long_rounded,
@@ -207,6 +215,15 @@ class SmxSaldiFyClienteDrawer extends StatelessWidget {
                   onTap: () {
                     Navigator.of(context).pop();
                     onSelect(1);
+                  },
+                ),
+                _DrawerItem(
+                  icon: Icons.workspace_premium_rounded,
+                  label: 'Programa de lealtad',
+                  selected: selectedIndex == 2,
+                  onTap: () {
+                    Navigator.of(context).pop();
+                    onSelect(2);
                   },
                 ),
                 const Divider(color: SmxColors.white24, height: 28),

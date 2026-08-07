@@ -8,7 +8,7 @@ import 'package:venture_saldify/smxThemeData.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  _applyDevCodigoInvitacion(isInvitado: false);
+  _applyDevCodigoInvitacion(isInvitado: true);
 
   final queryParameters = Uri.base.queryParameters;
   final saldifyLogonAssets = SmxSaldifyLogon.warmUpAssets();
@@ -28,8 +28,7 @@ void _applyDevCodigoInvitacion({required bool isInvitado}) {
   if (!kDebugMode || !isInvitado) return;
 
   const String codigoKey = 'codigo';
-  const String codigo = 'SF542030956578'; // calixto smxsas@gmail.com
-  // const String codigo = 'SF262092221742'; // santiago santiago.azael.mohr@gmail.com
+  const String codigo = 'SY807053972087'; // santiago santiago.azael.mohr@gmail.com
 
   if (Uri.base.queryParameters.containsKey(codigoKey)) {
     return;

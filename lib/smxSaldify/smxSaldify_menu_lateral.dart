@@ -70,6 +70,14 @@ class SmxSaldiFyNavigationPanel extends StatelessWidget {
                   selected: selectedIndex == 1,
                   onTap: () => onSelect(1),
                 ),
+                const SizedBox(height: 8),
+                _NavigationItem(
+                  icon: Icons.workspace_premium_rounded,
+                  label: 'Programa de lealtad',
+                  expanded: expanded,
+                  selected: selectedIndex == 2,
+                  onTap: () => onSelect(2),
+                ),
                 const Divider(color: SmxColors.white24, height: 32),
                 _NavigationItem(
                   icon: Icons.groups_rounded,
@@ -83,13 +91,6 @@ class SmxSaldiFyNavigationPanel extends StatelessWidget {
                 _NavigationItem(
                   icon: Icons.qr_code_2_rounded,
                   label: 'Eventos',
-                  expanded: expanded,
-                  enabled: false,
-                ),
-                const SizedBox(height: 8),
-                _NavigationItem(
-                  icon: Icons.workspace_premium_rounded,
-                  label: 'Programa de recompensas',
                   expanded: expanded,
                   enabled: false,
                 ),
@@ -211,6 +212,15 @@ class SmxSaldiFyDrawer extends StatelessWidget {
                     onSelect(1);
                   },
                 ),
+                _DrawerItem(
+                  icon: Icons.workspace_premium_rounded,
+                  label: 'Programa de lealtad',
+                  selected: selectedIndex == 2,
+                  onTap: () {
+                    Navigator.of(context).pop();
+                    onSelect(2);
+                  },
+                ),
                 const Divider(color: SmxColors.white24, height: 28),
                 const _DisabledDrawerItem(
                   icon: Icons.qr_code_2_rounded,
@@ -229,10 +239,6 @@ class SmxSaldiFyDrawer extends StatelessWidget {
                 const _DisabledDrawerItem(
                   icon: Icons.qr_code_2_rounded,
                   label: 'Eventos',
-                ),
-                const _DisabledDrawerItem(
-                  icon: Icons.workspace_premium_rounded,
-                  label: 'Programa de recompensas',
                 ),
                 const Spacer(),
                 const Padding(

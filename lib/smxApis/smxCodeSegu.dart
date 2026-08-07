@@ -1,14 +1,16 @@
 import 'dart:math';
 
+enum SmxSaldiFyInvitaStatus { SF, SY }
+
 class SmxGenCodeSeguridad {
-  static const String prefix = 'SF';
+  static const SmxSaldiFyInvitaStatus prefijoDefault = SmxSaldiFyInvitaStatus.SF;
   static const int digitCount = 12;
 
   static final Random _random = Random.secure();
 
   const SmxGenCodeSeguridad._();
 
-  static String generar() {
+  static String generar({required SmxSaldiFyInvitaStatus prefijo}) {
     final baseDigits = StringBuffer();
 
     for (var i = 0; i < digitCount - 1; i++) {
@@ -17,17 +19,14 @@ class SmxGenCodeSeguridad {
 
     final checkDigit = _buildLuhnCheckDigit(baseDigits.toString());
 
-    return '$prefix$baseDigits$checkDigit';
-  }
-
-  static String normalizar(String value) {
-    return value.toUpperCase().replaceAll(RegExp(r'[^A-Z0-9]'), '');
+    return '${prefijo.name}$baseDigits$checkDigit';
   }
 
   static String format(String value) {
-    final code = normalizar(value);
+    final code = _normalizar(value);
+    String? prefix = _obtenerPrefijo(code);
 
-    if (!code.startsWith(prefix)) return code;
+    if (prefix == null) return code;
 
     final digits = code.substring(prefix.length);
     final groups = <String>[];
@@ -41,15 +40,32 @@ class SmxGenCodeSeguridad {
   }
 
   static bool isValid(String value) {
-    final code = normalizar(value);
+    final code = _normalizar(value);
+    String? prefix = _obtenerPrefijo(code);
 
-    if (!code.startsWith(prefix)) return false;
+    if (prefix == null) return false;
 
     final digits = code.substring(prefix.length);
     if (digits.length != digitCount) return false;
     if (!RegExp(r'^\d+$').hasMatch(digits)) return false;
 
     return _isValidLuhn(digits);
+  }
+
+  static SmxSaldiFyInvitaStatus? getUrlTipo(String value) {
+    bool valid = isValid(value);
+    if (!valid) return null;
+
+    final code = _normalizar(value);
+    String? prefix = _obtenerPrefijo(code);
+
+    return SmxSaldiFyInvitaStatus.values.firstWhere(
+          (status) => status.name == prefix,
+    );
+  }
+
+  static String _normalizar(String value) {
+    return value.toUpperCase().replaceAll(RegExp(r'[^A-Z0-9]'), '');
   }
 
   static int _buildLuhnCheckDigit(String digits) {
@@ -78,5 +94,19 @@ class SmxGenCodeSeguridad {
     }
 
     return sum;
+  }
+
+  static String? _obtenerPrefijo(String value) {
+    if (value.length < 2) return null;
+
+    String prefijo = value.substring(0, 2);
+
+    for (var element in SmxSaldiFyInvitaStatus.values) {
+      if (element.name == prefijo) {
+        return element.name; // Retorna el prefijo si lo encuentra
+      }
+    }
+
+    return null; // Si termina el ciclo y no encontró nada, retorna null
   }
 }

@@ -6,6 +6,7 @@ import 'package:venture_widgets/smxController/smxControllerSendData.dart';
 import '../smxSaldify/smxSaldify_screens/smxSaldiFy_perfil.dart';
 import '../smxSaldifyAssistant/smxSaldifyAssistant.dart';
 import '../smxSaldifyAssistant/smxSaldifyAssistant_context.dart';
+import 'package:venture_saldify/smxSaldify/smxSaldify_screens/saldify_lealtad/smxSaldiFy_lealtad.dart';
 import 'smxSaldiFyCliente_controller.dart';
 import 'smxSaldiFyCliente_menu_lateral.dart';
 import 'smxSaldifyCliente_dashboard/smxSaldiFyCliente_dashboard.dart';
@@ -96,38 +97,48 @@ class _SmxSaldiFyClienteState extends State<SmxSaldiFyCliente> {
     required SmxLayoutSize layout,
     Widget? menuButton,
   }) {
-    final pageIndex = _selectedIndex >= 0 && _selectedIndex <= 1
+    final pageIndex = _selectedIndex >= 0 && _selectedIndex <= 2
         ? _selectedIndex
         : 0;
-    final page = IndexedStack(
-      index: pageIndex,
-      children: [
-        SmxSaldiFyClienteDashboard(
-          key: ValueKey('saldify-cliente-dashboard-$_dashboardRefreshRevision'),
-          controller: controller,
-          layout: layout,
-          menuButton: menuButton,
-          onRefresh: _refreshDashboard,
-        ),
-        SmxSaldiFyPerfil(
-          onBackToHome: () => _selectPage(0),
-          onAcceptToHome: _selectHomeAndRefreshDashboard,
-          layout: layout,
-        ),
-      ],
-    );
-
-    final screen = pageIndex == 0
-        ? SmxSaldifyAssistantScreen.dashboardCliente
-        : SmxSaldifyAssistantScreen.perfilCliente;
 
     return SmxSaldifyAssistantHost(
       role: SmxSaldifyAssistantRole.invitado,
-      screen: screen,
+      screen: pageIndex == 0
+          ? SmxSaldifyAssistantScreen.dashboardCliente
+          : SmxSaldifyAssistantScreen.perfilCliente,
       isMobile: layout.isMobile,
-      showFloatingLauncher:
-          screen != SmxSaldifyAssistantScreen.dashboardCliente,
-      child: page,
+      showFloatingLauncher: pageIndex != 0,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          // Dashboard del cliente: Persistente para que el botón atrás sea instantáneo
+          Offstage(
+            offstage: pageIndex != 0,
+            child: SmxSaldiFyClienteDashboard(
+              key: ValueKey(
+                  'saldify-cliente-dashboard-$_dashboardRefreshRevision'),
+              controller: controller,
+              layout: layout,
+              menuButton: menuButton,
+              onRefresh: _refreshDashboard,
+            ),
+          ),
+
+          // Perfil: Atómico (se destruye al salir)
+          if (pageIndex == 1)
+            SmxSaldiFyPerfil(
+              onBackToHome: () => _selectPage(0),
+              onAcceptToHome: _selectHomeAndRefreshDashboard,
+              layout: layout,
+            ),
+
+          // Lealtad: Atómico (se destruye al salir)
+          if (pageIndex == 2)
+            SmxSaldiFyLealtad(
+              onBackPressed: () => _selectPage(0),
+            ),
+        ],
+      ),
     );
   }
 

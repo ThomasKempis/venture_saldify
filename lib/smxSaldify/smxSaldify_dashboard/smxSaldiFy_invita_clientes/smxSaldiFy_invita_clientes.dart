@@ -9,6 +9,7 @@ import 'package:venture_saldify/smxLayout/smxColors.dart';
 import 'package:venture_saldify/smxLayout/smxBackgrounds/saldify_circles_background.dart';
 import 'package:venture_saldify/smxSaldifyAssistant/smxSaldifyAssistant.dart';
 
+import '../../../smxApis/smxCodeSegu.dart';
 import 'smxSaldiFy_invita_clientes_models.dart';
 import 'smxSaldiFy_invita_service.dart';
 
@@ -270,7 +271,7 @@ class _InvitaClientesSheetState extends State<_InvitaClientesSheet> {
 
     SmxSaldiFyInvitacionGenerada? invitacion;
 
-    invitacion = await SmxSaldifyInvitaService.crearInvitacion();
+    invitacion = await SmxSaldifyInvitaService.crearInvitacion(prefijo: SmxSaldiFyInvitaStatus.SF);
 
     if (!mounted) return;
 
