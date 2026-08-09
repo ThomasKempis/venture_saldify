@@ -9,6 +9,8 @@ import '../../smxApis/smxConstants.dart';
 import '../smxApis/smxCodeSegu.dart';
 
 class SmxSaldifyLogonController extends SmxController {
+  static const String _aliasInvitacion = 'QRY_SYSUSER90_91_FIND';
+
   String? codigoError;
   Image? welcomeImage;
   bool? _precachedWelcomeHd;
@@ -16,6 +18,7 @@ class SmxSaldifyLogonController extends SmxController {
   bool _disposed = false;
   bool _validandoCodigo = false;
   String _uuidAnfitrionValidado = '';
+  String _remitenteInvitacion = '';
 
   SmxSaldifyLogonController({required super.alias, required super.data}) {
     SmxConstants_core.instancia = "SALDIFY";
@@ -60,13 +63,15 @@ class SmxSaldifyLogonController extends SmxController {
   }
 
   bool get isInvitacionUrlValida => SmxConstants.urlValidator.isValida();
-  SmxSaldiFyInvitaStatus? get urlTipoInvitacion  => SmxConstants.urlValidator.getUrlTipo();
+  SmxSaldiFyInvitaStatus? get urlTipoInvitacion =>
+      SmxConstants.urlValidator.getUrlTipo();
 
   String get codigoUrl {
     return SmxConstants.urlValidator.codigo;
   }
 
   String get uuidAnfitrionValidado => _uuidAnfitrionValidado;
+  String get remitenteInvitacion => _remitenteInvitacion;
 
   Future<bool> validarInvitacionUrl(
     String correoGoogle, {
@@ -155,7 +160,30 @@ class SmxSaldifyLogonController extends SmxController {
   }
 
   @override
-  Future<void> init() async {}
+  Future<void> init() async {
+    if (!isInvitacionUrlValida) return;
+
+    final codigoSql = _sql(codigoUrl.trim());
+    removeSql(_aliasInvitacion);
+    addSql(
+      _aliasInvitacion,
+      "select * from QRY_SYSUSER90_91_FIND('$codigoSql')",
+    );
+
+    try {
+      await getRowSetFuture(_aliasInvitacion);
+      if (jsonSend.getError() != null) return;
+
+      final rst = getRowset(_aliasInvitacion);
+      if (rst.getRowCount() == 0) return;
+
+      rst.first();
+      _remitenteInvitacion =
+          rst.getValue('SYSUSER99_REMITENTE')?.toString().trim() ?? '';
+    } catch (_) {
+      _remitenteInvitacion = '';
+    }
+  }
 
   @override
   Future<void> save() async {}

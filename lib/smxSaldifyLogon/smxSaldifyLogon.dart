@@ -11,9 +11,9 @@ import 'package:venture_saldify/smxLayout/smx_message_dialog.dart';
 import 'package:venture_saldify/smxSaldifyAssistant/smxSaldifyAssistant.dart';
 import 'package:venture_saldify/smxSaldifyAssistant/smxSaldifyAssistant_context.dart';
 import 'package:venture_saldify/smxLayout/smxBackgrounds/logon_access_bg.dart';
-import 'package:venture_saldify/smxSaldifyLogon/screens/anfitrionOptionCard.dart';
+import 'package:venture_saldify/smxSaldifyLogon/screens/principalOptionCard.dart';
+import 'package:venture_saldify/smxSaldifyLogon/screens/invitacionClienteOptionCard.dart';
 import 'package:venture_saldify/smxSaldifyLogon/screens/invitacionLealtadOptionCard.dart';
-import 'package:venture_saldify/smxSaldifyLogon/screens/invitadoOptionCard.dart';
 import 'package:venture_widgets/smxCallBaseStateful.dart';
 import 'package:venture_widgets/smxController/smxControllerSendData.dart';
 
@@ -219,6 +219,20 @@ class _SmxSaldifyLogonBodyState extends State<_SmxSaldifyLogonBody> {
     });
   }
 
+  SmxSaldifyAssistantScreen get _assistantScreen {
+    if (!widget.controller.isInvitacionUrlValida) {
+      return SmxSaldifyAssistantScreen.logon;
+    }
+
+    return switch (widget.controller.urlTipoInvitacion) {
+      SmxSaldiFyInvitaStatus.SF =>
+        SmxSaldifyAssistantScreen.logonInvitacionCliente,
+      SmxSaldiFyInvitaStatus.SY =>
+        SmxSaldifyAssistantScreen.logonInvitacionLealtad,
+      null => SmxSaldifyAssistantScreen.logon,
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
@@ -229,7 +243,7 @@ class _SmxSaldifyLogonBodyState extends State<_SmxSaldifyLogonBody> {
           children: [
             SmxSaldifyAssistantHost(
               role: SmxSaldifyAssistantRole.publico,
-              screen: SmxSaldifyAssistantScreen.logon,
+              screen: _assistantScreen,
               isMobile: layout.isMobile,
               child: Scaffold(
                 backgroundColor: SmxColors.transparent,
@@ -300,13 +314,20 @@ class _SmxSaldifyLogonBodyState extends State<_SmxSaldifyLogonBody> {
                                                 children: [
                                                   _WelcomeCard(
                                                     compact: compact,
-                                                    controller: widget.controller,
-                                                    onAnfitrionTap: _onAnfitrionTap,
-                                                    onAnfitrionLealtadTap: _onAnfitrionTap,
-                                                    onInvitadoTap: _onInvitadoTap,
-                                                    onInvitadoCodigoTap: _onInvitacionUrlTap,
-                                                    onCambiarCuentaAnfitrionTap: _onCambiarCuentaAnfitrionTap,
-                                                    forceNextAnfitrionAccountSelection: _forceNextAnfitrionAccountSelection,
+                                                    controller:
+                                                        widget.controller,
+                                                    onAnfitrionTap:
+                                                        _onAnfitrionTap,
+                                                    onAnfitrionLealtadTap:
+                                                        _onAnfitrionTap,
+                                                    onInvitadoTap:
+                                                        _onInvitadoTap,
+                                                    onInvitadoCodigoTap:
+                                                        _onInvitacionUrlTap,
+                                                    onCambiarCuentaAnfitrionTap:
+                                                        _onCambiarCuentaAnfitrionTap,
+                                                    forceNextAnfitrionAccountSelection:
+                                                        _forceNextAnfitrionAccountSelection,
                                                   ),
                                                   SizedBox(
                                                     height: compact ? 12 : 14,
@@ -515,8 +536,6 @@ class _WelcomeCard extends StatelessWidget {
   // En lugar de variables 'late', usa getters que apunten al controller
   bool get isInvitacionUrlValida => controller.isInvitacionUrlValida;
   SmxSaldiFyInvitaStatus? get urlTipoInvitacion => controller.urlTipoInvitacion;
-  String get codigo => controller.codigoUrl;
-  String? get codigoError => controller.codigoError;
 
   const _WelcomeCard({
     required this.compact,
@@ -626,29 +645,30 @@ class _WelcomeCard extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        if (isInvitacionUrlValida && urlTipoInvitacion == SmxSaldiFyInvitaStatus.SF) ...[
-                          InvitadoOptionCard(
+                        if (isInvitacionUrlValida &&
+                            urlTipoInvitacion == SmxSaldiFyInvitaStatus.SF) ...[
+                          InvitacionClienteOptioncard(
                             compact: compact,
-                            codigo: codigo,
-                            codigoError: codigoError,
-                            onInvitadoCodigoTap: onInvitadoCodigoTap,
+                            remitente: controller.remitenteInvitacion,
+                            onTap: onInvitadoCodigoTap,
                           ),
-
-                        ] else if (isInvitacionUrlValida && urlTipoInvitacion == SmxSaldiFyInvitaStatus.SY) ...[
+                        ] else if (isInvitacionUrlValida &&
+                            urlTipoInvitacion == SmxSaldiFyInvitaStatus.SY) ...[
                           InvitacionLealtadOptioncard(
                             compact: compact,
+                            remitente: controller.remitenteInvitacion,
                             onTap: onAnfitrionLealtadTap,
-                          )
-
+                          ),
                         ] else ...[
-                          AnfitrionOptionCard(
+                          PrincipalOptionCard(
                             compact: compact,
                             onAnfitrionTap: onAnfitrionTap,
                             onInvitadoTap: onInvitadoTap,
-                            onCambiarCuentaAnfitrionTap: onCambiarCuentaAnfitrionTap,
-                            forceNextAnfitrionAccountSelection: forceNextAnfitrionAccountSelection,
+                            onCambiarCuentaAnfitrionTap:
+                                onCambiarCuentaAnfitrionTap,
+                            forceNextAnfitrionAccountSelection:
+                                forceNextAnfitrionAccountSelection,
                           ),
-
                         ],
                       ],
                     ),

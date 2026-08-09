@@ -708,6 +708,43 @@
 <h2 id="1-6-de-herramienta-de-control-a-plataforma-comercial">De herramienta de control a plataforma comercial</h2>
 <p>Saldify puede utilizarse inicialmente como un control de cartera. Sin embargo, su verdadero potencial aparece cuando el Anfitrion invita a sus clientes, publica su oferta y permite que algunos participantes desarrollen sus propias redes.</p>
 <p>La App deja entonces de ser solamente una sustitucion de Excel y WhatsApp para convertirse en una plataforma de operacion comercial colaborativa.</p>
+<h2 id="1-7-tipos-de-invitacion">Tipos de invitacion</h2>
+<p>Saldify utiliza enlaces de invitacion para identificar quien invita y que tipo de relacion se propone. El usuario no necesita capturar ni comprender el codigo: al abrir un enlace valido, la App muestra una tarjeta con el nombre del remitente y la accion correspondiente.</p>
+<p>Existen dos tipos de invitacion de producto:</p>
+<div class="table-wrap">
+<table>
+<thead>
+<tr><th>Tipo</th><th>Prefijo interno</th><th>Destinatario</th><th>Resultado</th></tr>
+</thead>
+<tbody>
+<tr><td>Invitacion a cliente</td><td><code>SF</code></td><td>Una persona que ingresara como cliente invitado</td><td>Vincula al cliente con la red comercial del Anfitrion</td></tr>
+<tr><td>Invitacion de lealtad</td><td><code>SY</code></td><td>Una persona que ingresara o se registrara como Anfitrion</td><td>Registra la referencia dentro del Programa de lealtad</td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="invitacion-a-cliente">Invitacion a cliente</h3>
+<p>La invitacion <code>SF</code> permite que un Anfitrion incorpore un cliente a su red comercial. Puede compartirse como QR o enlace y puede ser abierta, corresponder a un cliente existente o estar restringida a una cuenta de correo determinada. Estas son variantes de una misma invitacion a cliente, no tipos de producto distintos.</p>
+<p>Al aceptar:</p>
+<ul>
+<li>la persona se autentica con su cuenta;</li>
+<li>Saldify valida que la invitacion exista y corresponda al usuario;</li>
+<li>se crea o consolida la relacion directa con el Anfitrion;</li>
+<li>el cliente puede consultar credito, compras, pagos, saldo e historial;</li>
+<li>en accesos posteriores entra desde la opcion normal de Invitado.</li>
+</ul>
+<p>Una invitacion normal no cambia silenciosamente al cliente de una red a otra. Si la cuenta ya pertenece a un Anfitrion diferente, Saldify informa el estado y protege la relacion existente.</p>
+<h3 id="invitacion-de-lealtad">Invitacion de lealtad</h3>
+<p>La invitacion <code>SY</code> pertenece al Programa de lealtad. Su finalidad es identificar al participante que recomendo a un nuevo Anfitrion. No crea una relacion de cliente, no asigna credito y no sustituye la invitacion <code>SF</code>.</p>
+<p>Al aceptar:</p>
+<ul>
+<li>la persona ingresa o se registra como Anfitrion;</li>
+<li>Saldify conserva quien genero la invitacion de lealtad;</li>
+<li>la referencia se registra de manera independiente de las relaciones con clientes;</li>
+<li>en accesos posteriores entra desde la opcion normal de Anfitrion.</li>
+</ul>
+<p>Las reglas economicas, beneficios o condiciones comerciales del Programa de lealtad pueden evolucionar sin modificar el funcionamiento basico de la invitacion.</p>
+<h3 id="validacion-y-confianza">Validacion y confianza</h3>
+<p>Flutter valida primero el formato, prefijo y digito verificador del codigo. Si el formato no es valido, la App muestra el acceso general. Cuando el formato es correcto, Saldify consulta la base de datos para recuperar el nombre del remitente. La validacion definitiva vuelve a ejecutarse al aceptar la invitacion, antes de crear o modificar cualquier relacion.</p>
 <hr class="section-rule">
 </section>
 <section class="chapter" id="2-saldify-y-sus-modalidades">

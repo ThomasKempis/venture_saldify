@@ -28,7 +28,7 @@ void _applyDevCodigoInvitacion({required bool isInvitado}) {
   if (!kDebugMode || !isInvitado) return;
 
   const String codigoKey = 'codigo';
-  const String codigo = 'SY807053972087'; // santiago santiago.azael.mohr@gmail.com
+  const String codigo = 'SY454640065487';
 
   if (Uri.base.queryParameters.containsKey(codigoKey)) {
     return;

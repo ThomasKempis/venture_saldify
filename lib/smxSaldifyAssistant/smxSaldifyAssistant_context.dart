@@ -22,6 +22,8 @@ extension SmxSaldifyAssistantRoleLabel on SmxSaldifyAssistantRole {
 
 enum SmxSaldifyAssistantScreen {
   logon,
+  logonInvitacionCliente,
+  logonInvitacionLealtad,
   dashboardAnfitrion,
   perfilAnfitrion,
   dashboardCliente,
@@ -32,6 +34,10 @@ extension SmxSaldifyAssistantScreenLabel on SmxSaldifyAssistantScreen {
   String get label {
     return switch (this) {
       SmxSaldifyAssistantScreen.logon => 'Acceso ${SmxConfig.titulo}',
+      SmxSaldifyAssistantScreen.logonInvitacionCliente =>
+        'Invitacion a cliente',
+      SmxSaldifyAssistantScreen.logonInvitacionLealtad =>
+        'Invitacion de lealtad',
       SmxSaldifyAssistantScreen.dashboardAnfitrion => 'Dashboard anfitrion',
       SmxSaldifyAssistantScreen.perfilAnfitrion => 'Perfil anfitrion',
       SmxSaldifyAssistantScreen.dashboardCliente => 'Dashboard cliente',
@@ -42,6 +48,10 @@ extension SmxSaldifyAssistantScreenLabel on SmxSaldifyAssistantScreen {
   String get payloadValue {
     return switch (this) {
       SmxSaldifyAssistantScreen.logon => 'logon',
+      SmxSaldifyAssistantScreen.logonInvitacionCliente =>
+        'logon_invitacion_cliente',
+      SmxSaldifyAssistantScreen.logonInvitacionLealtad =>
+        'logon_invitacion_lealtad',
       SmxSaldifyAssistantScreen.dashboardAnfitrion => 'dashboard_anfitrion',
       SmxSaldifyAssistantScreen.perfilAnfitrion => 'perfil_anfitrion',
       SmxSaldifyAssistantScreen.dashboardCliente => 'dashboard_cliente',

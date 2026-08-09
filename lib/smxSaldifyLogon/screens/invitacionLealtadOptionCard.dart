@@ -1,20 +1,24 @@
 import 'package:flutter/material.dart';
-import '../../smxLayout/smxColors.dart';
 import '../../smxApis/smxConfig.dart';
 
 class InvitacionLealtadOptioncard extends StatelessWidget {
   final bool compact;
+  final String remitente;
   final VoidCallback? onTap;
 
   const InvitacionLealtadOptioncard({
     super.key,
     required this.compact,
+    required this.remitente,
     this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     final radius = compact ? 22.0 : 28.0;
+    final descripcion = remitente.isEmpty
+        ? 'Accede a beneficios exclusivos de la red ${SmxConfig.titulo} con tu código de lealtad validado.'
+        : '$remitente te invita a participar en el programa de lealtad de ${SmxConfig.titulo}.';
 
     return Container(
       decoration: BoxDecoration(
@@ -105,7 +109,7 @@ class InvitacionLealtadOptioncard extends StatelessWidget {
                       ),
                       const SizedBox(height: 18),
                       Text(
-                        'Accede a beneficios exclusivos de la red ${SmxConfig.titulo} con tu código de lealtad validado.',
+                        descripcion,
                         style: TextStyle(
                           color: Colors.white.withValues(alpha: 0.95),
                           fontSize: compact ? 14 : 15,

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../smxLayout/smxColors.dart';
 
-class AnfitrionOptionCard extends StatelessWidget {
+class PrincipalOptionCard extends StatelessWidget {
   final bool compact;
   final VoidCallback? onAnfitrionTap;
   final VoidCallback? onInvitadoTap;
@@ -9,7 +9,7 @@ class AnfitrionOptionCard extends StatelessWidget {
   final bool forceNextAnfitrionAccountSelection;
 
 
-  const AnfitrionOptionCard({
+  const PrincipalOptionCard({
     super.key,
     required this.compact,
     required this.onAnfitrionTap,

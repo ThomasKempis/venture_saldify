@@ -43,6 +43,55 @@ class SmxSaldifyAssistantScreenMock {
             'El codigo de invitacion vincula al cliente con un anfitrion. Si tienes uno, validalo antes de entrar con Google.',
       ),
     ],
+    SmxSaldifyAssistantScreen.logonInvitacionCliente: [
+      SmxSaldifyAssistantSuggestedQa(
+        question: 'Que tipo de invitacion recibi?',
+        answer:
+            'Recibiste una invitacion para ingresar como cliente de una red comercial. Al aceptarla, Saldify validara tu cuenta y la vinculara con el Anfitrion que aparece en la tarjeta.',
+      ),
+      SmxSaldifyAssistantSuggestedQa(
+        question: 'Quien me esta invitando?',
+        answer:
+            'El nombre del Anfitrion que genero el enlace aparece en la tarjeta. Saldify lo consulta directamente en la base de datos usando el codigo de invitacion.',
+      ),
+      SmxSaldifyAssistantSuggestedQa(
+        question: 'Que sucede al aceptar?',
+        answer:
+            'Seleccionaras tu cuenta, Saldify validara la invitacion y creara o confirmara tu relacion con el Anfitrion. Despues podras consultar credito, compras, pagos, saldo e historial.',
+      ),
+      SmxSaldifyAssistantSuggestedQa(
+        question: 'Como ingreso despues?',
+        answer:
+            'Despues de aceptar la invitacion, puedes entrar desde el acceso general usando la opcion Invitado y la misma cuenta con la que te registraste.',
+      ),
+      SmxSaldifyAssistantSuggestedQa(
+        question: 'Que pasa si ya pertenezco a otra red?',
+        answer:
+            'Una invitacion normal no cambia tu red automaticamente. Saldify protege la relacion existente y te mostrara el estado correspondiente si el Anfitrion es diferente.',
+      ),
+    ],
+    SmxSaldifyAssistantScreen.logonInvitacionLealtad: [
+      SmxSaldifyAssistantSuggestedQa(
+        question: 'Que tipo de invitacion recibi?',
+        answer:
+            'Recibiste una invitacion al Programa de lealtad para ingresar o registrarte como Anfitrion. No es una invitacion para convertirte en cliente.',
+      ),
+      SmxSaldifyAssistantSuggestedQa(
+        question: 'Quien me esta invitando?',
+        answer:
+            'El nombre de la persona que genero la invitacion de lealtad aparece en la tarjeta y se obtiene directamente desde Saldify.',
+      ),
+      SmxSaldifyAssistantSuggestedQa(
+        question: 'Que sucede al ingresar?',
+        answer:
+            'Saldify iniciara tu acceso como Anfitrion y registrara quien te recomendo dentro del Programa de lealtad. Esto no crea una relacion de cliente ni asigna credito.',
+      ),
+      SmxSaldifyAssistantSuggestedQa(
+        question: 'Como ingreso despues?',
+        answer:
+            'Una vez registrado, puedes entrar normalmente desde el acceso general usando la opcion Anfitrion y la misma cuenta.',
+      ),
+    ],
     SmxSaldifyAssistantScreen.dashboardAnfitrion: [
       SmxSaldifyAssistantSuggestedQa(
         question: 'Que significa credito total?',

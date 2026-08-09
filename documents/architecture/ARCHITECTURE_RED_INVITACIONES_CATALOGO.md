@@ -340,7 +340,28 @@ misma regla se aplica al abrir un cliente pendiente.
 
 ### 6.1 Tipos
 
-Flutter genera tres tipos:
+A nivel de producto existen dos familias:
+
+```text
+SF  invitacion a cliente
+SY  invitacion de lealtad para un Anfitrion referido
+```
+
+`SF` crea o consolida una relacion comercial en `SYSUSER11`. `SY` registra una
+referencia independiente en `SYSUSER91_TBL_LEALTAD` y no crea una relacion de
+cliente ni asigna credito.
+
+Antes de autenticar, el logon valida localmente el formato y consulta:
+
+```sql
+select * from QRY_SYSUSER90_91_FIND(:codigo)
+```
+
+La consulta devuelve el nombre del remitente para la tarjeta sin consumir el
+codigo. La validacion definitiva se conserva en el proceso que acepta cada tipo
+de invitacion.
+
+Dentro de la familia `SF`, Flutter genera tres variantes operativas:
 
 ```text
 anfitrionAnonimo     codigo sin destinatario previo

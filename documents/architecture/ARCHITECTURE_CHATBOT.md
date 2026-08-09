@@ -166,11 +166,26 @@ invitado
 Pantallas actuales:
 
 ```text
+logon
+logon_invitacion_cliente
+logon_invitacion_lealtad
 dashboard_anfitrion
 perfil_anfitrion
 dashboard_cliente
 perfil_cliente
 ```
+
+Los dos contextos de invitacion se derivan del codigo ya validado por Flutter:
+
+```text
+SF  invitacion para vincular un cliente con un Anfitrion
+SY  invitacion para registrar una referencia de lealtad de un Anfitrion
+```
+
+El nombre del remitente puede mostrarse en la tarjeta porque el logon consulta
+`QRY_SYSUSER90_91_FIND`. Ese nombre no se envia actualmente como parte del
+payload del chatbot; el contexto indica el tipo de flujo y la tarjeta identifica
+visualmente a quien invita.
 
 Cada enum tiene:
 

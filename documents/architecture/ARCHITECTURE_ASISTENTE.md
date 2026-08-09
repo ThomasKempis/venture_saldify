@@ -39,7 +39,9 @@ El asistente debe ayudar al usuario a entender:
 - Que es SaldiFY.
 - Que es un Anfitrion Empresa.
 - Que es un Invitado Cliente.
-- Como funciona el codigo de invitacion.
+- Como funciona una invitacion a cliente `SF`.
+- Como funciona una invitacion de lealtad `SY`.
+- Que ambas invitaciones tienen objetivos y accesos posteriores diferentes.
 - Que significan credito, disponible, saldo, compras, pagos y corte.
 - Que significan los estados de compras y pagos.
 - Que se puede hacer en cada pantalla.
@@ -427,6 +429,8 @@ Contexto inicial:
 ```dart
 enum SmxSaldifyAssistantScreen {
   logon,
+  logonInvitacionCliente,
+  logonInvitacionLealtad,
   dashboardCliente,
   anfitrionCliente,
   historialCliente,
@@ -436,6 +440,17 @@ enum SmxSaldifyAssistantScreen {
   invitacion,
 }
 ```
+
+En el logon, Flutter selecciona el contexto con el prefijo validado del URL:
+
+```text
+sin invitacion  -> logon
+SF              -> logon_invitacion_cliente
+SY              -> logon_invitacion_lealtad
+```
+
+Esta separacion evita que el asistente confunda una relacion comercial de
+cliente con una referencia del Programa de lealtad.
 
 Ejemplo:
 
