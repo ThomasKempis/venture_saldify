@@ -956,9 +956,63 @@ Reglas:
 - No afecta el flujo invitado.
 - Se limpia automaticamente cuando el acceso como anfitrion termina correctamente.
 
-## 17. Mi red de Venta
+## 17. Mi red de Venta y Mi red del Anfitrion
 
-Se agrego un nuevo acceso en el menu inferior del cliente, debajo de `Ver historial`:
+La pantalla `Mi red de Venta` tiene dos entradas funcionales:
+
+```text
+Acciones rapidas -> Mi red
+Menu de cliente activo -> Mi red de Venta
+```
+
+Ambas usan la misma pantalla y controller, pero cambian la raiz de consulta.
+
+### Entrada desde acciones rapidas
+
+La accion `Mi red` del dashboard anfitrion abre la red del Anfitrion conectado.
+
+Archivos involucrados:
+
+```text
+lib/smxSaldify/smxSaldify_dashboard/smxSaldiFy_acciones_rapidas/smxSaldiFy_acciones_rapidas_mock.dart
+lib/smxSaldify/smxSaldify_dashboard/smxSaldiFy_dashboard_main.dart
+lib/smxSaldify/smxSaldify_dashboard/smxSaldiFy_dashboard_controller.dart
+```
+
+La opcion se declara con:
+
+```text
+ICON_KEY = MI_RED
+LABEL    = Mi red
+```
+
+El dashboard la atiende con:
+
+```dart
+openMiRedAnfitrion(context)
+```
+
+Ese metodo toma:
+
+```dart
+idActivo = SmxConstants.controllerMain.rstSysUser10.getId()
+nombreRaiz = SmxConstants.controllerMain.getNombres()
+```
+
+y abre:
+
+```dart
+SmxSaldiFyMiRed(
+  idActivo: idActivo,
+  nombreRaiz: nombreRaiz,
+)
+```
+
+En esta entrada no se pasa `idRaiz`; la base recibe el usuario activo para resolver la red del Anfitrion conectado.
+
+### Entrada desde menu de cliente
+
+Se agrego tambien un acceso en el menu inferior del cliente, debajo de `Ver historial`:
 
 ```text
 Mi red de Venta
@@ -1000,9 +1054,10 @@ Estado actual:
 - Usa el fondo estandar de Saldify.
 - Usa `SmxSaldifyScreenHeader`.
 - Titulo: `Mi red de Venta`.
-- `sectionLabel`: nombre del cliente seleccionado.
+- `sectionLabel`: nombre del cliente seleccionado o del Anfitrion conectado, segun la entrada.
 - Carga los datos con `SmxCallBaseStateful<SmxSaldiFyMiRedController>`.
-- Recibe como raiz el `idSysuser11` del cliente seleccionado.
+- Desde cliente recibe como raiz el `idSysuser11` del cliente seleccionado.
+- Desde acciones rapidas recibe el `idActivo` del Anfitrion conectado.
 - Dibuja el arbol con `InteractiveViewer`, `CustomPaint` y tarjetas posicionadas en un `Stack`.
 - El nodo raiz queda centrado inicialmente en el visor.
 - El usuario puede hacer pan y zoom sobre la red.
@@ -1010,7 +1065,7 @@ Estado actual:
 SP usado:
 
 ```sql
-select * from QRY_SYSUSER11_MI_RED(:id_sysuser11_raiz)
+select * from QRY_SYSUSER11_MI_RED(:id_sysuser11_raiz, :id_activo)
 ```
 
 El SP devuelve:
@@ -1134,7 +1189,94 @@ La tarjeta grande funciona como una lupa/contenedor visual de la red. El conteni
 
 Objetivo funcional:
 
-Mostrar la red descendente del cliente seleccionado cuando ese cliente tambien actua como anfitrion dentro de `SYSUSER11_DET_CONTACTOS`.
+Mostrar la red descendente del Anfitrion conectado o del cliente seleccionado cuando ese cliente tambien actua como anfitrion dentro de `SYSUSER11_DET_CONTACTOS`.
+
+## 17.1 Reportes operativos
+
+La accion `Reportes` del dashboard anfitrion abre una pantalla operativa para consultar movimientos por tipo y rango de fechas.
+
+Archivos involucrados:
+
+```text
+lib/smxSaldify/smxSaldify_dashboard/smxSaldiFy_acciones_rapidas/smxSaldiFy_acciones_rapidas_mock.dart
+lib/smxSaldify/smxSaldify_dashboard/smxSaldiFy_dashboard_main.dart
+lib/smxSaldify/smxSaldify_dashboard/smxSaldiFy_dashboard_controller.dart
+lib/smxSaldify/smxSaldify_screens/saldify_reportes/smxSaldiFy_reportes.dart
+lib/smxSaldify/smxSaldify_screens/saldify_reportes/smxSaldiFy_reportes_controller.dart
+lib/smxSaldify/smxSaldify_screens/saldify_reportes/smxSaldiFy_reportes_viewer.dart
+lib/smxSaldify/smxSaldify_screens/saldify_reportes/smxSaldiFy_reportes_pdf.dart
+```
+
+La opcion se declara con:
+
+```text
+ICON_KEY = REPORTES
+LABEL    = Reportes
+```
+
+El dashboard la atiende con:
+
+```dart
+openReportes(context)
+```
+
+La pantalla permite elegir:
+
+```text
+Ventas -> tipoMovimiento = compra
+Cobros -> tipoMovimiento = pago
+```
+
+El controller usa fechas normalizadas con `DateUtils.dateOnly` y default de ultimos 7 dias:
+
+```dart
+fechaHasta = today;
+fechaDesde = today.subtract(const Duration(days: 7));
+```
+
+Consulta usada:
+
+```sql
+select * from QRY_SYSUSER10_HISTORIAL_REP(
+  :id_anfitrion,
+  :fecha_desde,
+  :fecha_hasta,
+  :tipo_movimiento
+)
+```
+
+Aunque el SQL es `select *`, se llama con:
+
+```dart
+addSTrans(...)
+await getCallWS()
+```
+
+porque el flujo se ejecuta dentro del canal transaccional de la plataforma y se envuelve con `showDialogWait`.
+
+El resultado se guarda en:
+
+```text
+rstReportes
+```
+
+Si trae filas, se posiciona con `first()` antes de publicar la informacion visual.
+
+El viewer permite leer movimientos y generar PDF con tres vistas:
+
+```text
+movimientos
+clientes
+productos
+```
+
+Reglas de implementacion:
+
+- No calcular reportes desde Flutter con listas locales.
+- No duplicar la consulta de historial de clientes.
+- La base debe devolver el rowset ya filtrado por anfitrion, rango y tipo.
+- La pantalla no certifica ventas ni cobros; solo presenta movimientos registrados.
+- El PDF es una salida operativa del rowset consultado, no una fuente distinta de datos.
 
 ## 18. Dialogos de mensajes, decisiones y validaciones
 

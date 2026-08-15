@@ -8,7 +8,7 @@ import 'package:venture_saldify/smxThemeData.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  _applyDevCodigoInvitacion(isInvitado: true);
+  _applyDevCodigoInvitacion(isInvitado: false);
 
   final queryParameters = Uri.base.queryParameters;
   final saldifyLogonAssets = SmxSaldifyLogon.warmUpAssets();

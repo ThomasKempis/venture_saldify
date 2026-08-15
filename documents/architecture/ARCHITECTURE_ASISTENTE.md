@@ -413,15 +413,16 @@ La UI no es el problema principal, pero la primera version podria tener:
 Modulo sugerido:
 
 ```text
-lib/smxSaldify/smxSaldify_assistant/
+lib/smxSaldifyAssistant/
 ```
 
-Archivos sugeridos:
+Archivos actuales/sugeridos:
 
 ```text
-smxSaldify_assistant.dart
-smxSaldify_assistant_controller.dart
-smxSaldify_assistant_context.dart
+smxSaldifyAssistant.dart
+smxSaldifyAssistant_controller.dart
+smxSaldifyAssistant_context.dart
+smxSaldifyAssistant_screen_mock.dart
 ```
 
 Contexto inicial:
@@ -438,8 +439,23 @@ enum SmxSaldifyAssistantScreen {
   pagos,
   listaClientes,
   invitacion,
+  miRed,
+  reportes,
 }
 ```
+
+Valores de payload recomendados:
+
+```text
+miRed    -> mi_red
+reportes -> reportes
+```
+
+`miRed` debe apoyarse en la documentacion `01.05.70 - Mi red y archivados.md`.
+
+`reportes` debe apoyarse en la documentacion `01.05.80 - Reportes.md`.
+
+Ambos contextos pertenecen al rol `anfitrion`.
 
 En el logon, Flutter selecciona el contexto con el prefijo validado del URL:
 

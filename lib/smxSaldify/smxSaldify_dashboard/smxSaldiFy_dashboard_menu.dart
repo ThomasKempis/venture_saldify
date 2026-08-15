@@ -124,8 +124,8 @@ class _ClienteActionsSheet extends StatelessWidget {
                     ),
                     _ClienteActionItem(
                       icon: Icons.account_tree_rounded,
-                      label: 'Mi red de Venta',
-                      onTap: () => Navigator.of(context).pop('mired'),
+                      label: 'Red de Venta',
+                      onTap: () => Navigator.of(context).pop('redventa'),
                     ),
                   ],
                 ),

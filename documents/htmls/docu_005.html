@@ -1255,6 +1255,15 @@ SYSUSER11_FAPL</code></pre>
 <li>Validacion de ciclos para relaciones nuevas.</li>
 <li>Rechazo de una segunda relacion directa.</li>
 </ul>
+<h3 id="acciones-rapidas-mi-red-y-reportes">Acciones rapidas: Mi red y Reportes</h3>
+<p>El dashboard del Anfitrion incluye dos accesos operativos adicionales que deben considerarse en arquitectura y soporte:</p>
+<ul>
+<li><code>Mi red</code>: abre <code>SmxSaldiFyMiRed</code> usando el usuario activo del Anfitrion conectado.</li>
+<li><code>Reportes</code>: abre <code>SmxSaldiFyReportes</code> para consultar ventas o cobros por rango de fechas.</li>
+</ul>
+<p><code>Mi red</code> usa <code>QRY_SYSUSER11_MI_RED(idRaiz, idActivo)</code>. Cuando se abre desde acciones rapidas viaja el <code>idActivo</code>; cuando se abre desde un cliente viaja el <code>idRaiz</code> de la relacion seleccionada.</p>
+<p><code>Reportes</code> usa <code>QRY_SYSUSER10_HISTORIAL_REP(idAnfitrion, desde, hasta, tipo)</code>, donde <code>tipo</code> distingue compras para ventas y pagos para cobros. El resultado se muestra como rowset y puede generar PDF operativo.</p>
+<p>Estas opciones no deben resolverse con calculos locales de Flutter. La base conserva la responsabilidad de filtrar la red y los movimientos; Flutter presenta el resultado con el patron <code>SmxController</code>, <code>SmxRowSet</code> y pantallas Saldify.</p>
 <h3 id="pendiente">Pendiente</h3>
 <ul>
 <li>Modificar <code>ADD_SYSUSER10_SYSUSER11</code> para permitir el cambio de padre cuando</li>

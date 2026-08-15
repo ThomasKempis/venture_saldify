@@ -36,15 +36,16 @@ No debe:
 Se creo el modulo:
 
 ```text
-lib/smxSaldify/smxSaldify_assistant/
+lib/smxSaldifyAssistant/
 ```
 
 Archivos:
 
 ```text
-smxSaldify_assistant.dart
-smxSaldify_assistant_controller.dart
-smxSaldify_assistant_context.dart
+smxSaldifyAssistant.dart
+smxSaldifyAssistant_controller.dart
+smxSaldifyAssistant_context.dart
+smxSaldifyAssistant_screen_mock.dart
 ```
 
 La UI esta integrada en:
@@ -175,6 +176,17 @@ dashboard_cliente
 perfil_cliente
 ```
 
+Contextos recomendados para las nuevas pantallas internas del anfitrion:
+
+```text
+mi_red
+reportes
+```
+
+`mi_red` debe usarse cuando el asistente se abra dentro de `SmxSaldiFyMiRed`, tanto si la entrada viene desde Acciones rapidas > Mi red como si viene desde el menu de un cliente activo. La respuesta debe explicar que la pantalla visualiza una red descendente y que ver una red no significa administrar directamente todos sus nodos.
+
+`reportes` debe usarse cuando el asistente se abra dentro de `SmxSaldiFyReportes`. La respuesta debe explicar ventas, cobros, rango de fechas, generacion del resultado y PDF, sin afirmar que el reporte fue generado, descargado o que los importes son definitivos si la pantalla no lo confirma.
+
 Los dos contextos de invitacion se derivan del codigo ya validado por Flutter:
 
 ```text
@@ -296,6 +308,33 @@ Opcionalmente podria incluir:
 
 No se deben enviar saldos reales ni datos sensibles si la primera version solo es de ayuda conceptual.
 
+### Documentos de conocimiento para estas pantallas
+
+Para que el chatbot responda sobre estas opciones, el vector store debe incluir:
+
+```text
+documents/screens IA/01.05.70 - Mi red y archivados.md
+documents/screens IA/01.05.80 - Reportes.md
+documents/screens IA/01.05.00 - Dashboard anfitrion.md
+```
+
+La documentacion de `Mi red` cubre dos accesos:
+
+```text
+Acciones rapidas -> Mi red
+Menu de cliente activo -> Mi red de Venta
+```
+
+La documentacion de `Reportes` cubre:
+
+```text
+Acciones rapidas -> Reportes
+Ventas
+Cobros
+Rango de fechas
+PDF operativo
+```
+
 ## Reglas De Implementacion
 
 1. La UI no debe llamar directo a OpenAI.
@@ -334,4 +373,4 @@ Resultado:
 - Conectar vector store `saldify_knowledge`.
 - Agregar manejo de errores del webservice.
 - Agregar limites de caracteres y control de envio.
-- Decidir si el asistente debe aparecer tambien en compras, pagos, credito e historial.
+- Decidir si el asistente debe aparecer tambien en compras, pagos, credito, historial, Mi red y Reportes.

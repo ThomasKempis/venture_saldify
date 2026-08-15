@@ -5,14 +5,16 @@ import 'package:venture_widgets/smxController/smxController.dart';
 class SmxSaldiFyMiRedController extends SmxController {
   static const String aliasMiRed = 'QRY_SYSUSER11_MI_RED';
 
-  final int idSysuser11Raiz;
+  final int idRaiz;
+  final int idActivo;
   SmxRowSet rstMiRed = SmxRowSet.newRowSet([]);
   final List<SmxMiRedNode> nodes = [];
 
   SmxSaldiFyMiRedController({
     required super.alias,
     required super.data,
-    required this.idSysuser11Raiz,
+    required this.idRaiz,
+    this.idActivo = 0,
   });
 
   @override
@@ -21,7 +23,10 @@ class SmxSaldiFyMiRedController extends SmxController {
     beginDB();
 
     removeSql(aliasMiRed);
-    addSql(aliasMiRed, 'select * from QRY_SYSUSER11_MI_RED($idSysuser11Raiz)');
+    addSql(
+      aliasMiRed,
+      'select * from QRY_SYSUSER11_MI_RED($idRaiz, $idActivo)',
+    );
 
     await getRowSetFuture(aliasMiRed);
 
@@ -111,5 +116,11 @@ class SmxMiRedNode {
     return value.isEmpty ? 'Sin nombre' : value;
   }
 
-  String get statusLabel => status == 1 ? 'Activo' : 'Pendiente';
+  String get statusLabel {
+    return switch (status) {
+      1 => 'Activo',
+      2 => 'Archivado',
+      _ => 'Pendiente',
+    };
+  }
 }

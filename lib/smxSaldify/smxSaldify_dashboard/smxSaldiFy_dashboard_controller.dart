@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:venture_core_connect/smxDataBase/smxRowSet.dart';
 
+import '../../smxApis/smxConstants.dart';
 import '../../smxLayout/smxScreenTmp.dart';
 import '../smxSaldify_screens/saldify_cliente/smxSaldiFy_cliente.dart';
 import '../smxSaldify_screens/saldify_archivados/smxSaldiFy_archivados.dart';
@@ -335,7 +336,26 @@ class SmxSaldiFyDashboardController {
     }
 
     await Navigator.of(context).push<void>(
-      MaterialPageRoute(builder: (_) => SmxSaldiFyMiRed(client: client)),
+      MaterialPageRoute(
+        builder: (_) => SmxSaldiFyMiRed(
+          idRaiz: client.idSysuser11,
+          nombreRaiz: client.name,
+        ),
+      ),
+    );
+  }
+
+  Future<void> openMiRedAnfitrion(BuildContext context) async {
+    final idActivo = SmxConstants.controllerMain.rstSysUser10.getId();
+    final nombreRaiz = SmxConstants.controllerMain.getNombres();
+
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute(
+        builder: (_) => SmxSaldiFyMiRed(
+          idActivo: idActivo,
+          nombreRaiz: nombreRaiz,
+        ),
+      ),
     );
   }
 
@@ -375,7 +395,7 @@ class SmxSaldiFyDashboardController {
       return openClienteCredito(context, client);
     }
 
-    if (action == 'mired') {
+    if (action == 'redventa') {
       await openClienteMiRed(context, client);
       return false;
     }

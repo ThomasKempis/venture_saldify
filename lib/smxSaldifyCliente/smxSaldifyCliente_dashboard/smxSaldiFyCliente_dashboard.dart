@@ -4,6 +4,8 @@ import 'package:venture_saldify/smxApis/smxConfig.dart';
 import 'package:venture_saldify/smxLayout/smxColors.dart';
 import 'package:venture_saldify/smxLayout/smxLayout.dart';
 
+import '../../smxApis/smxConstants.dart';
+import '../../smxSaldifyLogon/smxSaldifyAccessSession.dart';
 import '../smxSaldiFyCliente_controller.dart';
 import 'smxSaldiFyCliente_acciones_rapidas/smxSaldiFyCliente_acciones_rapidas.dart';
 import 'smxSaldiFyCliente_anfitrion/smxSaldiFyCliente_anfitrion.dart';
@@ -101,7 +103,7 @@ class _SmxSaldiFyClienteDashboardState
                                   !SmxLayout.isWebMobile(context) &&
                                   !SmxLayout.isWebStandalone,
                             ),
-                            SizedBox(height: layout.isMobile ? 26 : 34),
+                            SizedBox(height: 24),
                             Text(
                               'Hola, ${dashboardController.clientName}',
                               style: const TextStyle(
@@ -110,32 +112,46 @@ class _SmxSaldiFyClienteDashboardState
                                 fontWeight: FontWeight.w700,
                               ),
                             ),
-                            const SizedBox(height: 12),
+                            const SizedBox(height: 8),
                             SmxSaldiFyClienteMetricas(
                               isMobile: layout.isMobile,
                               relaSysuser10Anfitrion:
                                   dashboardController.relaSysuser10Anfitrion,
                             ),
                             SizedBox(height: layout.isMobile ? 16 : 20),
-                            Text(
-                              'Tu anfitrion',
-                              style: const TextStyle(
-                                color: SmxColors.white70,
-                                fontSize: 14,
-                                fontWeight: FontWeight.w700,
-                              ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Text(
+                                  'Tu anfitrion',
+                                  style: TextStyle(
+                                    color: SmxColors.white70,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                                if (SmxConstants.controllerMain.canSwitchRole)
+                                  _ReturnModeButton(
+                                    onTap: () => SmxConstants
+                                        .controllerMain
+                                        .switchAccessMode(
+                                          context,
+                                          SmxSaldifyAccessMode.anfitrion,
+                                        ),
+                                  ),
+                              ],
                             ),
-                            SizedBox(height: layout.isMobile ? 16 : 20),
+                            SizedBox(height: 16),
                             SmxSaldiFyClienteAnfitrion(
                               dashboardController: dashboardController,
                             ),
-                            SizedBox(height: layout.isMobile ? 16 : 20),
+                            SizedBox(height: 24),
                             SmxSaldiFyClienteAccionesRapidas(
                               isMobile: layout.isMobile,
                               onActionTap: (title) => dashboardController
                                   .openClienteAction(context, title),
                             ),
-                            SizedBox(height: layout.isMobile ? 26 : 30),
+                            SizedBox(height: 24),
                             SmxSaldiFyClienteHistorial(
                               isMobile: layout.isMobile,
                               isDesktop: layout.isDesktop,
@@ -150,6 +166,46 @@ class _SmxSaldiFyClienteDashboardState
                 ),
               ),
             ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ReturnModeButton extends StatelessWidget {
+  final VoidCallback onTap;
+
+  const _ReturnModeButton({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: SmxColors.whiteAlpha(.12),
+      borderRadius: BorderRadius.circular(20),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(20),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.arrow_back_rounded,
+                color: SmxColors.brandAccent.withValues(alpha: .8),
+                size: 16,
+              ),
+              const SizedBox(width: 8),
+              const Text(
+                'Modo Anfitrión',
+                style: TextStyle(
+                  color: SmxColors.white,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ],
           ),
         ),
       ),

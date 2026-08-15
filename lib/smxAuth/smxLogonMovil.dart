@@ -21,9 +21,11 @@ class SmxLogonMovil extends SmxTmpCtl {
   final SmxSaldifyAccessMode accessMode;
   late SmxRowSet rstSysUser10;
   String _uuidAnfitrionInvitacion = '';
+  late SmxSaldifyAccessMode _accessModeActive;
 
   SmxLogonMovil({required this.authUser, required this.accessMode}) {
     SmxConstants.controllerMain = this;
+    _accessModeActive = accessMode;
   }
 
   Future<void> checkPermissionCamara() async {
@@ -114,12 +116,12 @@ class SmxLogonMovil extends SmxTmpCtl {
       accion: 'LOGIN',
     );
 
-    SmxSaldifyAccessSession.markActive(accessMode, getCorreo());
+    SmxSaldifyAccessSession.markActive(_accessModeActive, getCorreo());
 
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: (_) => accessMode == SmxSaldifyAccessMode.invitado
+        builder: (_) => _accessModeActive == SmxSaldifyAccessMode.invitado
             ? SmxSaldiFyCliente()
             : SmxSaldiFy(),
       ),
@@ -208,5 +210,36 @@ class SmxLogonMovil extends SmxTmpCtl {
 
   static String _sql(String value) {
     return value.trim().replaceAll("'", "''");
+  }
+
+  // 1. El Getter de Permiso (Lógica de Negocio)
+  // Solo permitimos el cambio si el usuario entró originalmente como Anfitrión.
+  bool get canSwitchRole => accessMode == SmxSaldifyAccessMode.anfitrion;
+
+  // 2. Getter para saber el modo actual (ya que _accessModeActive es privado)
+  SmxSaldifyAccessMode get activeMode => _accessModeActive;
+
+  // 3. El método de intercambio protegido
+  Future<void>  switchAccessMode(BuildContext context, SmxSaldifyAccessMode newMode) async {
+    // Si intenta subir a anfitrión pero no tiene permiso, bloqueamos.
+    if (newMode == SmxSaldifyAccessMode.anfitrion && !canSwitchRole) {
+      return;
+    }
+
+    //0. Asigno el modo actual
+    _accessModeActive = newMode;
+
+    // 1. Actualizar el modo en la sesión (persistencia)
+    SmxSaldifyAccessSession.markActive(newMode, getCorreo());
+
+    // 2. Navegar al módulo correspondiente
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) => newMode == SmxSaldifyAccessMode.invitado
+            ? const SmxSaldiFyCliente()
+            : SmxSaldiFy(),
+      ),
+    );
   }
 }

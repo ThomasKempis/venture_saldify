@@ -181,6 +181,46 @@ correcto, Saldify consulta la base de datos para recuperar el nombre del
 remitente. La validacion definitiva vuelve a ejecutarse al aceptar la
 invitacion, antes de crear o modificar cualquier relacion.
 
+### Tres presentaciones del acceso
+
+Saldify utiliza una sola pantalla de acceso, pero adapta su contenido segun el
+enlace con el que se abre la App:
+
+#### Acceso principal
+
+Se muestra cuando la App se abre sin una invitacion valida. Permite elegir el
+rol con el que se desea ingresar:
+
+- **Anfitrion:** administra su cartera, clientes y operacion comercial.
+- **Invitado:** consulta y participa en la relacion que ya tiene con su
+  Anfitrion.
+
+Este acceso se utiliza normalmente despues de que el usuario ya completo su
+registro o acepto una invitacion.
+
+#### Acceso con invitacion a cliente
+
+Se muestra al abrir un enlace valido `SF`. En lugar de las opciones generales,
+presenta una tarjeta que identifica al Anfitrion remitente y permite aceptar la
+invitacion. El usuario se autentica como cliente invitado y Saldify valida la
+relacion antes de permitir el ingreso.
+
+Despues de completar este proceso, los siguientes accesos se realizan desde la
+opcion normal de Invitado en el acceso principal.
+
+#### Acceso con invitacion de lealtad
+
+Se muestra al abrir un enlace valido `SY`. Presenta una tarjeta que identifica
+al remitente de la invitacion y permite ingresar o registrarse como Anfitrion
+dentro del Programa de lealtad.
+
+Despues del registro, los siguientes accesos se realizan desde la opcion normal
+de Anfitrion en el acceso principal.
+
+Estas tres presentaciones no son aplicaciones ni cuentas separadas. Son
+variantes contextuales del mismo acceso de Saldify y utilizan la misma identidad
+del usuario.
+
 ---
 
 # 2. Saldify y sus Modalidades

@@ -745,6 +745,22 @@
 <p>Las reglas economicas, beneficios o condiciones comerciales del Programa de lealtad pueden evolucionar sin modificar el funcionamiento basico de la invitacion.</p>
 <h3 id="validacion-y-confianza">Validacion y confianza</h3>
 <p>Flutter valida primero el formato, prefijo y digito verificador del codigo. Si el formato no es valido, la App muestra el acceso general. Cuando el formato es correcto, Saldify consulta la base de datos para recuperar el nombre del remitente. La validacion definitiva vuelve a ejecutarse al aceptar la invitacion, antes de crear o modificar cualquier relacion.</p>
+<h3 id="tres-presentaciones-del-acceso">Tres presentaciones del acceso</h3>
+<p>Saldify utiliza una sola pantalla de acceso, pero adapta su contenido segun el enlace con el que se abre la App:</p>
+<h4 id="acceso-principal">Acceso principal</h4>
+<p>Se muestra cuando la App se abre sin una invitacion valida. Permite elegir el rol con el que se desea ingresar:</p>
+<ul>
+<li><strong>Anfitrion:</strong> administra su cartera, clientes y operacion comercial.</li>
+<li><strong>Invitado:</strong> consulta y participa en la relacion que ya tiene con su Anfitrion.</li>
+</ul>
+<p>Este acceso se utiliza normalmente despues de que el usuario ya completo su registro o acepto una invitacion.</p>
+<h4 id="acceso-con-invitacion-a-cliente">Acceso con invitacion a cliente</h4>
+<p>Se muestra al abrir un enlace valido <code>SF</code>. En lugar de las opciones generales, presenta una tarjeta que identifica al Anfitrion remitente y permite aceptar la invitacion. El usuario se autentica como cliente invitado y Saldify valida la relacion antes de permitir el ingreso.</p>
+<p>Despues de completar este proceso, los siguientes accesos se realizan desde la opcion normal de Invitado en el acceso principal.</p>
+<h4 id="acceso-con-invitacion-de-lealtad">Acceso con invitacion de lealtad</h4>
+<p>Se muestra al abrir un enlace valido <code>SY</code>. Presenta una tarjeta que identifica al remitente de la invitacion y permite ingresar o registrarse como Anfitrion dentro del Programa de lealtad.</p>
+<p>Despues del registro, los siguientes accesos se realizan desde la opcion normal de Anfitrion en el acceso principal.</p>
+<p>Estas tres presentaciones no son aplicaciones ni cuentas separadas. Son variantes contextuales del mismo acceso de Saldify y utilizan la misma identidad del usuario.</p>
 <hr class="section-rule">
 </section>
 <section class="chapter" id="2-saldify-y-sus-modalidades">

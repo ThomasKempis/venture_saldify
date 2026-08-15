@@ -6,6 +6,7 @@ SmxRowSet getRstSmxSaldiFyAccionesRapidasMock() {
 
 final List<Map<String, dynamic>> _rstSmxSaldiFyAccionesRapidasMock = [
   {'ICON_KEY': 'CLIENTE', 'LABEL': 'Cliente'},
+  {'ICON_KEY': 'MI_RED', 'LABEL': 'Mi red'},
   {'ICON_KEY': 'PRODUCTOS', 'LABEL': 'Productos'},
   {'ICON_KEY': 'REPORTES', 'LABEL': 'Reportes'},
   {'ICON_KEY': 'COBRANZA', 'LABEL': 'Cobranza'},

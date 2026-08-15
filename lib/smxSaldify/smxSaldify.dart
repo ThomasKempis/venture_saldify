@@ -92,8 +92,7 @@ class _SmxSaldiFy extends State<SmxSaldiFy> {
           ? SmxSaldifyAssistantScreen.dashboardAnfitrion
           : SmxSaldifyAssistantScreen.perfilAnfitrion,
       isMobile: layout.isMobile,
-      showFloatingLauncher:
-          pageIndex != SmxSaldifyAssistantScreen.dashboardAnfitrion,
+      showFloatingLauncher: false, //pageIndex != SmxSaldifyAssistantScreen.dashboardAnfitrion,
       child: Stack(
         fit: StackFit.expand,
         children: [

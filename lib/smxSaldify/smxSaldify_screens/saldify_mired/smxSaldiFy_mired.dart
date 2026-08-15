@@ -10,9 +10,16 @@ import '../../smxSaldify_dashboard/smxSaldiFy_clientes/smxSaldiFy_clientes.dart'
 import 'smxSaldiFy_mired_controller.dart';
 
 class SmxSaldiFyMiRed extends StatelessWidget {
-  final SmxSaldiFyClientTapData client;
+  final int idRaiz;
+  final int idActivo;
+  final String nombreRaiz;
 
-  const SmxSaldiFyMiRed({super.key, required this.client});
+  const SmxSaldiFyMiRed({
+    super.key,
+    this.idRaiz = 0,
+    this.idActivo = 0,
+    this.nombreRaiz = '',
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -20,19 +27,20 @@ class SmxSaldiFyMiRed extends StatelessWidget {
       controllerBuilder: (context) => SmxSaldiFyMiRedController(
         alias: 'SMXSALDIFY_MI_RED',
         data: SmxControllerSendData(context: context),
-        idSysuser11Raiz: client.idSysuser11,
+        idRaiz: idRaiz,
+        idActivo: idActivo,
       ),
       builder: (context, controller) =>
-          _MiRedView(client: client, controller: controller),
+          _MiRedView(nombreRaiz: nombreRaiz, controller: controller),
     );
   }
 }
 
 class _MiRedView extends StatelessWidget {
-  final SmxSaldiFyClientTapData client;
+  final String nombreRaiz;
   final SmxSaldiFyMiRedController controller;
 
-  const _MiRedView({required this.client, required this.controller});
+  const _MiRedView({required this.nombreRaiz, required this.controller});
 
   @override
   Widget build(BuildContext context) {
@@ -66,7 +74,7 @@ class _MiRedView extends StatelessWidget {
                     children: [
                       SmxSaldifyScreenHeader(
                         title: 'Mi red de Venta',
-                        sectionLabel: client.name,
+                        sectionLabel: nombreRaiz,
                         onBackPressed: () => Navigator.of(context).pop(),
                       ),
                       const SizedBox(height: 22),
@@ -175,10 +183,11 @@ class _TreeNodeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final active = node.status == 1;
-    final statusColor = active
-        ? SmxColors.brandPrimary
-        : SmxColors.warningForeground;
+    final statusColor = switch (node.status) {
+      1 => SmxColors.brandPrimary,
+      2 => SmxColors.dangerForeground,
+      _ => SmxColors.warningForeground,
+    };
     final initials = _initials(node.nombreCompleto);
 
     return DecoratedBox(

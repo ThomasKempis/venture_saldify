@@ -4,6 +4,7 @@ import 'package:venture_core_connect/smxDataBase/smxRowSet.dart';
 import '../../smxApis/smxConstants.dart';
 import '../../smxLayout/smxColors.dart';
 import '../../smxSaldifyCliente/smxSaldifyCliente_dashboard/smxSaldiFyCliente_anfitrion/smxSaldiFyCliente_anfitrion.dart';
+import '../../smxSaldifyLogon/smxSaldifyAccessSession.dart';
 import 'smxSaldiFy_acciones_rapidas/smxSaldiFy_acciones_rapidas.dart';
 import 'smxSaldiFy_clientes/smxSaldiFy_clientes.dart';
 import 'smxSaldiFy_clientes_pendientes/smxSaldiFy_clientes_pendientes.dart';
@@ -43,7 +44,7 @@ class SmxSaldiFyDashboardMain extends StatelessWidget {
           valueListenable: controller.anfitrionAnteriorRevisionNotifier,
           builder: (context, revision, _) {
             if (revision == 0) {
-              return SizedBox(height: isMobile ? 24 : 30);
+              return SizedBox(height: 24);
             }
 
             final rstMetricas = SmxConstants.rstMetricasAnfitrion;
@@ -51,31 +52,45 @@ class SmxSaldiFyDashboardMain extends StatelessWidget {
             final relaSysuser11 = rstMetricas.getValue('RELA_SYSUSER11');
 
             if (relaSysuser10 == 0) {
-              return SizedBox(height: isMobile ? 24 : 30);
+              return SizedBox(height: 24);
             }
 
             return Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                SizedBox(height: isMobile ? 24 : 30),
-                const Text(
-                  'Tu anfitrion',
-                  style: TextStyle(
-                    color: SmxColors.white70,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                  ),
+                SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Tu anfitrion',
+                      style: TextStyle(
+                        color: SmxColors.white70,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    if (SmxConstants.controllerMain.canSwitchRole)
+                      _SwitchModeButton(
+                        onTap: () =>
+                            SmxConstants.controllerMain.switchAccessMode(
+                              context,
+                              SmxSaldifyAccessMode.invitado,
+                            ),
+                      ),
+                  ],
                 ),
-                SizedBox(height: isMobile ? 16 : 20),
+                SizedBox(height: 16),
                 SmxSaldiFyClienteAnfitrion(
                   desdeDashboardAnfitrion: true,
                   relaSysuser11: relaSysuser11,
                 ),
-                SizedBox(height: isMobile ? 24 : 30),
+                SizedBox(height: 16),
               ],
             );
           },
         ),
+
         SmxSaldiFyAccionesRapidas(
           isMobile: isMobile,
           cardWidth: quickActionCardWidth,
@@ -85,6 +100,11 @@ class SmxSaldiFyDashboardMain extends StatelessWidget {
               if (saved == true) {
                 await onRefresh();
               }
+              return;
+            }
+
+            if (title == 'Mi red') {
+              await controller.openMiRedAnfitrion(context);
               return;
             }
 
@@ -117,7 +137,7 @@ class SmxSaldiFyDashboardMain extends StatelessWidget {
             controller.openUnderConstruction(context, title);
           },
         ),
-        SizedBox(height: isMobile ? 26 : 30),
+        SizedBox(height: 24),
         SmxSaldiFyClientes(
           isMobile: isMobile,
           isDesktop: isDesktop,
@@ -167,6 +187,46 @@ class SmxSaldiFyDashboardMain extends StatelessWidget {
           },
         ),
       ],
+    );
+  }
+}
+
+class _SwitchModeButton extends StatelessWidget {
+  final VoidCallback onTap;
+
+  const _SwitchModeButton({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: SmxColors.whiteAlpha(.12),
+      borderRadius: BorderRadius.circular(20),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(20),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                'Modo Invitado',
+                style: TextStyle(
+                  color: SmxColors.white,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Icon(
+                Icons.arrow_forward_rounded,
+                color: SmxColors.brandAccent.withValues(alpha: .8),
+                size: 16,
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

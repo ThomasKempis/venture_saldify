@@ -147,6 +147,8 @@ class _SmxSaldiFyDashboardState extends State<SmxSaldiFyDashboard> {
                                                 .initial)
                                           SmxSaldiFyDashboardIni(
                                             isMobile: layout.isMobile,
+                                            uuidAnfitrion: widget.uuidAnfitrion,
+                                            anfitrionNombre: widget.adminName,
                                             onContinue: () async {
                                               final saved = await _controller
                                                   .openCliente(context);
