@@ -6,6 +6,7 @@ import 'package:venture_saldify/smxSaldifyAssistant/smxSaldifyAssistant.dart';
 import 'package:venture_widgets/smxCallBaseStateful.dart';
 import 'package:venture_widgets/smxController/smxControllerSendData.dart';
 
+import '../../smxSaldifyCliente_screens/saldify_cancelacion/smxSaldiFy_cliente_cancelacion.dart';
 import '../smxSaldiFyCliente_dashboard_controller.dart';
 import 'smxSaldiFyCliente_anfitrion_controller.dart';
 import 'smxSaldiFyCliente_anfitrion_skeleton.dart';
@@ -80,18 +81,32 @@ class _SmxSaldiFyClienteAnfitrionView extends StatelessWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Container(
-                  width: 64,
-                  height: 64,
-                  decoration: BoxDecoration(
-                    color: SmxColors.surfaceQr,
+                Material(
+                  color: SmxColors.transparent,
+                  borderRadius: BorderRadius.circular(16),
+                  child: InkWell(
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => SmxSaldiFyClienteCancelacion(
+                          anfitrionNombre: controller.nombreAnfitrion,
+                        ),
+                      ),
+                    ),
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: SmxColors.white, width: 5),
-                  ),
-                  child: const Icon(
-                    Icons.storefront_rounded,
-                    color: SmxColors.iconDark,
-                    size: 38,
+                    child: Container(
+                      width: 64,
+                      height: 64,
+                      decoration: BoxDecoration(
+                        color: SmxColors.surfaceQr,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: SmxColors.white, width: 5),
+                      ),
+                      child: const Icon(
+                        Icons.storefront_rounded,
+                        color: SmxColors.iconDark,
+                        size: 38,
+                      ),
+                    ),
                   ),
                 ),
                 const SizedBox(width: 16),

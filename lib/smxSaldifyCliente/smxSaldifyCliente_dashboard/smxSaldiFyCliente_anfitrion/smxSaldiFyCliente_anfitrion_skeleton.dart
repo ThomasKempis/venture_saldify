@@ -9,8 +9,8 @@ class SmxSaldiFyClienteAnfitrionSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      constraints: const BoxConstraints(minHeight: 155),
-      padding: const EdgeInsets.all(14),
+      constraints: const BoxConstraints(minHeight: 128),
+      clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         color: SmxColors.whiteAlpha(.95),
         borderRadius: BorderRadius.circular(20),
@@ -22,12 +22,32 @@ class SmxSaldiFyClienteAnfitrionSkeleton extends StatelessWidget {
           ),
         ],
       ),
-      child: const Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: const Stack(
         children: [
-          _IconSkeleton(),
-          SizedBox(width: 16),
-          Expanded(child: _ContentSkeleton()),
+          Padding(
+            padding: EdgeInsets.all(14),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                _IconSkeleton(),
+                SizedBox(width: 16),
+                Expanded(child: _ContentSkeleton()),
+              ],
+            ),
+          ),
+          Positioned(
+            right: 26,
+            top: 0,
+            bottom: 20,
+            child: Center(
+              child: SmxSaldiFySkeletonBlock(
+                width: 38,
+                height: 38,
+                radius: 999,
+                alpha: .18,
+              ),
+            ),
+          ),
         ],
       ),
     );
